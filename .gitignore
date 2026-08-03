@@ -1,0 +1,38 @@
+# Environment & API Keys
+.env
+.env.local
+*.key
+
+# Chroma Vector Database (large files)
+rag-knowledge-base/chroma_db/
+
+# Raw data files (large)
+rag-knowledge-base/data/raw/*.pdf
+rag-knowledge-base/data/raw/*.txt
+
+# Chunks directory (generated)
+rag-knowledge-base/data/chunks/
+
+# Node / Python
+node_modules/
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Build artifacts
+frontend/dist/
+frontend/build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
