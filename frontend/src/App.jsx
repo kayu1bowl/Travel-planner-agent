@@ -93,24 +93,35 @@ export default function App() {
     ]);
 
     try {
-      const response = await fetchTravelPlan(queryText, language);
-      if (response && response.success && response.plan) {
-        const transformed = transformBackendPlan(response.plan, language);
-        setDynamicCustomPlan(transformed);
-        setActiveDay(1);
+      const response = await fetchTravelPlan(queryText, messages);
+      const rawPlan = response?.plan || (response?.itineraries ? response : null);
+
+      if (rawPlan) {
+        const transformed = transformBackendPlan(rawPlan, language);
+        if (transformed) {
+          setDynamicCustomPlan(transformed);
+          setActiveDay(1);
+        }
 
         const aiMsg = {
           id: Date.now() + 1,
           sender: 'assistant',
-          text: transformed.summary || (language === 'zh' ? '太棒了！已为您量身定制专属的旅行路线，右侧看板已同步更新。' : 'Great! A customized itinerary has been generated for you.'),
-          dataSources: [
+          text: transformed?.summary || response?.summary || (language === 'zh' ? '太棒了！已为您量身定制专属的旅行路线，右侧看板已同步更新。' : 'Great! A customized itinerary has been generated for you.'),
+          dataSources: response?.data_sources || transformed?.dataSources || [
             language === 'zh' ? '官方权威步道与暗夜保护区指南' : 'Official DOC Hiking & Sky Reserve Guides',
             language === 'zh' ? '智能路线优化与实时天气核验' : 'Route Optimization & Weather Verification'
           ]
         };
         setMessages(prev => [...prev, aiMsg]);
+      } else if (response?.needs_more_info && response?.follow_up_question) {
+        const aiMsg = {
+          id: Date.now() + 1,
+          sender: 'assistant',
+          text: response.follow_up_question
+        };
+        setMessages(prev => [...prev, aiMsg]);
       } else {
-        const replyText = response?.reply || (language === 'zh' ? '已为您生成行程建议。' : 'Itinerary suggestion updated.');
+        const replyText = response?.reply || response?.error || (language === 'zh' ? '已收到您的需求，看板已完成更新。' : 'Request received, dashboard updated.');
         const aiMsg = {
           id: Date.now() + 1,
           sender: 'assistant',
@@ -123,7 +134,7 @@ export default function App() {
       const fallbackAiMsg = {
         id: Date.now() + 1,
         sender: 'assistant',
-        text: language === 'zh' ? '已收到您的需求，看板已完成更新。' : 'Request received, dashboard updated.'
+        text: language === 'zh' ? '已收到您的旅行需求，看板已完成更新。' : 'Request received, dashboard updated.'
       };
       setMessages(prev => [...prev, fallbackAiMsg]);
     } finally {

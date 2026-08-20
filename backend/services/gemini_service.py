@@ -134,6 +134,8 @@ class GeminiNativeService:
                 model=self.default_model
             )
             raw_text = res.text if hasattr(res, "text") else str(res)
+            if not raw_text and hasattr(res, "candidates") and res.candidates:
+                raw_text = res.candidates[0].text or ""
 
             clean_json = raw_text.strip()
             if "```json" in clean_json:
@@ -141,7 +143,17 @@ class GeminiNativeService:
             elif "```" in clean_json:
                 clean_json = clean_json.split("```")[1].split("```")[0].strip()
 
-            parsed = json.loads(clean_json)
+            parsed = None
+            try:
+                parsed = json.loads(clean_json)
+            except Exception:
+                import re
+                json_match = re.search(r'(\{[\s\S]*\})', raw_text)
+                if json_match:
+                    parsed = json.loads(json_match.group(1).strip())
+                else:
+                    raise ValueError("未在模型输出中找到合法的 JSON 结构")
+
             parsed["data_sources"] = data_sources
             return TravelPlanResponse(**parsed)
         except AuthError as e:

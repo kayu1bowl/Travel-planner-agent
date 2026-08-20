@@ -146,6 +146,8 @@ class AgentRouter:
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": user_prompt}
                 ],
+                "temperature": 0.7
+            }
             endpoints = [
                 self.openai_api_base,
                 "http://localhost:10000/v1",

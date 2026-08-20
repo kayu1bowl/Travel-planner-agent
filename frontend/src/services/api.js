@@ -12,27 +12,31 @@ export async function fetchTravelPlan(query, conversationHistory = null) {
       conversation_history: conversationHistory
     }, {
       headers: { 'Content-Type': 'application/json' },
-      timeout: 35000
+      timeout: 45000
     });
     return response.data;
   } catch (err8080) {
-    console.warn("ℹ️ OpenClaw 8080 主接口未连接或超时，尝试 Fallback 模式...", err8080.message);
+    console.warn("ℹ️ OpenClaw 8080 主接口未连接或超时，尝试 8000 端口服务...", err8080.message);
 
-    // 2. 尝试调用 OpenClaw Mock 接口 (/api/plan/mock)
+    // 2. 尝试调用 8000 端口服务 (/api/v1/plan)
     try {
-      const mockRes = await axios.post(`${PRIMARY_API_URL}/plan/mock`, {
+      const res8000 = await axios.post(`${FALLBACK_API_URL}/plan`, {
         query
-      }, { timeout: 4000 });
-      return mockRes.data;
-    } catch (errMock) {
-      // 3. 尝试调用 8000 端口服务
+      }, {
+        headers: { 'Content-Type': 'application/json' },
+        timeout: 45000
+      });
+      return res8000.data;
+    } catch (err8000) {
+      console.warn("ℹ️ 8000 端口服务未连接，尝试 Mock 接口...", err8000.message);
+      // 3. 尝试调用 Mock 接口 (/api/plan/mock)
       try {
-        const res8000 = await axios.post(`${FALLBACK_API_URL}/plan`, {
+        const mockRes = await axios.post(`${PRIMARY_API_URL}/plan/mock`, {
           query
-        }, { timeout: 5000 });
-        return res8000.data;
-      } catch (err8000) {
-        console.warn("⚠️ 后端 API 连接提示 (启用客户端高保真 Agent 模拟引擎):", err8000.message);
+        }, { timeout: 4000 });
+        return mockRes.data;
+      } catch (errMock) {
+        console.warn("⚠️ 所有后端 API 均离线 (启用客户端高保真 Agent 模拟引擎):", errMock.message);
         throw err8080;
       }
     }
@@ -45,7 +49,7 @@ export async function fetchSystemStatus() {
     return res.data;
   } catch (err8080) {
     try {
-      const resFallback = await axios.get(`http://localhost:8000/`, { timeout: 2000 });
+      const resFallback = await axios.get(`http://localhost:8000/api/v1/health`, { timeout: 2000 });
       return {
         status: "ok",
         version: "1.0.0",
@@ -61,4 +65,3 @@ export async function fetchSystemStatus() {
     }
   }
 }
-
