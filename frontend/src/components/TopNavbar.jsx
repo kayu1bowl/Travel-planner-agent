@@ -5,12 +5,22 @@ export default function TopNavbar({
   activeTab = 'home', 
   onTabChange, 
   onSearch, 
+  onSearchSubmit,
+  onOpenStatusModal,
   onExportMarkdown,
   copied = false,
   language = 'zh',
   onToggleLanguage,
   labels = {}
 }) {
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && e.target.value.trim()) {
+      if (onSearchSubmit) {
+        onSearchSubmit(e.target.value.trim());
+      }
+    }
+  };
+
   return (
     <header className="bento-top-navbar">
       {/* 左侧导航 Tabs */}
@@ -41,7 +51,11 @@ export default function TopNavbar({
 
         <button 
           className={`nav-tab-btn ${activeTab === 'settings' ? 'active' : ''}`}
-          onClick={() => onTabChange && onTabChange('settings')}
+          onClick={() => {
+            if (onTabChange) onTabChange('settings');
+            if (onOpenStatusModal) onOpenStatusModal();
+          }}
+          title={language === 'zh' ? '查看系统状态与模型配置' : 'System Status & Settings'}
         >
           <Settings size={16} />
           <span>{labels.settings || 'Settings'}</span>
@@ -68,8 +82,9 @@ export default function TopNavbar({
           <input 
             type="text" 
             className="navbar-search-input" 
-            placeholder={labels.searchPlaceholder || "Search trips..."} 
+            placeholder={labels.searchPlaceholder || "Search trips (Press Enter)..."} 
             onChange={(e) => onSearch && onSearch(e.target.value)}
+            onKeyDown={handleKeyDown}
           />
         </div>
 
@@ -78,15 +93,20 @@ export default function TopNavbar({
           <button 
             className="navbar-export-btn"
             onClick={onExportMarkdown}
-            title={language === 'zh' ? '一键复制 Markdown 行程方案' : 'Copy Markdown Itinerary'}
+            title={language === 'zh' ? '一键导出全部天数的完整 Markdown 行程方案' : 'Copy Full Markdown Itinerary'}
           >
             {copied ? <Check size={15} color="#10B981" /> : <Copy size={15} />}
             <span>{copied ? labels.copied || '已复制' : labels.exportPlan || '导出方案'}</span>
           </button>
         )}
 
-        {/* 通知铃铛 */}
-        <button className="navbar-bell-btn" aria-label="Notifications">
+        {/* 通知铃铛 (查看后端状态) */}
+        <button 
+          className="navbar-bell-btn" 
+          onClick={onOpenStatusModal}
+          aria-label="Notifications"
+          title={language === 'zh' ? '系统运行状态诊断' : 'System Diagnostics'}
+        >
           <Bell size={17} />
           <span className="bell-badge-dot"></span>
         </button>

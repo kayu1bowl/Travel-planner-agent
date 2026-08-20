@@ -4,6 +4,7 @@ import { Send, MoreHorizontal, Sparkles, Database, Globe, CheckCircle2, Loader2,
 export default function ConversationalSidebar({ 
   messages = [], 
   onSendMessage, 
+  onResetChat,
   loading = false,
   agentStatusSteps = [],
   labels = {},
@@ -40,7 +41,12 @@ export default function ConversationalSidebar({
           </div>
         </div>
 
-        <button className="icon-more-btn" aria-label="More options">
+        <button 
+          className="icon-more-btn" 
+          onClick={onResetChat}
+          aria-label="Reset chat"
+          title={language === 'zh' ? '清空对话历史 / 新建行程' : 'Reset Chat / New Trip'}
+        >
           <MoreHorizontal size={18} />
         </button>
       </div>

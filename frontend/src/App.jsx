@@ -5,6 +5,7 @@ import TripBannerCard from './components/TripBannerCard';
 import DailyScheduleCard from './components/DailyScheduleCard';
 import MustVisitCuisineCard from './components/MustVisitCuisineCard';
 import PhotographyGuideCard from './components/PhotographyGuideCard';
+import SystemStatusModal from './components/SystemStatusModal';
 import { DESTINATION_DATASETS, transformBackendPlan } from './services/destinations';
 import { TRANSLATIONS } from './services/i18n';
 import { fetchTravelPlan } from './services/api';
@@ -14,10 +15,11 @@ export default function App() {
   const [currentDatasetKey, setCurrentDatasetKey] = useState('newzealand');
   const [dynamicCustomPlan, setDynamicCustomPlan] = useState(null);
   const [activeNavTab, setActiveNavTab] = useState('home');
-  const [activeDay, setActiveDay] = useState(2);
+  const [activeDay, setActiveDay] = useState(1);
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
   const [agentStatusSteps, setAgentStatusSteps] = useState([]);
+  const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
 
   const t = TRANSLATIONS[language] || TRANSLATIONS.zh;
 
@@ -72,6 +74,21 @@ export default function App() {
         ]
       }
     ]);
+  };
+
+  // 重置对话与新建行程
+  const handleResetChat = () => {
+    const currentT = TRANSLATIONS[language];
+    setMessages([
+      {
+        id: Date.now(),
+        sender: 'ai',
+        text: currentT.sidebar.welcomeMsg
+      }
+    ]);
+    setDynamicCustomPlan(null);
+    setCurrentDatasetKey('newzealand');
+    setActiveDay(1);
   };
 
   const destinationData = DESTINATION_DATASETS[currentDatasetKey] || DESTINATION_DATASETS.newzealand;
@@ -183,27 +200,45 @@ export default function App() {
     }
   };
 
-  // 导出 Markdown 行程文档
+  // 顶部搜索回车联动
+  const handleSearchSubmit = (query) => {
+    handleSendMessage(query);
+  };
+
+  // 导出全部天数的完整 Markdown 行程文档
   const handleExportMarkdown = () => {
-    let md = `# ${currentData.tripTitle}\n\n> ${currentData.summary}\n\n`;
-    md += `## 🗓️ ${t.cards.dailyScheduleTitle} (Day ${activeDay})\n\n`;
-    md += `| ${t.cards.tableCols.time} | ${t.cards.tableCols.activity} | ${t.cards.tableCols.location} | ${t.cards.tableCols.details} |\n`;
-    md += `| :--- | :--- | :--- | :--- |\n`;
-    
-    const rows = currentData.dailySchedules[activeDay] || currentData.dailySchedules[1] || [];
-    rows.forEach(r => {
-      md += `| ${r.time} | **${r.activity}** | ${r.location} | ${r.details} |\n`;
+    let md = `# ${currentData.tripTitle}\n\n> ${currentData.summary || currentData.tripSubtitle}\n\n`;
+    md += `* ${language === 'zh' ? '行程规格' : 'Itinerary Specs'}: ${currentData.tripSubtitle}\n\n`;
+
+    // 循环遍历所有天数 (Day 1 ~ Day N)
+    const days = Object.keys(currentData.dailySchedules).map(Number).sort((a, b) => a - b);
+    days.forEach(dayNum => {
+      md += `## 🗓️ ${language === 'zh' ? `第 ${dayNum} 天行程安排` : `Day ${dayNum} Schedule`}\n\n`;
+      md += `| ${t.cards.tableCols.time} | ${t.cards.tableCols.activity} | ${t.cards.tableCols.location} | ${t.cards.tableCols.details} |\n`;
+      md += `| :--- | :--- | :--- | :--- |\n`;
+      
+      const rows = currentData.dailySchedules[dayNum] || [];
+      rows.forEach(r => {
+        md += `| ${r.time} | **${r.activity}** | ${r.location} | ${r.details} |\n`;
+      });
+      md += `\n`;
     });
 
-    md += `\n## 🍲 ${t.cards.mustVisitTitle}\n\n`;
-    currentData.mustVisit.forEach(m => {
-      md += `* **${m.name}** [${m.category}]: ${m.recommendations} (Tips: ${m.tipsEmoji})\n`;
-    });
+    if (currentData.mustVisit && currentData.mustVisit.length > 0) {
+      md += `## 🍲 ${t.cards.mustVisitTitle}\n\n`;
+      currentData.mustVisit.forEach(m => {
+        md += `* **${m.name}** [${m.category}]: ${m.recommendations} (Tips: ${m.tipsEmoji})\n`;
+      });
+      md += `\n`;
+    }
 
-    md += `\n## 📷 ${t.cards.photoGuideTitle}\n\n`;
-    currentData.photoGuides.forEach(p => {
-      md += `* **${p.title}** - ${p.subtitle} (${t.cards.paramsLabel}: ${p.params})\n`;
-    });
+    if (currentData.photoGuides && currentData.photoGuides.length > 0) {
+      md += `## 📷 ${t.cards.photoGuideTitle}\n\n`;
+      currentData.photoGuides.forEach(p => {
+        md += `* **${p.title}** - ${p.subtitle} (${t.cards.paramsLabel}: ${p.params})\n`;
+      });
+      md += `\n`;
+    }
 
     navigator.clipboard.writeText(md);
     setCopied(true);
@@ -218,6 +253,7 @@ export default function App() {
         <ConversationalSidebar 
           messages={messages}
           onSendMessage={handleSendMessage}
+          onResetChat={handleResetChat}
           loading={loading}
           agentStatusSteps={agentStatusSteps}
           labels={t.sidebar}
@@ -230,6 +266,8 @@ export default function App() {
           <TopNavbar 
             activeTab={activeNavTab}
             onTabChange={(tab) => setActiveNavTab(tab)}
+            onSearchSubmit={handleSearchSubmit}
+            onOpenStatusModal={() => setIsStatusModalOpen(true)}
             onExportMarkdown={handleExportMarkdown}
             copied={copied}
             language={language}
@@ -275,6 +313,13 @@ export default function App() {
           </div>
         </main>
       </div>
+
+      {/* 系统状态与模型诊断弹窗 */}
+      <SystemStatusModal 
+        isOpen={isStatusModalOpen}
+        onClose={() => setIsStatusModalOpen(false)}
+        language={language}
+      />
     </div>
   );
 }

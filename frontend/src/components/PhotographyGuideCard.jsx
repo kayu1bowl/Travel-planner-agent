@@ -3,11 +3,30 @@ import { MoreHorizontal, Link2, Users, Check, Camera, Sparkles } from 'lucide-re
 
 export default function PhotographyGuideCard({ photoGuides = [], labels = {}, language = 'zh' }) {
   const [copiedId, setCopiedId] = useState(null);
+  const [sharedId, setSharedId] = useState(null);
 
   const handleCopyLink = (item) => {
     navigator.clipboard.writeText(`${item.title} - ${item.subtitle} (${labels.paramsLabel || '参数建议'}: ${item.params || '推荐广角镜头'})`);
     setCopiedId(item.id);
     setTimeout(() => setCopiedId(null), 2000);
+  };
+
+  const handleShare = (item) => {
+    const text = `📸 【${item.title}】\n✨ 构图指南: ${item.subtitle}\n⚙️ 参数建议: ${item.params || '黄金时刻'}\n来源: Roam Copilot 智能旅行规划`;
+    if (navigator.share) {
+      navigator.share({
+        title: item.title,
+        text: text,
+      }).catch(() => {
+        navigator.clipboard.writeText(text);
+        setSharedId(item.id);
+        setTimeout(() => setSharedId(null), 2000);
+      });
+    } else {
+      navigator.clipboard.writeText(text);
+      setSharedId(item.id);
+      setTimeout(() => setSharedId(null), 2000);
+    }
   };
 
   return (
@@ -17,9 +36,6 @@ export default function PhotographyGuideCard({ photoGuides = [], labels = {}, la
         <div className="title-with-badge">
           <h3 className="card-title">{labels.photoGuideTitle || "Photography Guide & Photo Spots"}</h3>
         </div>
-        <button className="icon-more-btn" aria-label="Photo guide options">
-          <MoreHorizontal size={18} />
-        </button>
       </div>
 
       {/* 3 张大卡片横向排版 */}
@@ -62,9 +78,10 @@ export default function PhotographyGuideCard({ photoGuides = [], labels = {}, la
                 </button>
                 <button 
                   className="spot-action-icon-btn"
-                  title={labels.shareSpotBtn || "分享机位"}
+                  onClick={() => handleShare(guide)}
+                  title={sharedId === guide.id ? (language === 'zh' ? '已复制分享文案' : 'Share text copied') : (labels.shareSpotBtn || "分享机位文案")}
                 >
-                  <Users size={14} />
+                  {sharedId === guide.id ? <Check size={14} color="#10B981" /> : <Users size={14} />}
                 </button>
               </div>
             </div>

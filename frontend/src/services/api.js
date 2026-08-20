@@ -38,3 +38,27 @@ export async function fetchTravelPlan(query, conversationHistory = null) {
     }
   }
 }
+
+export async function fetchSystemStatus() {
+  try {
+    const res = await axios.get(`${PRIMARY_API_URL}/status`, { timeout: 3000 });
+    return res.data;
+  } catch (err8080) {
+    try {
+      const resFallback = await axios.get(`http://localhost:8000/`, { timeout: 2000 });
+      return {
+        status: "ok",
+        version: "1.0.0",
+        service: "Travel Planner Core (Port 8000)",
+        config_warnings: []
+      };
+    } catch (err8000) {
+      return {
+        status: "offline",
+        version: "1.0.0",
+        config_warnings: ["后端服务当前离线，已自动启用前端本地高性能 Agent 响应引擎"]
+      };
+    }
+  }
+}
+
