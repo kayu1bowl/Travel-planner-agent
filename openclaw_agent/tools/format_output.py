@@ -132,7 +132,40 @@ def call_llm(messages: list[dict], system_prompt: Optional[str] = None) -> str:
     LLM 生成的文本
   """
   if not LLM_API_KEY:
-    return " LLM_API_KEY 未配置，请设置环境变量后再试。"
+    try:
+      from backend.services.gemini_service import GeminiNativeService
+      svc = GeminiNativeService()
+      user_text = "\n".join([m.get("content", "") for m in messages if m.get("role") == "user"])
+      sys_text = system_prompt or "你是一个专业旅行规划智能体。"
+      combined_prompt = f"{sys_text}\n\n{user_text}"
+      
+      import asyncio
+      loop = None
+      try:
+        loop = asyncio.get_event_loop()
+      except RuntimeError:
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        
+      async def _ask():
+        await svc.ensure_init()
+        if svc._pool:
+          res = await svc._pool.generate_content(combined_prompt)
+          return res.text if hasattr(res, "text") else str(res)
+        return None
+
+      if loop.is_running():
+        import nest_asyncio
+        nest_asyncio.apply()
+        gen_text = loop.run_until_complete(_ask())
+      else:
+        gen_text = loop.run_until_complete(_ask())
+        
+      if gen_text:
+        return gen_text
+    except Exception as ex:
+      print(f"⚠️ [GeminiNative Fallback] {ex}")
+    return "⚠️ LLM_API_KEY 未配置，请设置环境变量后再试。"
 
   if system_prompt:
     full_messages = [{"role": "system", "content": system_prompt}]

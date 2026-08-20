@@ -10,6 +10,7 @@ LLM 调用使用 OpenAI 兼容接口，支持 DeepSeek / 硅基流动 / 等。
 """
 
 import os
+from pathlib import Path
 from typing import Optional
 
 # ============================================================
@@ -55,8 +56,9 @@ API_CORS_ORIGINS = os.getenv("API_CORS_ORIGINS", "*")
 def validate() -> list[str]:
     """检查配置完整性，返回缺失的必填项列表"""
     warnings: list[str] = []
-    if not LLM_API_KEY:
-        warnings.append("LLM_API_KEY 未设置 — LLM 调用将失败")
+    has_gemini_cookies = Path(r"D:\SJTU\编程\gemini-API\cookies.json").exists()
+    if not LLM_API_KEY and not has_gemini_cookies:
+        warnings.append("未检测到 LLM_API_KEY 或 Gemini 原生账号池配置")
     if WEB_SEARCH_BACKEND == "tavily" and not TAVILY_API_KEY:
         warnings.append("TAVILY_API_KEY 未设置 — Tavily 搜索将失败")
     if WEB_SEARCH_BACKEND == "serpapi" and not SERPAPI_API_KEY:

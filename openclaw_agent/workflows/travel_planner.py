@@ -110,7 +110,7 @@ def plan_trip(user_input: str, conversation_history: Optional[list] = None) -> d
   messages = history + [{"role": "user", "content": design_prompt}]
   llm_output = call_llm(messages, system_prompt=system_prompt)
 
-  if llm_output.startswith(""):
+  if llm_output.startswith("⚠️") or llm_output.startswith("❌") or llm_output.startswith("Error"):
     return {
       "success": False,
       "plan": None,
