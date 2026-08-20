@@ -80,6 +80,10 @@ export default function PhotographyGuideCard({ photoGuides = [], labels = {}, la
       {/* 头部 Header */}
       <div className="card-top-header">
         <div className="title-with-badge">
+          <div className="travel-eyebrow">
+            <span className="eyebrow-dot"></span>
+            <span>VISUAL EXPEDITION · 摄影出片指南</span>
+          </div>
           <h3 className="card-title">{labels.photoGuideTitle || "摄影机位与出片指南"}</h3>
         </div>
       </div>

@@ -34,6 +34,7 @@
   --font-heading: 'Outfit', 'Plus Jakarta Sans', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei UI', sans-serif;
   --font-artistic-serif: 'Noto Serif SC', 'Playfair Display', 'Songti SC', 'STSong', 'Source Han Serif SC', serif;
   --font-artistic-display: 'ZCOOL XiaoWei', 'Noto Serif SC', 'Playfair Display', 'Cinzel', 'STSong', serif;
+  --font-handwritten: 'Caveat', 'Brush Script MT', cursive, sans-serif;
   --font-mono: 'JetBrains Mono', 'SF Mono', Consolas, 'Liberation Mono', monospace;
 }
 
@@ -626,10 +627,39 @@ body {
   flex-shrink: 0;
 }
 
+.travel-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-heading);
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #4F46E5;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 2px;
+}
+
+.eyebrow-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #4F46E5;
+  display: inline-block;
+  box-shadow: 0 0 6px rgba(79, 70, 229, 0.6);
+}
+
+.title-row-with-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .current-day-badge {
   background: #EEF2FF;
   color: var(--primary-indigo);
-  font-size: 0.76rem;
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
   font-weight: 700;
   padding: 2px 8px;
   border-radius: 8px;
@@ -651,7 +681,7 @@ body {
 .day-pill-btn {
   background: #F1F5F9;
   border: 1px solid transparent;
-  padding: 3px 9px;
+  padding: 3px 8px;
   border-radius: 8px;
   font-size: 0.72rem;
   font-weight: 600;
@@ -659,6 +689,20 @@ body {
   cursor: pointer;
   white-space: nowrap;
   transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.day-num-prefix {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #64748B;
+}
+
+.day-pill-btn.active .day-num-prefix {
+  color: #EEF2FF;
 }
 
 .day-pill-btn:hover {
@@ -672,7 +716,7 @@ body {
   box-shadow: 0 2px 6px rgba(79, 70, 229, 0.25);
 }
 
-/* 4.1 Trip Banner Card */
+/* 4.1 Trip Banner Card & Editorial Banner */
 .trip-banner-card {
   background: var(--card-bg);
   border: 1px solid var(--border-light);
@@ -684,11 +728,18 @@ body {
   align-items: center;
   cursor: pointer;
   transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.trip-banner-card.editorial-banner {
+  background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 60%, #EEF2FF 100%);
+  border: 1px solid #E0E7FF;
 }
 
 .trip-banner-card:hover {
-  border-color: #CBD5E1;
-  box-shadow: 0 6px 20px -4px rgba(0, 0, 0, 0.05);
+  border-color: #C7D2FE;
+  box-shadow: 0 6px 20px -4px rgba(79, 70, 229, 0.08);
 }
 
 .trip-banner-left {
@@ -698,13 +749,41 @@ body {
 }
 
 .calendar-icon-box {
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
   background: #EEF2FF;
+  border: 1px solid #E0E7FF;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 2px 6px rgba(79, 70, 229, 0.1);
+}
+
+.trip-banner-right-editorial {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.handwritten-motto {
+  font-family: var(--font-handwritten);
+  font-size: 1.22rem;
+  color: #4338CA;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  letter-spacing: 0.02em;
+  text-shadow: 0 1px 2px rgba(67, 56, 202, 0.05);
+}
+
+.quote-mark {
+  font-family: var(--font-artistic-serif);
+  font-size: 1.35rem;
+  color: #818CF8;
+  opacity: 0.8;
+  line-height: 0.8;
 }
 
 .trip-main-title {
@@ -787,20 +866,27 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  background: #EEF2FF;
-  color: #4F46E5;
-  border: 1px solid #E0E7FF;
+  background: #F0FDF4;
+  color: #166534;
+  border: 1px solid #BBF7D0;
   font-family: var(--font-mono, monospace);
-  font-size: 0.74rem;
+  font-size: 0.76rem;
   font-weight: 700;
-  padding: 3px 7px;
+  padding: 3px 8px;
   border-radius: 6px;
   white-space: nowrap;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.04em;
+  box-shadow: 0 1px 2px rgba(22, 101, 52, 0.06);
+}
+
+.time-dot {
+  color: #16A34A;
+  font-size: 0.55rem;
+  line-height: 1;
 }
 
 .time-clock-icon {
-  color: #6366F1;
+  color: #16A34A;
   flex-shrink: 0;
 }
 
@@ -2374,6 +2460,31 @@ body {
   }
 
   /* --- 移动端竖屏下的各卡片自适应重构 --- */
+  .trip-banner-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 12px 14px;
+  }
+
+  .trip-banner-left {
+    width: 100%;
+  }
+
+  .trip-banner-right-editorial {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px dashed #E2E8F0;
+    padding-top: 6px;
+    margin-top: 2px;
+  }
+
+  .handwritten-motto {
+    font-size: 0.92rem;
+  }
+
   .cuisine-items-grid {
     grid-template-columns: 1fr;
     gap: 10px;

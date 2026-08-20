@@ -64,7 +64,13 @@ export default function MustVisitCuisineCard({ items = [], labels = {}, language
     <div className="bento-card must-visit-cuisine-card">
       {/* 头部 Header */}
       <div className="card-top-header">
-        <h3 className="card-title">{labels.mustVisitTitle || "必去地标与风味美食"}</h3>
+        <div>
+          <div className="travel-eyebrow">
+            <span className="eyebrow-dot"></span>
+            <span>TASTE & SIGHTS · 风物指南</span>
+          </div>
+          <h3 className="card-title">{labels.mustVisitTitle || "必去地标与风味美食"}</h3>
+        </div>
         
         {/* 分类切换药丸 */}
         <div className="cuisine-filter-pills">
