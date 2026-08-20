@@ -1,25 +1,23 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   Calendar, 
   MapPin, 
   Clock, 
   Compass, 
   Sparkles, 
-  ArrowLeft, 
   Navigation,
-  Download,
-  Share2
+  ChevronRight
 } from 'lucide-react';
+import ActivityDetailModal from './ActivityDetailModal';
 
 export default function ItinerariesFullView({ 
   currentData, 
   labels = {}, 
-  language = 'zh', 
-  onBackHome,
-  onExportMarkdown 
+  language = 'zh'
 }) {
   const days = Object.keys(currentData.dailySchedules || {}).map(Number).sort((a, b) => a - b);
   const totalStops = days.reduce((acc, d) => acc + (currentData.dailySchedules[d]?.length || 0), 0);
+  const [selectedActivity, setSelectedActivity] = useState(null);
 
   return (
     <div className="itineraries-full-view-container">
@@ -53,9 +51,10 @@ export default function ItinerariesFullView({
             <div key={dayNum} className="itinerary-day-card">
               {/* Day 标题栏 */}
               <div className="day-card-header">
-                <div className="day-card-badge">
-                  <Calendar size={14} />
-                  <span>{language === 'zh' ? `第 ${dayNum} 天` : `Day ${dayNum}`}</span>
+                <div className="day-title-box">
+                  <span className="day-badge-primary">
+                    {language === 'zh' ? `第 ${dayNum} 天` : `Day ${dayNum}`}
+                  </span>
                 </div>
                 <div className="day-card-meta">
                   <span className="day-stops-count">
@@ -75,11 +74,16 @@ export default function ItinerariesFullView({
 
                 <div className="timeline-rows-list">
                   {rows.map((item, idx) => (
-                    <div key={idx} className="timeline-row-item">
+                    <div 
+                      key={idx} 
+                      className="timeline-row-item clickable-timeline-row"
+                      onClick={() => setSelectedActivity({ ...item, day: dayNum })}
+                      title={language === 'zh' ? '点击查看该节点与地点详情' : 'Click to view stop details'}
+                    >
                       {/* 1. 时刻胶囊 */}
                       <div className="td-col td-time">
                         <div className="time-pill">
-                          <Clock size={11} className="time-clock-icon" />
+                          <span className="time-dot">●</span>
                           <span className="time-val">{item.time}</span>
                         </div>
                       </div>
@@ -99,7 +103,10 @@ export default function ItinerariesFullView({
 
                       {/* 4. 细节与体验 */}
                       <div className="td-col td-details">
-                        <p className="details-paragraph">{item.details}</p>
+                        <div className="details-cell-inner">
+                          <p className="details-paragraph">{item.details}</p>
+                          <ChevronRight size={13} className="details-row-arrow" />
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -109,6 +116,14 @@ export default function ItinerariesFullView({
           );
         })}
       </div>
+
+      {/* 行程节点详情弹窗 */}
+      <ActivityDetailModal 
+        item={selectedActivity}
+        isOpen={Boolean(selectedActivity)}
+        onClose={() => setSelectedActivity(null)}
+        language={language}
+      />
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { MoreHorizontal, Clock, MapPin, Copy, Check, Share2, Printer } from 'lucide-react';
+import { MoreHorizontal, Clock, MapPin, Copy, Check, Share2, Printer, ChevronRight } from 'lucide-react';
+import ActivityDetailModal from './ActivityDetailModal';
 
 export default function DailyScheduleCard({ 
   dailySchedules = {}, 
@@ -13,6 +14,7 @@ export default function DailyScheduleCard({
   const currentRows = dailySchedules[currentDay] || dailySchedules[availableDays[0]] || [];
   const [showMenu, setShowMenu] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [selectedActivity, setSelectedActivity] = useState(null);
   const menuRef = useRef(null);
 
   useEffect(() => {
@@ -123,15 +125,20 @@ export default function DailyScheduleCard({
         <table className="bento-schedule-table">
           <thead>
             <tr>
-              <th style={{ width: '15%' }}>{cols.time}</th>
-              <th style={{ width: '29%' }}>{cols.activity}</th>
-              <th style={{ width: '24%' }}>{cols.location}</th>
-              <th style={{ width: '32%' }}>{cols.details}</th>
+              <th style={{ width: '14%' }}>{cols.time}</th>
+              <th style={{ width: '28%' }}>{cols.activity}</th>
+              <th style={{ width: '22%' }}>{cols.location}</th>
+              <th style={{ width: '36%' }}>{cols.details}</th>
             </tr>
           </thead>
           <tbody>
             {currentRows.map((row, idx) => (
-              <tr key={idx} className="bento-schedule-row">
+              <tr 
+                key={idx} 
+                className="bento-schedule-row clickable-row"
+                onClick={() => setSelectedActivity({ ...row, day: currentDay })}
+                title={language === 'zh' ? '点击查看该节点与地点详情' : 'Click to view stop details'}
+              >
                 <td className="time-cell">
                   <div className="time-pill">
                     <span className="time-dot">●</span>
@@ -148,13 +155,24 @@ export default function DailyScheduleCard({
                   </div>
                 </td>
                 <td className="details-cell">
-                  <span className="details-text">{row.details}</span>
+                  <div className="details-cell-inner">
+                    <span className="details-text">{row.details}</span>
+                    <ChevronRight size={13} className="details-row-arrow" />
+                  </div>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+
+      {/* 行程节点详情弹窗 */}
+      <ActivityDetailModal 
+        item={selectedActivity}
+        isOpen={Boolean(selectedActivity)}
+        onClose={() => setSelectedActivity(null)}
+        language={language}
+      />
     </div>
   );
 }
