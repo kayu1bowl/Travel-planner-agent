@@ -37,6 +37,10 @@ export const DESTINATION_DATASETS = {
         {
           name: "库克山高山三文鱼 (Alpine Salmon)",
           image: "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=800&auto=format&fit=crop&q=80",
+          imageSource: "Unsplash",
+          wikimediaUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/LakeTekapoNov242024_05.jpg/960px-LakeTekapoNov242024_05.jpg",
+          aiPrompt: "Fresh Alpine salmon sashimi plate near snowy mountains of Lake Pukaki New Zealand, gourmet food photography",
+          wikiTitle: "Lake_Pukaki",
           recommendations: "高海拔冰川冷水滋养，肉质紧致肥美、现切极鲜刺身。",
           tipsEmoji: "🍣🏔️",
           category: "地道美食"
@@ -44,6 +48,10 @@ export const DESTINATION_DATASETS = {
         {
           name: "好牧羊人教堂 (Good Shepherd)",
           image: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=800&auto=format&fit=crop&q=80",
+          imageSource: "Unsplash",
+          wikimediaUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/57/Church_of_the_Good_Shepherd%2C_Tekapo_01.jpg/960px-Church_of_the_Good_Shepherd%2C_Tekapo_01.jpg",
+          aiPrompt: "Church of the Good Shepherd Lake Tekapo at night with bright Milky Way galaxy arch in starry sky, landscape photography",
+          wikiTitle: "Church_of_the_Good_Shepherd,_Lake_Tekapo",
           recommendations: "世界顶级暗夜星空保护区地标，石砌教堂与苍穹银河交相辉映。",
           tipsEmoji: "🌌⛪",
           category: "经典地标"
@@ -51,6 +59,10 @@ export const DESTINATION_DATASETS = {
         {
           name: "皇后镇 Fergburger 大汉堡",
           image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800&auto=format&fit=crop&q=80",
+          imageSource: "Unsplash",
+          wikimediaUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/Fergburger_Queenstown.jpg/800px-Fergburger_Queenstown.jpg",
+          aiPrompt: "Giant gourmet prime beef burger with juicy cheese and crispy lettuce on wooden board, Queenstown restaurant style",
+          wikiTitle: "Fergburger",
           recommendations: "被 CNN 誉为全球最佳汉堡，排队虽长但肉香四溢、汁水极其丰盈。",
           tipsEmoji: "🍔🔥",
           category: "地道美食"
@@ -62,6 +74,9 @@ export const DESTINATION_DATASETS = {
           title: "1. 好牧羊人教堂暗夜星空",
           subtitle: "超广角低机位仰拍，将石砌教堂作为前景纳整片银河拱桥",
           image: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=800&auto=format&fit=crop&q=80",
+          imageSource: "Unsplash",
+          wikimediaUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/57/Church_of_the_Good_Shepherd%2C_Tekapo_01.jpg/960px-Church_of_the_Good_Shepherd%2C_Tekapo_01.jpg",
+          aiPrompt: "Church of Good Shepherd Tekapo night sky starry milky way long exposure wide angle",
           tipsAvatars: ["🌌", "📷"],
           params: "14-24mm f/2.8 · 20s · ISO 3200"
         },
@@ -70,6 +85,9 @@ export const DESTINATION_DATASETS = {
           title: "2. 罗伊斯峰山脊晨光俯瞰",
           subtitle: "黄金时刻逆光拍摄山脊蜿蜒延伸至瓦纳卡湖的绝美层次",
           image: "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=800&auto=format&fit=crop&q=80",
+          imageSource: "Unsplash",
+          wikimediaUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/Roys_Peak_Track_Wanaka.jpg/960px-Roys_Peak_Track_Wanaka.jpg",
+          aiPrompt: "Roys Peak trail sunrise overlooking Lake Wanaka New Zealand golden hour mountain ridge",
           tipsAvatars: ["🌅", "🏔️"],
           params: "24-70mm f/8 · 1/200s · ISO 100"
         },
@@ -78,6 +96,9 @@ export const DESTINATION_DATASETS = {
           title: "3. 米尔福德峡湾教冠峰水面倒影",
           subtitle: "利用潮汐滩涂水面与 CPL 偏振镜，消除杂光捕获巍峨雪山倒影",
           image: "https://images.unsplash.com/photo-1433086966358-54859d0ed716?w=800&auto=format&fit=crop&q=80",
+          imageSource: "Unsplash",
+          wikimediaUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/Mitre_Peak_Milford_Sound.jpg/960px-Mitre_Peak_Milford_Sound.jpg",
+          aiPrompt: "Milford Sound Mitre Peak reflection in pristine calm fjord water with waterfall morning mist",
           tipsAvatars: ["🌊", "🚢"],
           params: "16-35mm + CPL · 30s · ISO 100"
         }

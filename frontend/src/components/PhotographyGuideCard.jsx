@@ -1,5 +1,51 @@
 import React, { useState } from 'react';
-import { MoreHorizontal, Link2, Users, Check, Camera, Sparkles } from 'lucide-react';
+import { Link2, Users, Check, Camera, Globe, Sparkles } from 'lucide-react';
+import { resolveMultiLevelImage } from '../services/imageResolver';
+
+function PhotoGuideImageWithFallback({ guide }) {
+  const meta = resolveMultiLevelImage(guide);
+  const [currentSrc, setCurrentSrc] = useState(meta.primaryUrl);
+  const [currentSource, setCurrentSource] = useState(meta.primarySource);
+  const [fallbackIndex, setFallbackIndex] = useState(0);
+
+  const handleError = () => {
+    if (fallbackIndex < meta.fallbacks.length) {
+      const nextFallback = meta.fallbacks[fallbackIndex];
+      setCurrentSrc(nextFallback.url);
+      setCurrentSource(nextFallback.source);
+      setFallbackIndex(prev => prev + 1);
+    }
+  };
+
+  const getSourceIcon = (src) => {
+    if (src?.includes('Wikimedia')) return <Globe size={9} />;
+    if (src?.includes('AI')) return <Sparkles size={9} />;
+    return <Camera size={9} />;
+  };
+
+  return (
+    <div className="spot-photo-wrapper">
+      <img 
+        src={currentSrc} 
+        alt={guide.title} 
+        className="spot-photo-img" 
+        onError={handleError}
+        loading="lazy"
+      />
+      {guide.params && (
+        <div className="photo-params-pill">
+          <Camera size={11} />
+          <span>{guide.params}</span>
+        </div>
+      )}
+      {/* 来源标注角标 */}
+      <span className="image-source-badge" title={`机位图片数据源: ${currentSource}`}>
+        {getSourceIcon(currentSource)}
+        <span>{currentSource}</span>
+      </span>
+    </div>
+  );
+}
 
 export default function PhotographyGuideCard({ photoGuides = [], labels = {}, language = 'zh' }) {
   const [copiedId, setCopiedId] = useState(null);
@@ -12,7 +58,7 @@ export default function PhotographyGuideCard({ photoGuides = [], labels = {}, la
   };
 
   const handleShare = (item) => {
-    const text = `📸 【${item.title}】\n✨ 构图指南: ${item.subtitle}\n⚙️ 参数建议: ${item.params || '黄金时刻'}\n来源: Roam Copilot 智能旅行规划`;
+    const text = `📸 【${item.title}】\n✨ 构图指南: ${item.subtitle}\n⚙️ 参数建议: ${item.params || '黄金时刻'}\n来源: Roam AI 智能旅行规划`;
     if (navigator.share) {
       navigator.share({
         title: item.title,
@@ -34,7 +80,7 @@ export default function PhotographyGuideCard({ photoGuides = [], labels = {}, la
       {/* 头部 Header */}
       <div className="card-top-header">
         <div className="title-with-badge">
-          <h3 className="card-title">{labels.photoGuideTitle || "Photography Guide & Photo Spots"}</h3>
+          <h3 className="card-title">{labels.photoGuideTitle || "摄影机位与出片指南"}</h3>
         </div>
       </div>
 
@@ -42,16 +88,7 @@ export default function PhotographyGuideCard({ photoGuides = [], labels = {}, la
       <div className="photo-guides-grid">
         {photoGuides.map((guide) => (
           <div key={guide.id} className="photo-spot-box">
-            {/* 封面照片 */}
-            <div className="spot-photo-wrapper">
-              <img src={guide.image} alt={guide.title} className="spot-photo-img" />
-              {guide.params && (
-                <div className="photo-params-pill">
-                  <Camera size={11} />
-                  <span>{guide.params}</span>
-                </div>
-              )}
-            </div>
+            <PhotoGuideImageWithFallback guide={guide} />
 
             {/* 标题与构图技巧 */}
             <h4 className="spot-title-text">{guide.title}</h4>

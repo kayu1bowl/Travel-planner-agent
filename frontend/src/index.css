@@ -968,6 +968,29 @@ body {
   gap: 4px;
 }
 
+/* 图片数据来源标注徽章 (Attribution Badge) */
+.image-source-badge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #F8FAFC;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  padding: 2px 6px;
+  border-radius: 6px;
+  font-size: 0.62rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  z-index: 2;
+  letter-spacing: 0.02em;
+  pointer-events: none;
+}
+
 .spot-title-text {
   font-size: 0.9rem;
   font-weight: 700;
