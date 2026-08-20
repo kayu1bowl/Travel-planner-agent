@@ -79,7 +79,7 @@ export default function PhotographyGuideCard({ photoGuides = [], labels = {}, la
     <div className="bento-card photo-guide-bento-card">
       {/* 头部 Header */}
       <div className="card-top-header">
-        <div className="title-with-badge">
+        <div className="card-title-group">
           <div className="travel-eyebrow">
             <span className="eyebrow-dot"></span>
             <span>VISUAL EXPEDITION · 摄影出片指南</span>

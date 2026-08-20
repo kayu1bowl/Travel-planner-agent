@@ -1,21 +1,17 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, MoreHorizontal, Sparkles, Database, Globe, CheckCircle2, Loader2, Compass, Bot, Trash2, Copy, Check, Activity } from 'lucide-react';
+import { Send, Database, Globe, CheckCircle2, Loader2, Bot } from 'lucide-react';
 
 export default function ConversationalSidebar({ 
   messages = [], 
   onSendMessage, 
   onResetChat,
-  onOpenStatusModal,
   loading = false,
   agentStatusSteps = [],
   labels = {},
   language = 'zh'
 }) {
   const [inputText, setInputText] = useState('');
-  const [showMenu, setShowMenu] = useState(false);
-  const [copied, setCopied] = useState(false);
   const messagesEndRef = useRef(null);
-  const menuRef = useRef(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -24,17 +20,6 @@ export default function ConversationalSidebar({
   useEffect(() => {
     scrollToBottom();
   }, [messages, loading, agentStatusSteps]);
-
-  // 点击外部关闭下拉菜单
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (menuRef.current && !menuRef.current.contains(event.target)) {
-        setShowMenu(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -46,21 +31,6 @@ export default function ConversationalSidebar({
   const handleQuickPrompt = (prompt) => {
     if (loading) return;
     onSendMessage(prompt);
-  };
-
-  const handleCopyChat = () => {
-    const text = messages.map(m => `【${m.sender === 'user' ? '用户' : 'AI 向导'}】\n${m.text}`).join('\n\n');
-    navigator.clipboard.writeText(text);
-    setCopied(true);
-    setTimeout(() => {
-      setCopied(false);
-      setShowMenu(false);
-    }, 1500);
-  };
-
-  const handleClear = () => {
-    setShowMenu(false);
-    if (onResetChat) onResetChat();
   };
 
   return (
@@ -76,33 +46,8 @@ export default function ConversationalSidebar({
           </div>
           <div className="user-meta">
             <h3 className="user-name">{labels.title || 'Roam Copilot'}</h3>
-            <p className="user-role">{labels.subtitle || 'Conversational AI'}</p>
+            <p className="user-role">{labels.subtitle || (language === 'zh' ? '智能旅行向导' : 'Conversational AI')}</p>
           </div>
-        </div>
-
-        {/* 菜单下拉锚点 */}
-        <div className="more-menu-container" ref={menuRef}>
-          <button 
-            className="icon-more-btn" 
-            onClick={() => setShowMenu(!showMenu)}
-            aria-label="Conversation options"
-            title={language === 'zh' ? '更多会话操作' : 'Conversation options'}
-          >
-            <MoreHorizontal size={18} />
-          </button>
-
-          {showMenu && (
-            <div className="action-dropdown-menu">
-              <button className="dropdown-menu-item" onClick={handleClear}>
-                <Trash2 size={14} color="#EF4444" />
-                <span>{language === 'zh' ? '清空并新建对话' : 'Clear & New Chat'}</span>
-              </button>
-              <button className="dropdown-menu-item" onClick={handleCopyChat}>
-                {copied ? <Check size={14} color="#10B981" /> : <Copy size={14} />}
-                <span>{copied ? (language === 'zh' ? '已复制对话！' : 'Copied!') : (language === 'zh' ? '复制对话记录' : 'Copy Chat Log')}</span>
-              </button>
-            </div>
-          )}
         </div>
       </div>
 
@@ -129,15 +74,15 @@ export default function ConversationalSidebar({
             <div className="message-bubble">
               <div className="message-content-text">{msg.text}</div>
 
-              {/* RAG 引用信源展示 */}
-              {msg.sources && msg.sources.length > 0 && (
+              {/* 信源展示 */}
+              {msg.dataSources && msg.dataSources.length > 0 && (
                 <div className="rag-sources-box">
                   <div className="sources-title">
                     <Database size={12} />
-                    <span>{language === 'zh' ? '知识库与搜索信源' : 'Knowledge & Search Sources'}</span>
+                    <span>{language === 'zh' ? '官方指南与核验信源' : 'Official Guides & Sources'}</span>
                   </div>
                   <div className="source-tags-list">
-                    {msg.sources.map((src, idx) => (
+                    {msg.dataSources.map((src, idx) => (
                       <span key={idx} className="source-tag-item">
                         <Globe size={10} />
                         <span>{src}</span>
@@ -156,7 +101,7 @@ export default function ConversationalSidebar({
             <div className="message-bubble thinking-bubble">
               <div className="thinking-header">
                 <Loader2 size={16} className="spin-animate" />
-                <span>{language === 'zh' ? 'AI 正在检索知识库并规划行程...' : 'AI is researching & planning...'}</span>
+                <span>{language === 'zh' ? 'AI 正在为您定制专属行程路线...' : 'AI is customizing your itinerary...'}</span>
               </div>
               {agentStatusSteps && agentStatusSteps.length > 0 && (
                 <div className="agent-steps-list">
