@@ -163,10 +163,6 @@ export default function BookingsFullView({
               <strong className="stat-value text-indigo">{confirmedCount} / {bookingItems.length} {language === 'zh' ? '已确认' : 'Done'}</strong>
             </div>
           </div>
-
-          <button className="back-home-btn" onClick={onBackHome}>
-            {language === 'zh' ? '返回看板视图' : 'Back to Dashboard'}
-          </button>
         </div>
       </div>
 

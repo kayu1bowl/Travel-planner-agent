@@ -179,13 +179,11 @@ export default function App() {
                 currentData={currentData}
                 labels={t.cards}
                 language={language}
-                onBackHome={() => setActiveNavTab('home')}
               />
             ) : activeNavTab === 'bookings' ? (
               <BookingsFullView 
                 currentData={currentData}
                 language={language}
-                onBackHome={() => setActiveNavTab('home')}
               />
             ) : (
               /* 便士网格 Bento Grid 内容区 */
@@ -252,13 +250,11 @@ export default function App() {
               currentData={currentData}
               labels={t.cards}
               language={language}
-              onBackHome={() => setMobileTab('home')}
             />
           ) : mobileTab === 'bookings' ? (
             <BookingsFullView 
               currentData={currentData}
               language={language}
-              onBackHome={() => setMobileTab('home')}
             />
           ) : (
             /* 移动端单列卡片探索看板 */

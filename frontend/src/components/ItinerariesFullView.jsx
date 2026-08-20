@@ -42,11 +42,6 @@ export default function ItinerariesFullView({
             <span className="stats-number">{totalStops}</span>
             <span className="stats-unit">{language === 'zh' ? '个节点' : 'Stops'}</span>
           </div>
-
-          <button className="back-home-btn" onClick={onBackHome}>
-            <ArrowLeft size={14} />
-            <span>{language === 'zh' ? '返回看板视图' : 'Back to Dashboard'}</span>
-          </button>
         </div>
       </div>
 
