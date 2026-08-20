@@ -17,13 +17,15 @@ from typing import Optional
 # LLM 配置（OpenAI 兼容接口）
 # ============================================================
 
-# API 地址
-LLM_API_BASE = os.getenv("LLM_API_BASE", "https://api.deepseek.com/v1")
-# API Key（必须设置）
-LLM_API_KEY = os.getenv("LLM_API_KEY", "")
-# 模型名称
-LLM_MODEL = os.getenv("LLM_MODEL", "deepseek-chat")
-# 推理参数
+# API 地址（优先检测本地 Gemini OpenAI 兼容服务）
+has_gemini_cookies = Path(r"D:\SJTU\编程\gemini-API\cookies.json").exists()
+default_base = "http://localhost:10000/v1" if has_gemini_cookies else "https://api.deepseek.com/v1"
+default_model = "gemini-3.7-flash" if has_gemini_cookies else "deepseek-chat"
+default_key = "gemini-local" if has_gemini_cookies else ""
+
+LLM_API_BASE = os.getenv("LLM_API_BASE", default_base)
+LLM_API_KEY = os.getenv("LLM_API_KEY", default_key)
+LLM_MODEL = os.getenv("LLM_MODEL", default_model)
 LLM_TEMPERATURE = float(os.getenv("LLM_TEMPERATURE", "0.7"))
 LLM_MAX_TOKENS = int(os.getenv("LLM_MAX_TOKENS", "4096"))
 

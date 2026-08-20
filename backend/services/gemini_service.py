@@ -1,5 +1,6 @@
 """
 基于 D:\\SJTU\\编程\\gemini-API 真实 Gemini 模型原生客户端连接服务
+严格遵循 API_SPECIFICATION.md 与 README.md 调用规范
 支持直连 AccountPool 与 OpenAI-Compatible 代理双模式
 """
 import os
@@ -17,6 +18,16 @@ if (GEMINI_API_DIR / "src").exists() and str(GEMINI_API_DIR / "src") not in sys.
 try:
     from gemini_webapi.account_pool import AccountPool
     from gemini_webapi.client import GeminiClient
+    from gemini_webapi.constants import Model
+    from gemini_webapi.exceptions import (
+        GeminiError,
+        AuthError,
+        UsageLimitExceeded,
+        TemporarilyBlocked,
+        ModelInvalid,
+        APIError,
+        TimeoutError,
+    )
     HAS_GEMINI_NATIVE = True
 except ImportError:
     HAS_GEMINI_NATIVE = False
@@ -32,9 +43,11 @@ class GeminiNativeService:
     def __init__(self):
         self.cookies_path = GEMINI_API_DIR / "cookies.json"
         self.is_initialized = False
+        # 遵循 API_SPECIFICATION.md §2.1 规范，默认使用 3.7 Flash 旗舰推理模型
+        self.default_model = os.getenv("LLM_MODEL", "gemini-3.7-flash")
 
     async def ensure_init(self):
-        """确保 AccountPool 懒加载单例初始化"""
+        """确保 AccountPool 懒加载单例初始化 (符合 API_SPECIFICATION.md §4.1 规范)"""
         if self.is_initialized and self._pool:
             return
 
@@ -52,17 +65,22 @@ class GeminiNativeService:
                     elif isinstance(data, dict):
                         accounts.append(data.get("cookies", data))
 
-                    print(f"🚀 [GeminiNative] 正在初始化 {len(accounts)} 个 Google AI Pro 账号池...")
-                    pool = AccountPool(accounts)
+                    print(f"🚀 [GeminiNative] 正在按照 API_SPECIFICATION 初始化 {len(accounts)} 个 Google AI 账号池...")
+                    # 遵循规范: min_interval=0.5 (防风控平滑间隔), max_concurrency_per_account=2 (单账号最大并发)
+                    pool = AccountPool(
+                        accounts_cookies=accounts,
+                        min_interval=0.5,
+                        max_concurrency_per_account=2
+                    )
                     await pool.init()
                     self._pool = pool
                     self.is_initialized = True
-                    print("✅ [GeminiNative] Gemini 原生账号池初始化完成！")
+                    print(f"✅ [GeminiNative] Gemini 原生账号池初始化完成！活跃账号数: {len(pool.clients)}")
                 except Exception as e:
                     print(f"⚠️ [GeminiNative] 初始化账号池异常: {e}")
 
     async def generate_plan_async(self, query: str, context: str, data_sources: List[str]) -> Optional[TravelPlanResponse]:
-        """异步调用真实 Gemini 模型生成结构化旅行规划"""
+        """异步调用真实 Gemini 模型生成结构化旅行规划 (符合 API_SPECIFICATION.md §3.2 规范)"""
         await self.ensure_init()
         if not self._pool:
             return None
@@ -109,8 +127,12 @@ class GeminiNativeService:
         full_prompt = f"{system_instruction}\n\n=== 用户需求 ===\n{query}\n\n=== 参考资料 ===\n{context}\n\n请直接输出 JSON："
 
         try:
-            print("🤖 [GeminiNative] 正在投递 Prompt 给真实 Google Gemini 大模型...")
-            res = await self._pool.generate_content(full_prompt)
+            print(f"🤖 [GeminiNative] 正在使用标准模型 [{self.default_model}] 投递 Prompt 给真实 Google Gemini 大模型...")
+            # 按照规范传递标准模型名称与参数
+            res = await self._pool.generate_content(
+                full_prompt,
+                model=self.default_model
+            )
             raw_text = res.text if hasattr(res, "text") else str(res)
 
             clean_json = raw_text.strip()
@@ -122,8 +144,20 @@ class GeminiNativeService:
             parsed = json.loads(clean_json)
             parsed["data_sources"] = data_sources
             return TravelPlanResponse(**parsed)
+        except AuthError as e:
+            print(f"❌ [GeminiNative] 账号 Cookie 鉴权失效 (AuthError): {e}，请按规范更新 cookies.json")
+            return None
+        except UsageLimitExceeded as e:
+            print(f"⚠️ [GeminiNative] 账号算力额度达上限 (UsageLimitExceeded): {e}")
+            return None
+        except TemporarilyBlocked as e:
+            print(f"⚠️ [GeminiNative] 触发 Google 临时频控 (TemporarilyBlocked): {e}")
+            return None
+        except ModelInvalid as e:
+            print(f"⚠️ [GeminiNative] 模型名称无效 (ModelInvalid): {e}，建议回退至 gemini-3.7-flash / gemini-3.5-flash-lite")
+            return None
         except Exception as e:
-            print(f"⚠️ [GeminiNative] Gemini 原生推理或 JSON 解析异常: {e}")
+            print(f"⚠️ [GeminiNative] Gemini 推理或 JSON 解析异常: {e}")
             return None
 
     def generate_plan(self, query: str, context: str, data_sources: List[str]) -> Optional[TravelPlanResponse]:

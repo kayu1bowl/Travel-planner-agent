@@ -20,7 +20,7 @@ class AgentRouter:
         self.gemini_native = GeminiNativeService()
         self.openai_api_key = os.getenv("OPENAI_API_KEY", "gemini-local")
         self.openai_api_base = os.getenv("OPENAI_API_BASE", "http://localhost:10000/v1")
-        self.model_name = os.getenv("LLM_MODEL", "gemini-2.5-flash")
+        self.model_name = os.getenv("LLM_MODEL", "gemini-3.7-flash")
 
     def plan_trip(self, user_query: str, preferences: dict = None) -> TravelPlanResponse:
         """
@@ -146,20 +146,32 @@ class AgentRouter:
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": user_prompt}
                 ],
-                "temperature": 0.7
-            }
-            res = requests.post(f"{self.openai_api_base}/chat/completions", json=body, headers=headers, timeout=35)
-            if res.status_code == 200:
-                raw_content = res.json()["choices"][0]["message"]["content"]
-                clean_json_str = raw_content.strip()
-                if "```json" in clean_json_str:
-                    clean_json_str = clean_json_str.split("```json")[1].split("```")[0].strip()
-                elif "```" in clean_json_str:
-                    clean_json_str = clean_json_str.split("```")[1].split("```")[0].strip()
-                
-                data = json.loads(clean_json_str)
-                data["data_sources"] = data_sources
-                return TravelPlanResponse(**data)
+            endpoints = [
+                self.openai_api_base,
+                "http://localhost:10000/v1",
+                "http://localhost:8000/v1",
+            ]
+            # 去重保持顺序
+            seen = set()
+            unique_endpoints = [x for x in endpoints if not (x in seen or seen.add(x))]
+
+            for ep in unique_endpoints:
+                try:
+                    res = requests.post(f"{ep}/chat/completions", json=body, headers=headers, timeout=25)
+                    if res.status_code == 200:
+                        raw_content = res.json()["choices"][0]["message"]["content"]
+                        clean_json_str = raw_content.strip()
+                        if "```json" in clean_json_str:
+                            clean_json_str = clean_json_str.split("```json")[1].split("```")[0].strip()
+                        elif "```" in clean_json_str:
+                            clean_json_str = clean_json_str.split("```")[1].split("```")[0].strip()
+                        
+                        data = json.loads(clean_json_str)
+                        data["data_sources"] = data_sources
+                        print(f"🌟 [AgentRouter] 成功由 Gemini OpenAI 兼容服务 ({ep}) 生成规划！")
+                        return TravelPlanResponse(**data)
+                except Exception:
+                    continue
         except Exception as e:
             print(f"ℹ️ Gemini HTTP 代理连接提示: {e}")
 

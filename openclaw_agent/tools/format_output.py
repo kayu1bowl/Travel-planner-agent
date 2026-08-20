@@ -150,7 +150,7 @@ def call_llm(messages: list[dict], system_prompt: Optional[str] = None) -> str:
       async def _ask():
         await svc.ensure_init()
         if svc._pool:
-          res = await svc._pool.generate_content(combined_prompt)
+          res = await svc._pool.generate_content(combined_prompt, model=LLM_MODEL)
           return res.text if hasattr(res, "text") else str(res)
         return None
 
