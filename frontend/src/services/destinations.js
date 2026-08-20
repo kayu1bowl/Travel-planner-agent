@@ -31,6 +31,18 @@ export const DESTINATION_DATASETS = {
           { time: "07:30", activity: "米尔福德观光公路穿越", location: "镜湖 & 荷马隧道", details: "穿行古老温带雨林与穿山峡谷隧道，感受峡湾磅礴" },
           { time: "13:00", activity: "米尔福德峡湾游船巡礼", location: "米尔福德峡湾", details: "近距离仰望主教冠峰，驶入斯特林瀑布水雾感受峡湾生命力" },
           { time: "19:30", activity: "Fergburger 皇后镇大汉堡", location: "皇后镇商业街", details: "打卡全球知名的手打多汁厚牛排汉堡，搭配特制蒜香酱" }
+        ],
+        6: [
+          { time: "09:00", activity: "TSS 厄恩斯劳号蒸汽船巡游", location: "瓦卡蒂普湖", details: "搭乘百年燃煤蒸汽船前往瓦尔特峰高地牧场，享用英式湖畔下午茶" },
+          { time: "13:30", activity: "格伦诺基“中土公路”自驾", location: "格伦诺基 (Glenorchy)", details: "沿湖岸行驶至指环王取景地，拍摄经典红色木屋与雪山倒影" },
+          { time: "16:30", activity: "天堂镇原始山毛榉森林探幽", location: "天堂镇 (Paradise)", details: "穿行雪山环抱的高山峡谷与原始溪流，感受中土自然纯粹" },
+          { time: "20:00", activity: "皇后镇湖畔精酿与夜景漫步", location: "皇后镇码头", details: "品尝新西兰本土精酿啤酒与深海炸鱼薯条，漫步湖畔璀璨夜色" }
+        ],
+        7: [
+          { time: "09:30", activity: "卡瓦劳大桥世界蹦极发源地", location: "卡瓦劳峡谷", details: "观摩世界首座商业蹦极跳台，感受碧绿激流与峡谷风光" },
+          { time: "12:00", activity: "吉布斯顿酒庄黑皮诺品鉴", location: "Gibbston Valley", details: "品尝新西兰享誉全球的 Pinot Noir 红葡萄酒与高山奶酪拼盘" },
+          { time: "15:30", activity: "机场还车 & 购买麦卢卡蜂蜜", location: "皇后镇机场", details: "办理四驱车还车手续，选购当地优质蜂胶与羊毛工艺品伴手礼" },
+          { time: "18:00", activity: "满载美好回忆踏上返程航班", location: "机场离境", details: "结束 7 天震撼自驾与风光摄影之旅，启航返程" }
         ]
       },
       mustVisit: [
@@ -135,6 +147,18 @@ export const DESTINATION_DATASETS = {
           { time: "07:30", activity: "Milford Road Scenic Drive", location: "Mirror Lakes & Homer", details: "Pass ancient temperate rainforest & Homer Tunnel" },
           { time: "13:00", activity: "Milford Sound Nature Cruise", location: "Milford Sound", details: "Mitre Peak, Stirling Falls & fjord fur seals" },
           { time: "19:30", activity: "Fergburger Queenstown", location: "Shotover Street", details: "World-famous gourmet beef burger with aioli" }
+        ],
+        6: [
+          { time: "09:00", activity: "TSS Earnslaw Steamship Cruise", location: "Lake Wakatipu", details: "Historic steamship voyage to Walter Peak High Country Farm with afternoon tea" },
+          { time: "13:30", activity: "Glenorchy Road Scenic Drive", location: "Glenorchy", details: "Drive along lakefront, iconic red boat shed photo spot & LOTR scenery" },
+          { time: "16:30", activity: "Paradise Beech Forest Walk", location: "Paradise", details: "Ancient beech forest, dramatic alpine valley & pristine mountain rivers" },
+          { time: "20:00", activity: "Lakeside Craft Beer & Dinner", location: "Queenstown Pier", details: "Sample local craft ales & fish and chips by the evening lakefront" }
+        ],
+        7: [
+          { time: "09:30", activity: "Kawarau Bridge Bungy Centre", location: "Kawarau Gorge", details: "Visit the world's birthplace of commercial bungy jumping" },
+          { time: "12:00", activity: "Gibbston Valley Wine Tasting", location: "Gibbston Valley", details: "Award-winning Pinot Noir wine flight with artisan cheese platter" },
+          { time: "15:30", activity: "Car Return & Souvenir Shopping", location: "Queenstown Airport", details: "Drop off rental SUV, pick up Manuka honey & alpaca wool gifts" },
+          { time: "18:00", activity: "Departure Flight Home", location: "Airport Departure", details: "Board flight home with unforgettable South Island memories" }
         ]
       },
       mustVisit: [
@@ -191,7 +215,7 @@ export const DESTINATION_DATASETS = {
   tokyo: {
     zh: {
       tripTitle: "东京 7 天金秋漫游与地道赏味之旅",
-      tripSubtitle: "7 天行程 | 浅草 · 涩谷 · 新宿 · 筑地 · 银座",
+      tripSubtitle: "7 天行程 | 浅草 · 涩谷 · 新宿 · 筑地 · 银座 · 镰仓 · 吉祥寺",
       summary: "穿梭于传统江户神社古风与现代赛博朋克霓虹街景之间，打卡米其林拉面、筑地海鲜与宫崎骏童话圣地。",
       dailySchedules: {
         1: [
@@ -208,6 +232,26 @@ export const DESTINATION_DATASETS = {
           { time: "08:30", activity: "筑地场外市场美食巡游", location: "筑地", details: "品尝现切蓝鳍金枪鱼大腹刺身、A5 和牛烤串与松软厚蛋烧" },
           { time: "13:00", activity: "银座艺术画廊与旗舰店探索", location: "银座", details: "漫步世界知名商圈，登顶 Ginza Six 屋顶空中花园小憩" },
           { time: "19:00", activity: "涩谷十字路口与 Shibuya Sky", location: "涩谷", details: "在世界最繁忙十字路口感受都市脉搏，俯瞰 neon 霓虹人潮" }
+        ],
+        4: [
+          { time: "09:00", activity: "镰仓高校前灌篮高手海景平交道", location: "镰仓 (Kamakura)", details: "在经典路口捕捉复古江之电列车驶过湘南海岸的电影画面" },
+          { time: "13:00", activity: "江之岛海蜡烛灯塔与海鲜盖饭", location: "江之岛", details: "登岛远眺相模湾与富士山轮廓，品尝现捞生吻仔鱼与烤海螺" },
+          { time: "17:30", activity: "镰仓小町通老街风味散步", location: "小町通", details: "漫步古色古香街道，品尝抹茶冰淇淋、紫薯炸肉饼与传统和菓子" }
+        ],
+        5: [
+          { time: "09:30", activity: "三鹰之森吉卜力美术馆童话巡礼", location: "三鹰市", details: "探访宫崎骏动画世界，打卡巨型机械兵与珍贵原稿手绘" },
+          { time: "13:30", activity: "井之头恩赐公园天鹅船漫游", location: "吉祥寺", details: "在绿意盎然的天然湖泊上泛舟，漫步林荫步道与咖啡店" },
+          { time: "18:30", activity: "吉祥寺口琴横丁炭火居酒屋", location: "口琴横丁", details: "体验地道昭和风情小酒馆，品尝炭火现烤鸡肉串与纯米大吟酿" }
+        ],
+        6: [
+          { time: "10:00", activity: "上野恩赐公园与国立西洋美术馆", location: "上野", details: "漫步文化胜地，欣赏莫奈《睡莲》与柯布西耶世界文化遗产建筑" },
+          { time: "14:00", activity: "秋叶原动漫手办与电气街探索", location: "秋叶原", details: "探访手办圣地与复古中古店，感受二次元文化的独特魅力" },
+          { time: "18:30", activity: "阿美横町热闹市集与特色小吃", location: "阿美横町", details: "体验接地气的市井活力，品尝铁板海鲜与地道居酒屋" }
+        ],
+        7: [
+          { time: "09:30", activity: "皇居外苑二重桥与楠木正成像", location: "皇居", details: "漫步标志性黑松草坪，观赏古老石桥与江户古城遗迹" },
+          { time: "12:30", activity: "丸之内东京站地下街经典拉面", location: "东京车站", details: "打卡百年文艺复兴红砖车站，品尝东京拉面街高分浓汤面" },
+          { time: "16:00", activity: "羽田/成田机场免税采购与返程", location: "机场离境", details: "购买东京香蕉蛋糕与伴手礼，结束充实东京 7 天金秋漫游" }
         ]
       },
       mustVisit: [
@@ -279,6 +323,26 @@ export const DESTINATION_DATASETS = {
           { time: "08:30", activity: "Tsukiji Outer Market Food Tour", location: "Tsukiji", details: "Fresh sushi, wagyu skewers & tamagoyaki" },
           { time: "13:00", activity: "Ginza Luxury & Art Galleries", location: "Ginza", details: "Flagship stores & Ginza Six rooftop garden" },
           { time: "19:00", activity: "Shibuya Crossing & Sky Deck", location: "Shibuya", details: "World's busiest crossing with Shibuya Sky views" }
+        ],
+        4: [
+          { time: "09:00", activity: "Kamakura Coastal Railroad Walk", location: "Kamakura", details: "Classic Enoden train ocean view crossing" },
+          { time: "13:00", activity: "Enoshima Island Lighthouse & Seafood", location: "Enoshima", details: "Panoramic Sagami Bay views and fresh seafood bowl" },
+          { time: "17:30", activity: "Komachi-dori Street Stroll", location: "Kamakura Old Town", details: "Historic shopping street with matcha snacks" }
+        ],
+        5: [
+          { time: "09:30", activity: "Ghibli Museum Animation Tour", location: "Mitaka", details: "Whimsical animation art & giant rooftop robot" },
+          { time: "13:30", activity: "Inokashira Park Swan Boats", location: "Kichijoji", details: "Scenic lakeside walk and leafy park stroll" },
+          { time: "18:30", activity: "Harmonica Yokocho Izakaya", location: "Kichijoji Alley", details: "Authentic retro yakitori skewers and sake" }
+        ],
+        6: [
+          { time: "10:00", activity: "Ueno Park & National Museum of Western Art", location: "Ueno", details: "Le Corbusier heritage architecture & Monet art" },
+          { time: "14:00", activity: "Akihabara Electric Town Tour", location: "Akihabara", details: "Anime collectibles, retro gaming & tech culture" },
+          { time: "18:30", activity: "Ameyoko Market Food Stalls", location: "Ameyoko", details: "Bustling street market with teppan seafood" }
+        ],
+        7: [
+          { time: "09:30", activity: "Imperial Palace Nijubashi Bridge", location: "Imperial Palace", details: "Historic stone bridge & ancient pine gardens" },
+          { time: "12:30", activity: "Tokyo Station Ramen Street", location: "Tokyo Station", details: "Iconic red-brick station & gourmet ramen" },
+          { time: "16:00", activity: "Airport Souvenirs & Flight Home", location: "Airport Departure", details: "Tokyo Banana gifts & departure flight" }
         ]
       },
       mustVisit: [
@@ -398,7 +462,7 @@ export function transformBackendPlan(apiData, language = 'zh') {
         category: language === 'zh' ? "出行指南" : "Travel Guide"
       })),
       photoGuides: undefined,
-      dataSources: ["OpenClaw Agent 智能体调度", "ChromaDB 向量知识库", "全网实时搜索"]
+      dataSources: ["官方权威指南", "全网实时路况与气象核验"]
     };
   }
 
