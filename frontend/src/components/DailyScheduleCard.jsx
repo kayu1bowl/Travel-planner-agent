@@ -1,5 +1,5 @@
-import React from 'react';
-import { MoreHorizontal, Clock, MapPin, Compass } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { MoreHorizontal, Clock, MapPin, Copy, Check, Share2, Printer } from 'lucide-react';
 
 export default function DailyScheduleCard({ 
   dailySchedules = {}, 
@@ -11,11 +11,46 @@ export default function DailyScheduleCard({
   const availableDays = Object.keys(dailySchedules).map(Number).sort((a, b) => a - b);
   const currentDay = availableDays.includes(activeDay) ? activeDay : (availableDays[0] || 1);
   const currentRows = dailySchedules[currentDay] || dailySchedules[availableDays[0]] || [];
+  const [showMenu, setShowMenu] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const menuRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setShowMenu(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   const cols = labels.tableCols || {
     time: "时刻",
     activity: "行程活动",
     location: "地点 / 区域",
     details: "细节与体验"
+  };
+
+  const handleCopySchedule = () => {
+    const lines = currentRows.map(r => `• 【${r.time}】${r.activity} @ ${r.location}\n  ${r.details}`);
+    const text = `📅 【第 ${currentDay} 天精选行程路线】\n` + lines.join('\n\n');
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => {
+      setCopied(false);
+      setShowMenu(false);
+    }, 1500);
+  };
+
+  const handleCopyLocations = () => {
+    const locs = currentRows.map(r => r.location).join(' ➔ ');
+    navigator.clipboard.writeText(`🚗 第 ${currentDay} 天途经路线: ${locs}`);
+    setCopied(true);
+    setTimeout(() => {
+      setCopied(false);
+      setShowMenu(false);
+    }, 1500);
   };
 
   return (
@@ -52,9 +87,34 @@ export default function DailyScheduleCard({
             </div>
           )}
 
-          <button className="icon-more-btn" aria-label="Schedule options">
-            <MoreHorizontal size={18} />
-          </button>
+          {/* 更多操作下拉菜单 */}
+          <div className="more-menu-container" ref={menuRef}>
+            <button 
+              className="icon-more-btn" 
+              onClick={() => setShowMenu(!showMenu)}
+              aria-label="Schedule options"
+              title={language === 'zh' ? '日程操作菜单' : 'Schedule options'}
+            >
+              <MoreHorizontal size={18} />
+            </button>
+
+            {showMenu && (
+              <div className="action-dropdown-menu">
+                <button className="dropdown-menu-item" onClick={handleCopySchedule}>
+                  {copied ? <Check size={14} color="#10B981" /> : <Copy size={14} />}
+                  <span>{copied ? (language === 'zh' ? '已复制今日路线！' : 'Copied!') : (language === 'zh' ? '复制今日路线文本' : 'Copy Day Route')}</span>
+                </button>
+                <button className="dropdown-menu-item" onClick={handleCopyLocations}>
+                  <Share2 size={14} color="#4F46E5" />
+                  <span>{language === 'zh' ? '复制途经地点串' : 'Copy Location Path'}</span>
+                </button>
+                <button className="dropdown-menu-item" onClick={() => { setShowMenu(false); window.print(); }}>
+                  <Printer size={14} color="#64748B" />
+                  <span>{language === 'zh' ? '打印当前路书' : 'Print Itinerary'}</span>
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

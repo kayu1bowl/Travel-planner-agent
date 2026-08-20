@@ -1,17 +1,21 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, MoreHorizontal, Sparkles, Database, Globe, CheckCircle2, Loader2, Compass, Bot } from 'lucide-react';
+import { Send, MoreHorizontal, Sparkles, Database, Globe, CheckCircle2, Loader2, Compass, Bot, Trash2, Copy, Check, Activity } from 'lucide-react';
 
 export default function ConversationalSidebar({ 
   messages = [], 
   onSendMessage, 
   onResetChat,
+  onOpenStatusModal,
   loading = false,
   agentStatusSteps = [],
   labels = {},
   language = 'zh'
 }) {
   const [inputText, setInputText] = useState('');
+  const [showMenu, setShowMenu] = useState(false);
+  const [copied, setCopied] = useState(false);
   const messagesEndRef = useRef(null);
+  const menuRef = useRef(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -20,6 +24,17 @@ export default function ConversationalSidebar({
   useEffect(() => {
     scrollToBottom();
   }, [messages, loading, agentStatusSteps]);
+
+  // 点击外部关闭下拉菜单
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setShowMenu(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -31,6 +46,21 @@ export default function ConversationalSidebar({
   const handleQuickPrompt = (prompt) => {
     if (loading) return;
     onSendMessage(prompt);
+  };
+
+  const handleCopyChat = () => {
+    const text = messages.map(m => `【${m.sender === 'user' ? '用户' : 'AI 向导'}】\n${m.text}`).join('\n\n');
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => {
+      setCopied(false);
+      setShowMenu(false);
+    }, 1500);
+  };
+
+  const handleClear = () => {
+    setShowMenu(false);
+    if (onResetChat) onResetChat();
   };
 
   return (
@@ -50,14 +80,36 @@ export default function ConversationalSidebar({
           </div>
         </div>
 
-        <button 
-          className="icon-more-btn" 
-          onClick={onResetChat}
-          aria-label="Reset chat"
-          title={language === 'zh' ? '清空对话历史 / 新建行程' : 'Reset Chat / New Trip'}
-        >
-          <MoreHorizontal size={18} />
-        </button>
+        {/* 菜单下拉锚点 */}
+        <div className="more-menu-container" ref={menuRef}>
+          <button 
+            className="icon-more-btn" 
+            onClick={() => setShowMenu(!showMenu)}
+            aria-label="Conversation options"
+            title={language === 'zh' ? '更多会话操作' : 'Conversation options'}
+          >
+            <MoreHorizontal size={18} />
+          </button>
+
+          {showMenu && (
+            <div className="action-dropdown-menu">
+              <button className="dropdown-menu-item" onClick={handleClear}>
+                <Trash2 size={14} color="#EF4444" />
+                <span>{language === 'zh' ? '清空并新建对话' : 'Clear & New Chat'}</span>
+              </button>
+              <button className="dropdown-menu-item" onClick={handleCopyChat}>
+                {copied ? <Check size={14} color="#10B981" /> : <Copy size={14} />}
+                <span>{copied ? (language === 'zh' ? '已复制对话！' : 'Copied!') : (language === 'zh' ? '复制对话记录' : 'Copy Chat Log')}</span>
+              </button>
+              {onOpenStatusModal && (
+                <button className="dropdown-menu-item" onClick={() => { setShowMenu(false); onOpenStatusModal(); }}>
+                  <Activity size={14} color="#4F46E5" />
+                  <span>{language === 'zh' ? '服务诊断状态' : 'Service Status'}</span>
+                </button>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* 快捷灵感推荐 Chips */}
@@ -78,23 +130,45 @@ export default function ConversationalSidebar({
 
       {/* 对话流 Feed */}
       <div className="chat-messages-feed">
-        {messages.map((msg, idx) => (
-          <div key={idx} className={`chat-message-row ${msg.sender}`}>
-            {msg.sender === 'ai' && (
-              <div className="ai-badge-circle">
-                <Bot size={13} />
+        {messages.map((msg) => (
+          <div key={msg.id} className={`message-bubble-wrapper ${msg.sender}`}>
+            <div className="message-bubble">
+              <div className="message-content-text">{msg.text}</div>
+
+              {/* RAG 引用信源展示 */}
+              {msg.sources && msg.sources.length > 0 && (
+                <div className="rag-sources-box">
+                  <div className="sources-title">
+                    <Database size={12} />
+                    <span>{language === 'zh' ? '知识库与搜索信源' : 'Knowledge & Search Sources'}</span>
+                  </div>
+                  <div className="source-tags-list">
+                    {msg.sources.map((src, idx) => (
+                      <span key={idx} className="source-tag-item">
+                        <Globe size={10} />
+                        <span>{src}</span>
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        ))}
+
+        {/* 思考状态与步骤展示 */}
+        {loading && (
+          <div className="message-bubble-wrapper assistant">
+            <div className="message-bubble thinking-bubble">
+              <div className="thinking-header">
+                <Loader2 size={16} className="spin-animate" />
+                <span>{language === 'zh' ? 'AI 正在检索知识库并规划行程...' : 'AI is researching & planning...'}</span>
               </div>
-            )}
-
-            <div className={`message-bubble ${msg.sender}`}>
-              <p>{msg.text}</p>
-
-              {/* AI 消息附带的动态状态胶囊 */}
-              {msg.statusSteps && msg.statusSteps.length > 0 && (
-                <div className="agent-status-pills">
-                  {msg.statusSteps.map((step, sIdx) => (
-                    <div key={sIdx} className="status-micro-pill">
-                      <Sparkles size={11} color="#4F46E5" />
+              {agentStatusSteps && agentStatusSteps.length > 0 && (
+                <div className="agent-steps-list">
+                  {agentStatusSteps.map((step, idx) => (
+                    <div key={idx} className="agent-step-item">
+                      <CheckCircle2 size={12} className="step-check-icon" />
                       <span>{step}</span>
                     </div>
                   ))}
@@ -102,54 +176,32 @@ export default function ConversationalSidebar({
               )}
             </div>
           </div>
-        ))}
-
-        {/* 正在生成中的思考微动效 */}
-        {loading && (
-          <div className="chat-message-row ai">
-            <div className="ai-badge-circle">
-              <Bot size={13} />
-            </div>
-            <div className="message-bubble ai loading-bubble">
-              <div className="typing-indicator">
-                <span></span>
-                <span></span>
-                <span></span>
-              </div>
-              <span className="loading-hint-text">
-                {agentStatusSteps.length > 0 ? agentStatusSteps[agentStatusSteps.length - 1] : "正在检索知识库与生成规划..."}
-              </span>
-            </div>
-          </div>
         )}
+
         <div ref={messagesEndRef} />
       </div>
 
-      {/* 底部自然语言输入框 */}
-      <div className="sidebar-bottom-input-container">
-        <form onSubmit={handleSubmit} className="pill-input-form">
+      {/* 底部输入栏 */}
+      <form className="sidebar-input-form" onSubmit={handleSubmit}>
+        <div className="input-field-wrapper">
           <input
             type="text"
-            className="pill-text-input"
+            className="chat-text-input"
+            placeholder={labels.inputPlaceholder || "输入你的旅行想法或修改要求..."}
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
-            placeholder={labels.inputPlaceholder || "Type a message..."}
             disabled={loading}
           />
           <button 
             type="submit" 
-            className="pill-send-btn"
+            className="send-action-btn" 
             disabled={!inputText.trim() || loading}
             aria-label="Send message"
           >
-            {loading ? (
-              <Loader2 size={16} className="spin-icon" />
-            ) : (
-              <Send size={15} />
-            )}
+            <Send size={16} />
           </button>
-        </form>
-      </div>
+        </div>
+      </form>
     </aside>
   );
 }
