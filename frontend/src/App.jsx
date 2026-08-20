@@ -6,6 +6,7 @@ import DailyScheduleCard from './components/DailyScheduleCard';
 import MustVisitCuisineCard from './components/MustVisitCuisineCard';
 import PhotographyGuideCard from './components/PhotographyGuideCard';
 import SystemStatusModal from './components/SystemStatusModal';
+import ItinerariesFullView from './components/ItinerariesFullView';
 import { DESTINATION_DATASETS, transformBackendPlan } from './services/destinations';
 import { TRANSLATIONS } from './services/i18n';
 import { fetchTravelPlan } from './services/api';
@@ -275,42 +276,53 @@ export default function App() {
             labels={t.nav}
           />
 
-          {/* 便士网格 Bento Grid 内容区 */}
-          <div className="bento-content-layout">
-            {/* 顶部：行程总览 Banner 卡片 */}
-            <TripBannerCard 
-              title={currentData.tripTitle}
-              subtitle={currentData.tripSubtitle}
+          {/* Tab 视图切换：Itineraries 全景模式 或 Bento Grid 看板模式 */}
+          {activeNavTab === 'itineraries' ? (
+            <ItinerariesFullView 
+              currentData={currentData}
+              labels={t.cards}
+              language={language}
+              onBackHome={() => setActiveNavTab('home')}
+              onExportMarkdown={handleExportMarkdown}
             />
-
-            {/* 中间行：2 列便士卡片 (左侧日程表格 + 右侧必吃美食与景点) */}
-            <div className="bento-middle-row">
-              {/* 每日日程路线表 */}
-              <DailyScheduleCard 
-                dailySchedules={currentData.dailySchedules}
-                activeDay={activeDay}
-                onSelectDay={(d) => setActiveDay(d)}
-                labels={t.cards}
-                language={language}
+          ) : (
+            /* 便士网格 Bento Grid 内容区 */
+            <div className="bento-content-layout">
+              {/* 顶部：行程总览 Banner 卡片 */}
+              <TripBannerCard 
+                title={currentData.tripTitle}
+                subtitle={currentData.tripSubtitle}
               />
 
-              {/* 必吃美食与打卡景点 */}
-              <MustVisitCuisineCard 
-                items={currentData.mustVisit}
-                labels={t.cards}
-                language={language}
-              />
+              {/* 中间行：2 列便士卡片 (左侧日程表格 + 右侧必吃美食与景点) */}
+              <div className="bento-middle-row">
+                {/* 每日日程路线表 */}
+                <DailyScheduleCard 
+                  dailySchedules={currentData.dailySchedules}
+                  activeDay={activeDay}
+                  onSelectDay={(d) => setActiveDay(d)}
+                  labels={t.cards}
+                  language={language}
+                />
+
+                {/* 必吃美食与打卡景点 */}
+                <MustVisitCuisineCard 
+                  items={currentData.mustVisit}
+                  labels={t.cards}
+                  language={language}
+                />
+              </div>
+
+              {/* 底部行：摄影机位与出片指南卡片 */}
+              <div className="bento-bottom-row">
+                <PhotographyGuideCard 
+                  photoGuides={currentData.photoGuides}
+                  labels={t.cards}
+                  language={language}
+                />
+              </div>
             </div>
-
-            {/* 底部行：摄影机位与出片指南卡片 */}
-            <div className="bento-bottom-row">
-              <PhotographyGuideCard 
-                photoGuides={currentData.photoGuides}
-                labels={t.cards}
-                language={language}
-              />
-            </div>
-          </div>
+          )}
         </main>
       </div>
 

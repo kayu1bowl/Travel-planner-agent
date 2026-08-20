@@ -43,7 +43,7 @@ export const DESTINATION_DATASETS = {
         },
         {
           name: "好牧羊人教堂 (Good Shepherd)",
-          image: "https://images.unsplash.com/photo-1507699622108-4be3abd695ad?w=800&auto=format&fit=crop&q=80",
+          image: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=800&auto=format&fit=crop&q=80",
           recommendations: "世界顶级暗夜星空保护区地标，石砌教堂与苍穹银河交相辉映。",
           tipsEmoji: "🌌⛪",
           category: "经典地标"
@@ -61,7 +61,7 @@ export const DESTINATION_DATASETS = {
           id: 1,
           title: "1. 好牧羊人教堂暗夜星空",
           subtitle: "超广角低机位仰拍，将石砌教堂作为前景纳整片银河拱桥",
-          image: "https://images.unsplash.com/photo-1507699622108-4be3abd695ad?w=800&auto=format&fit=crop&q=80",
+          image: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=800&auto=format&fit=crop&q=80",
           tipsAvatars: ["🌌", "📷"],
           params: "14-24mm f/2.8 · 20s · ISO 3200"
         },
@@ -126,7 +126,7 @@ export const DESTINATION_DATASETS = {
         },
         {
           name: "Church of Good Shepherd",
-          image: "https://images.unsplash.com/photo-1507699622108-4be3abd695ad?w=800&auto=format&fit=crop&q=80",
+          image: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=800&auto=format&fit=crop&q=80",
           recommendations: "Iconic Dark Sky reserve & stone church.",
           tipsEmoji: "🌌⛪",
           category: "Landmark"

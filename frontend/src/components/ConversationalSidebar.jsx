@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Send, MoreHorizontal, Sparkles, Database, Globe, CheckCircle2, Loader2, Compass, Bot } from 'lucide-react';
 
 export default function ConversationalSidebar({ 
@@ -11,6 +11,15 @@ export default function ConversationalSidebar({
   language = 'zh'
 }) {
   const [inputText, setInputText] = useState('');
+  const messagesEndRef = useRef(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, loading, agentStatusSteps]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -113,6 +122,7 @@ export default function ConversationalSidebar({
             </div>
           </div>
         )}
+        <div ref={messagesEndRef} />
       </div>
 
       {/* 底部自然语言输入框 */}

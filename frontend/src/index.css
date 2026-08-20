@@ -74,9 +74,9 @@ body {
   border-radius: var(--radius-app);
   box-shadow: var(--shadow-app);
   display: flex;
-  min-height: 880px;
+  min-height: 560px;
   height: 94vh;
-  max-height: 1050px;
+  max-height: 1100px;
   overflow: hidden;
 }
 
@@ -399,8 +399,31 @@ body {
   flex-direction: column;
   padding: 20px 24px;
   overflow-y: auto;
+  overflow-x: hidden;
   gap: 16px;
   background: var(--app-bg);
+  height: 100%;
+}
+
+.bento-grid-workspace::-webkit-scrollbar,
+.chat-messages-feed::-webkit-scrollbar {
+  width: 6px;
+}
+
+.bento-grid-workspace::-webkit-scrollbar-track,
+.chat-messages-feed::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.bento-grid-workspace::-webkit-scrollbar-thumb,
+.chat-messages-feed::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 4px;
+}
+
+.bento-grid-workspace::-webkit-scrollbar-thumb:hover,
+.chat-messages-feed::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
 }
 
 /* Top Navbar */
@@ -779,6 +802,7 @@ body {
   height: 84px;
   border-radius: 10px;
   overflow: hidden;
+  position: relative;
   margin-bottom: 6px;
 }
 
@@ -1156,13 +1180,11 @@ body {
 }
 
 .module-name {
-  font-size: 0.8rem;
+  font-size: 0.82rem;
   font-weight: 600;
   color: var(--text-main);
   margin: 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  line-height: 1.25;
 }
 
 .module-sub {
@@ -1306,4 +1328,114 @@ body {
   padding: 2px 6px;
   border-radius: 4px;
 }
+
+/* ==========================================================================
+   7. Itineraries Full Multi-Day View
+   ========================================================================== */
+.itineraries-full-view-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.itineraries-header-card {
+  background: linear-gradient(135deg, #FAF5FF 0%, #EEF2FF 100%);
+  border: 1px solid #E0E7FF;
+  border-radius: var(--radius-lg);
+  padding: 18px 22px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.itineraries-header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.itineraries-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #FFFFFF;
+  border: 1px solid #C7D2FE;
+  color: var(--primary-indigo);
+  font-size: 0.76rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 12px;
+  width: fit-content;
+}
+
+.itineraries-main-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--text-main);
+  margin: 2px 0 0 0;
+}
+
+.itineraries-subtitle-text {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.back-home-btn {
+  background: #FFFFFF;
+  border: 1px solid var(--border-light);
+  color: var(--primary-indigo);
+  padding: 8px 16px;
+  border-radius: 12px;
+  font-size: 0.84rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  transition: all 0.15s ease;
+}
+
+.back-home-btn:hover {
+  background: #EEF2FF;
+  border-color: #C7D2FE;
+}
+
+.itineraries-days-waterfall {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.itinerary-day-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.day-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.day-card-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--primary-indigo);
+  color: #FFFFFF;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 8px;
+}
+
+.day-stops-count {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
 
