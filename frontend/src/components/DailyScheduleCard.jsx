@@ -3,14 +3,14 @@ import { MoreHorizontal, Clock, MapPin, Navigation } from 'lucide-react';
 
 export default function DailyScheduleCard({ 
   dailySchedules = {}, 
-  activeDay = 2, 
+  activeDay = 1, 
   onSelectDay,
   labels = {},
   language = 'zh'
 }) {
   const availableDays = Object.keys(dailySchedules).map(Number).sort((a, b) => a - b);
-  const currentDay = activeDay || 2;
-  const currentRows = dailySchedules[currentDay] || dailySchedules[1] || [];
+  const currentDay = availableDays.includes(activeDay) ? activeDay : (availableDays[0] || 1);
+  const currentRows = dailySchedules[currentDay] || dailySchedules[availableDays[0]] || [];
   const cols = labels.tableCols || {
     time: "Time",
     activity: "Activity",
