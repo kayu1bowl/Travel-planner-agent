@@ -1937,5 +1937,531 @@ body {
   color: var(--primary-indigo);
 }
 
+/* ==========================================================================
+   9. Dual-Paradigm Layout: Desktop Landscape vs. Mobile Portrait
+   ========================================================================== */
+
+/* 9.1 Default Visibility */
+.desktop-landscape-view {
+  display: block;
+  width: 100%;
+}
+
+.mobile-portrait-view {
+  display: none;
+}
+
+/* 9.2 Mobile & Portrait View Trigger (@media query) */
+@media screen and (orientation: portrait), screen and (max-width: 680px) {
+  /* 隐藏桌面端双栏与桌面看板 */
+  .desktop-landscape-view {
+    display: none !important;
+  }
+
+  /* 激活手机竖屏专属体验 */
+  .mobile-portrait-view {
+    display: flex !important;
+    flex-direction: column;
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+    background: #F8FAFC;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+  }
+
+  body {
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    background: #F8FAFC !important;
+  }
+
+  .bento-app-viewport {
+    width: 100vw !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    padding: 0 !important;
+  }
+
+  /* --- 移动端顶部 Header --- */
+  .mobile-top-header {
+    height: 54px;
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border-light);
+    padding: 0 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+    z-index: 50;
+  }
+
+  .mobile-brand-section {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .mobile-brand-icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 9px;
+    background: var(--primary-gradient);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 6px rgba(67, 97, 238, 0.28);
+  }
+
+  .mobile-brand-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.15;
+  }
+
+  .mobile-app-name {
+    font-family: var(--font-heading);
+    font-size: 0.96rem;
+    font-weight: 800;
+    color: var(--text-main);
+    letter-spacing: -0.02em;
+    margin: 0;
+  }
+
+  .mobile-app-tag {
+    font-size: 0.64rem;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+
+  .mobile-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .mobile-action-pill {
+    background: #F1F5F9;
+    border: 1px solid #E2E8F0;
+    color: var(--text-main);
+    padding: 4px 9px;
+    border-radius: 8px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+  }
+
+  .mobile-icon-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: #F8FAFC;
+    border: 1px solid #E2E8F0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    cursor: pointer;
+  }
+
+  .mobile-status-dot {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: 6px;
+    height: 6px;
+    background: #10B981;
+    border-radius: 50%;
+    border: 1.5px solid #FFFFFF;
+  }
+
+  /* --- 移动端中间滚动内容区 --- */
+  .mobile-scrollable-content {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    padding: 12px 12px 76px 12px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .mobile-bento-cards-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  /* --- 移动端底部固定 TabBar --- */
+  .mobile-bottom-navbar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 58px;
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(16px);
+    border-top: 1px solid var(--border-light);
+    z-index: 100;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.04);
+  }
+
+  .mobile-nav-inner {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    height: 100%;
+    align-items: center;
+  }
+
+  .mobile-nav-item {
+    background: transparent;
+    border: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    color: #94A3B8;
+    cursor: pointer;
+    padding: 4px 0;
+    transition: all 0.15s ease;
+  }
+
+  .mobile-nav-icon-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .nav-badge-dot {
+    position: absolute;
+    top: -2px;
+    right: -3px;
+    width: 6px;
+    height: 6px;
+    background: #EF4444;
+    border-radius: 50%;
+  }
+
+  .mobile-nav-label {
+    font-size: 0.66rem;
+    font-weight: 600;
+  }
+
+  .mobile-nav-item.active {
+    color: var(--primary-indigo);
+  }
+
+  .mobile-nav-item.active .mobile-nav-label {
+    font-weight: 700;
+  }
+
+  /* --- 移动端专属全屏对话视图 --- */
+  .mobile-chat-view-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: calc(100vh - 140px);
+    min-height: calc(100dvh - 140px);
+    position: relative;
+  }
+
+  .mobile-chat-quick-tags {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    flex-shrink: 0;
+    scrollbar-width: none;
+  }
+
+  .mobile-chat-quick-tags::-webkit-scrollbar {
+    display: none;
+  }
+
+  .mobile-quick-tag-btn {
+    background: #FFFFFF;
+    border: 1px solid var(--border-light);
+    color: var(--text-body);
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 5px 10px;
+    border-radius: 12px;
+    white-space: nowrap;
+    cursor: pointer;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  }
+
+  .mobile-chat-messages-scroll {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px 0 60px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .mobile-msg-row {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .mobile-msg-row.user {
+    flex-direction: row-reverse;
+  }
+
+  .mobile-msg-avatar {
+    flex-shrink: 0;
+  }
+
+  .bot-avatar-box, .user-avatar-box {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .bot-avatar-box {
+    background: var(--primary-gradient);
+  }
+
+  .user-avatar-box {
+    background: #64748B;
+  }
+
+  .mobile-msg-bubble {
+    max-width: 82%;
+    padding: 10px 14px;
+    border-radius: 16px;
+    font-size: 0.82rem;
+    line-height: 1.45;
+  }
+
+  .mobile-msg-row.assistant .mobile-msg-bubble {
+    background: #FFFFFF;
+    border: 1px solid var(--border-light);
+    color: var(--text-main);
+    border-top-left-radius: 4px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+  }
+
+  .mobile-msg-row.user .mobile-msg-bubble {
+    background: var(--primary-gradient);
+    color: #FFFFFF;
+    border-top-right-radius: 4px;
+    box-shadow: 0 2px 8px rgba(67, 97, 238, 0.25);
+  }
+
+  .mobile-msg-sources {
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .mobile-source-badge {
+    background: #F8FAFC;
+    border: 1px solid #E2E8F0;
+    color: var(--text-muted);
+    font-size: 0.68rem;
+    padding: 3px 6px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  /* 移动端对话输入条（固定在底部 Tab 上方） */
+  .mobile-chat-input-bar {
+    position: fixed;
+    bottom: 58px;
+    left: 0;
+    right: 0;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid var(--border-light);
+    padding: 8px 12px;
+    z-index: 90;
+  }
+
+  .mobile-input-inner {
+    display: flex;
+    align-items: center;
+    background: #F1F5F9;
+    border: 1px solid #E2E8F0;
+    border-radius: 20px;
+    padding: 3px 6px 3px 12px;
+  }
+
+  .mobile-chat-input-field {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: 0.8rem;
+    color: var(--text-main);
+    padding: 6px 0;
+  }
+
+  .mobile-chat-send-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--primary-indigo);
+    color: #FFFFFF;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: opacity 0.15s ease;
+  }
+
+  .mobile-chat-send-btn:disabled {
+    opacity: 0.4;
+  }
+
+  /* --- 移动端竖屏下的各卡片自适应重构 --- */
+  .cuisine-items-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .photo-guides-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  /* 移动端每日日程与瀑布流卡片自适应 */
+  .timeline-table-header {
+    display: none; /* 移动端隐藏表头，采用紧凑卡片流 */
+  }
+
+  .timeline-row-item {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    padding: 10px 10px;
+    background: #FDFEFE;
+    border: 1px solid #F1F5F9;
+    border-radius: 10px;
+    margin-bottom: 6px;
+  }
+
+  /* 移动端每日日程卡片化自适应重构 */
+  .bento-schedule-table thead {
+    display: none;
+  }
+
+  .bento-schedule-table,
+  .bento-schedule-table tbody {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .bento-schedule-row {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    background: #FDFEFE;
+    border: 1px solid #F1F5F9;
+    border-radius: 12px;
+    padding: 10px 12px !important;
+    gap: 6px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+  }
+
+  .bento-schedule-row td {
+    padding: 0 !important;
+    border: none !important;
+    width: 100% !important;
+  }
+
+  .bento-schedule-row .activity-cell {
+    margin-top: 2px;
+  }
+
+  .bento-schedule-row .location-cell {
+    margin-top: 2px;
+  }
+
+  .bento-schedule-row .details-cell {
+    margin-top: 2px;
+    border-top: 1px dashed #F1F5F9;
+    padding-top: 6px !important;
+  }
+
+  .bento-schedule-row .details-text {
+    -webkit-line-clamp: unset !important;
+    font-size: 0.78rem;
+    line-height: 1.45;
+  }
+
+  .itineraries-header-card, .bookings-header-card {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 14px 16px;
+    gap: 10px;
+  }
+
+  .itineraries-header-actions, .bookings-header-right {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .bookings-stats-box {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .bookings-stats-box .stat-pill {
+    flex: 1;
+    padding: 6px 8px;
+    align-items: center;
+  }
+
+  .back-home-btn {
+    display: none !important; /* 移动端有底部 TabBar，无需顶栏返回按钮 */
+  }
+
+  .booking-card-top {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .booking-price-col {
+    width: 100%;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px dashed #E2E8F0;
+    padding-top: 8px;
+    margin-top: 4px;
+  }
+}
+
+
 
 
