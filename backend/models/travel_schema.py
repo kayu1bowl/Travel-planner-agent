@@ -7,13 +7,13 @@ from typing import List, Optional
 
 
 class DailyItinerary(BaseModel):
-    day: int = Field(description="第几天，如 1")
-    theme: str = Field(description="当日主题，如：基督城 ➔ 特卡波湖 (Lake Tekapo)")
-    morning: str = Field(description="上午行程安排与打卡推荐")
-    afternoon: str = Field(description="下午行程安排与交通/景点描述")
-    evening: str = Field(description="晚上行程安排、夜游或餐饮推荐")
-    transport: str = Field(description="交通建议与预估用时")
-    tips: str = Field(description="贴心避坑提示或注意事项")
+    day: int = Field(default=1, description="第几天，如 1")
+    theme: str = Field(default="", description="当日主题，如：基督城 ➔ 特卡波湖 (Lake Tekapo)")
+    morning: str = Field(default="", description="上午行程安排与打卡推荐")
+    afternoon: str = Field(default="", description="下午行程安排与交通/景点描述")
+    evening: str = Field(default="自由活动 / 休息或启程返航", description="晚上行程安排、夜游或餐饮推荐")
+    transport: str = Field(default="自驾 / 公共交通", description="交通建议与预估用时")
+    tips: str = Field(default="按需携带保暖防风衣物", description="贴心避坑提示或注意事项")
 
 
 class MustVisitSpot(BaseModel):
