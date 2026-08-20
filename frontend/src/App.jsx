@@ -7,6 +7,7 @@ import MustVisitCuisineCard from './components/MustVisitCuisineCard';
 import PhotographyGuideCard from './components/PhotographyGuideCard';
 import SystemStatusModal from './components/SystemStatusModal';
 import ItinerariesFullView from './components/ItinerariesFullView';
+import BookingsFullView from './components/BookingsFullView';
 import { DESTINATION_DATASETS, transformBackendPlan } from './services/destinations';
 import { TRANSLATIONS } from './services/i18n';
 import { fetchTravelPlan } from './services/api';
@@ -276,7 +277,7 @@ export default function App() {
             labels={t.nav}
           />
 
-          {/* Tab 视图切换：Itineraries 全景模式 或 Bento Grid 看板模式 */}
+          {/* Tab 视图切换：Itineraries 全景模式 / Bookings 预订清单模式 / Bento Grid 看板模式 */}
           {activeNavTab === 'itineraries' ? (
             <ItinerariesFullView 
               currentData={currentData}
@@ -284,6 +285,12 @@ export default function App() {
               language={language}
               onBackHome={() => setActiveNavTab('home')}
               onExportMarkdown={handleExportMarkdown}
+            />
+          ) : activeNavTab === 'bookings' ? (
+            <BookingsFullView 
+              currentData={currentData}
+              language={language}
+              onBackHome={() => setActiveNavTab('home')}
             />
           ) : (
             /* 便士网格 Bento Grid 内容区 */
