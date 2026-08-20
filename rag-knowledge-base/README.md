@@ -21,7 +21,7 @@
 
 | 模块 | 位置 | 职责 |
 |------|------|------|
-| **OpenClaw 智能体调度核心** | `openclaw-agent/` | 任务拆解、工具编排、大模型推理决策 |
+| **OpenClaw 智能体调度核心** | `openclaw_agent/` | 任务拆解、工具编排、大模型推理决策 |
 | **自研 RAG 向量知识库** | `rag_knowledge_base/` | 私有领域资料离线分片→嵌入→检索 |
 | **前端交互页面** | `frontend/` | 用户输入/调整需求、行程展示、导出 |
 
@@ -41,7 +41,7 @@ Travel_planner_agent/
 │   ├── components/                # 可复用组件
 │   └── ...
 │
-├── openclaw-agent/                # OpenClaw 智能体核心
+├── openclaw_agent/                # OpenClaw 智能体核心
 │   ├── config/                    # 智能体配置文件
 │   ├── tools/                     # 自定义工具定义（RAG 检索、联网搜索等）
 │   ├── prompts/                   # 系统提示词模板
@@ -93,7 +93,7 @@ Travel_planner_agent/
 ### 各文件夹说明
 
 - **frontend/** — 面向用户的网页端，负责需求输入、行程可视化、Markdown 导出、二次修改迭代
-- **openclaw-agent/** — 系统的"大脑"，基于 OpenClaw 框架，自主拆分任务、调用工具、组织大模型输出
+- **openclaw_agent/** — 系统的"大脑"，基于 OpenClaw 框架，自主拆分任务、调用工具、组织大模型输出
 - **rag_knowledge_base/** — 核心私有知识库，离线收集新西兰自驾、摄影等资料，在线语义检索
 - **docs/** — 团队协作文档、架构图、答辩材料，供全员查阅
 - **scripts/** — 数据处理、构建、部署等自动化脚本
