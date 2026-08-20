@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { MoreHorizontal, Clock, MapPin, Navigation } from 'lucide-react';
+import React from 'react';
+import { MoreHorizontal, Clock, MapPin } from 'lucide-react';
 
 export default function DailyScheduleCard({ 
   dailySchedules = {}, 
@@ -17,10 +17,6 @@ export default function DailyScheduleCard({
     location: "Location",
     details: "Details"
   };
-
-  const titleText = language === 'zh'
-    ? `${labels.dailyScheduleTitle || '每日行程路线'} (第 ${currentDay} 天)`
-    : `${labels.dailyScheduleTitle || 'Daily Schedule'} (Day ${currentDay})`;
 
   return (
     <div className="bento-card daily-schedule-card">
@@ -60,19 +56,33 @@ export default function DailyScheduleCard({
         <table className="bento-schedule-table">
           <thead>
             <tr>
-              <th style={{ width: '15%' }}>{cols.time}</th>
-              <th style={{ width: '32%' }}>{cols.activity}</th>
-              <th style={{ width: '23%' }}>{cols.location}</th>
-              <th style={{ width: '30%' }}>{cols.details}</th>
+              <th style={{ width: '14%' }}>{cols.time}</th>
+              <th style={{ width: '30%' }}>{cols.activity}</th>
+              <th style={{ width: '24%' }}>{cols.location}</th>
+              <th style={{ width: '32%' }}>{cols.details}</th>
             </tr>
           </thead>
           <tbody>
             {currentRows.map((row, idx) => (
-              <tr key={idx}>
-                <td className="time-cell">{row.time}</td>
-                <td className="activity-cell">{row.activity}</td>
-                <td className="location-cell">{row.location}</td>
-                <td className="details-cell">{row.details}</td>
+              <tr key={idx} className="bento-schedule-row">
+                <td className="time-cell">
+                  <div className="time-pill">
+                    <Clock size={10} className="time-clock-icon" />
+                    <span className="time-val">{row.time}</span>
+                  </div>
+                </td>
+                <td className="activity-cell">
+                  <span className="activity-title-text">{row.activity}</span>
+                </td>
+                <td className="location-cell">
+                  <div className="location-chip">
+                    <MapPin size={11} className="location-chip-pin" />
+                    <span className="location-chip-name">{row.location}</span>
+                  </div>
+                </td>
+                <td className="details-cell">
+                  <span className="details-text">{row.details}</span>
+                </td>
               </tr>
             ))}
           </tbody>
