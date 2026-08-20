@@ -112,7 +112,7 @@ export default function MobileChatView({
             <div className="mobile-msg-bubble thinking">
               <div className="thinking-row">
                 <Loader2 size={14} className="spin-loader" />
-                <span>{language === 'zh' ? '智能体正在检索知识库并调用大模型规划中...' : 'Agent reasoning with Gemini Pro & RAG...'}</span>
+                <span>{language === 'zh' ? 'AI 正在为您精心规划路线...' : 'AI is customizing your itinerary...'}</span>
               </div>
 
               {agentStatusSteps && agentStatusSteps.length > 0 && (

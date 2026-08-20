@@ -1,19 +1,10 @@
 import React from 'react';
-import { 
-  Sparkles, 
-  Languages, 
-  Activity, 
-  Download, 
-  Search,
-  Compass
-} from 'lucide-react';
+import { Sparkles, Languages } from 'lucide-react';
 
 export default function MobileHeader({
   tripTitle,
   language = 'zh',
-  onToggleLanguage,
-  onOpenStatusModal,
-  onExportMarkdown
+  onToggleLanguage
 }) {
   return (
     <header className="mobile-top-header">
@@ -28,7 +19,7 @@ export default function MobileHeader({
         </div>
       </div>
 
-      {/* 右侧：操作区（语言切换 + 状态诊断 + 导出） */}
+      {/* 右侧：操作区（语言切换） */}
       <div className="mobile-header-actions">
         {/* 语言切换 */}
         <button 
@@ -38,25 +29,6 @@ export default function MobileHeader({
         >
           <Languages size={13} />
           <span>{language === 'zh' ? 'EN' : '中文'}</span>
-        </button>
-
-        {/* 系统状态 */}
-        <button 
-          className="mobile-icon-btn" 
-          onClick={onOpenStatusModal}
-          title={language === 'zh' ? '系统状态与模型诊断' : 'System Diagnostics'}
-        >
-          <Activity size={15} color="#10B981" />
-          <span className="mobile-status-dot" />
-        </button>
-
-        {/* 导出 Markdown */}
-        <button 
-          className="mobile-icon-btn" 
-          onClick={onExportMarkdown}
-          title={language === 'zh' ? '导出行程 Markdown' : 'Export Markdown'}
-        >
-          <Download size={15} color="#4F46E5" />
         </button>
       </div>
     </header>

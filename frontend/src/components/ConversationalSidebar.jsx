@@ -101,12 +101,6 @@ export default function ConversationalSidebar({
                 {copied ? <Check size={14} color="#10B981" /> : <Copy size={14} />}
                 <span>{copied ? (language === 'zh' ? '已复制对话！' : 'Copied!') : (language === 'zh' ? '复制对话记录' : 'Copy Chat Log')}</span>
               </button>
-              {onOpenStatusModal && (
-                <button className="dropdown-menu-item" onClick={() => { setShowMenu(false); onOpenStatusModal(); }}>
-                  <Activity size={14} color="#4F46E5" />
-                  <span>{language === 'zh' ? '服务诊断状态' : 'Service Status'}</span>
-                </button>
-              )}
             </div>
           )}
         </div>

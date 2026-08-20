@@ -1,14 +1,11 @@
 import React from 'react';
-import { Home, BookOpen, Plane, Settings, Search, Bell, Copy, Check, Languages } from 'lucide-react';
+import { Home, BookOpen, Plane, Search, Languages } from 'lucide-react';
 
 export default function TopNavbar({ 
   activeTab = 'home', 
   onTabChange, 
   onSearch, 
   onSearchSubmit,
-  onOpenStatusModal,
-  onExportMarkdown,
-  copied = false,
   language = 'zh',
   onToggleLanguage,
   labels = {}
@@ -30,7 +27,7 @@ export default function TopNavbar({
           onClick={() => onTabChange && onTabChange('home')}
         >
           <Home size={16} />
-          <span>{labels.home || 'Home'}</span>
+          <span>{labels.home || (language === 'zh' ? '首页探索' : 'Home')}</span>
         </button>
 
         <button 
@@ -38,7 +35,7 @@ export default function TopNavbar({
           onClick={() => onTabChange && onTabChange('itineraries')}
         >
           <BookOpen size={16} />
-          <span>{labels.itineraries || 'Itineraries'}</span>
+          <span>{labels.itineraries || (language === 'zh' ? '行程规划' : 'Itineraries')}</span>
         </button>
 
         <button 
@@ -46,24 +43,24 @@ export default function TopNavbar({
           onClick={() => onTabChange && onTabChange('bookings')}
         >
           <Plane size={16} />
-          <span>{labels.bookings || 'Bookings'}</span>
-        </button>
-
-        <button 
-          className={`nav-tab-btn ${activeTab === 'settings' ? 'active' : ''}`}
-          onClick={() => {
-            if (onTabChange) onTabChange('settings');
-            if (onOpenStatusModal) onOpenStatusModal();
-          }}
-          title={language === 'zh' ? '查看系统状态与模型配置' : 'System Status & Settings'}
-        >
-          <Settings size={16} />
-          <span>{labels.settings || 'Settings'}</span>
+          <span>{labels.bookings || (language === 'zh' ? '预订清单' : 'Bookings')}</span>
         </button>
       </nav>
 
-      {/* 右侧搜索与动作控件 */}
+      {/* 右侧搜索与语言控件 */}
       <div className="navbar-controls-group">
+        {/* 搜索框 */}
+        <div className="search-pill-wrapper">
+          <Search size={15} color="#94A3B8" />
+          <input 
+            type="text" 
+            className="navbar-search-input" 
+            placeholder={labels.searchPlaceholder || (language === 'zh' ? "搜索行程与目的地 (回车确认)..." : "Search trips...")} 
+            onChange={(e) => onSearch && onSearch(e.target.value)}
+            onKeyDown={handleKeyDown}
+          />
+        </div>
+
         {/* 中英文切换按钮 */}
         <button 
           className="navbar-lang-btn"
@@ -75,43 +72,7 @@ export default function TopNavbar({
             {language === 'zh' ? '中文' : 'EN'}
           </span>
         </button>
-
-        {/* 搜索框 */}
-        <div className="search-pill-wrapper">
-          <Search size={15} color="#94A3B8" />
-          <input 
-            type="text" 
-            className="navbar-search-input" 
-            placeholder={labels.searchPlaceholder || "Search trips (Press Enter)..."} 
-            onChange={(e) => onSearch && onSearch(e.target.value)}
-            onKeyDown={handleKeyDown}
-          />
-        </div>
-
-        {/* 导出 Markdown 快捷按钮 */}
-        {onExportMarkdown && (
-          <button 
-            className="navbar-export-btn"
-            onClick={onExportMarkdown}
-            title={language === 'zh' ? '一键导出全部天数的完整 Markdown 行程方案' : 'Copy Full Markdown Itinerary'}
-          >
-            {copied ? <Check size={15} color="#10B981" /> : <Copy size={15} />}
-            <span>{copied ? labels.copied || '已复制' : labels.exportPlan || '导出方案'}</span>
-          </button>
-        )}
-
-        {/* 通知铃铛 (查看后端状态) */}
-        <button 
-          className="navbar-bell-btn" 
-          onClick={onOpenStatusModal}
-          aria-label="Notifications"
-          title={language === 'zh' ? '系统运行状态诊断' : 'System Diagnostics'}
-        >
-          <Bell size={17} />
-          <span className="bell-badge-dot"></span>
-        </button>
       </div>
     </header>
   );
 }
-

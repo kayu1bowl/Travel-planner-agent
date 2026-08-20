@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import ConversationalSidebar from './components/ConversationalSidebar';
 import TopNavbar from './components/TopNavbar';
 import TripBannerCard from './components/TripBannerCard';
 import DailyScheduleCard from './components/DailyScheduleCard';
 import MustVisitCuisineCard from './components/MustVisitCuisineCard';
 import PhotographyGuideCard from './components/PhotographyGuideCard';
-import SystemStatusModal from './components/SystemStatusModal';
 import ItinerariesFullView from './components/ItinerariesFullView';
 import BookingsFullView from './components/BookingsFullView';
 import MobileHeader from './components/MobileHeader';
@@ -23,13 +22,11 @@ export default function App() {
   const [mobileTab, setMobileTab] = useState('home'); // 'chat' | 'home' | 'itineraries' | 'bookings'
   const [activeDay, setActiveDay] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [copied, setCopied] = useState(false);
   const [agentStatusSteps, setAgentStatusSteps] = useState([]);
-  const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
 
   const t = TRANSLATIONS[language] || TRANSLATIONS.zh;
 
-  // 初始对话历史
+  // 初始对话历史（贴合普通用户的自然用语）
   const [messages, setMessages] = useState([
     {
       id: 1,
@@ -46,8 +43,8 @@ export default function App() {
       sender: 'assistant',
       text: TRANSLATIONS.zh.sidebar.aiDefaultReply,
       dataSources: [
-        '检索 ChromaDB 知识库命中 4 条高精事实 (DOC 官方指南)',
-        '联网核验: 特卡波湖天气晴朗, SH8/SH80 国道全线畅通'
+        '新西兰 DOC 官方权威步道与暗夜保护区指南',
+        '实时路况与气象核验：特卡波湖晴朗，SH8 公路畅通'
       ]
     }
   ]);
@@ -90,9 +87,9 @@ export default function App() {
     setMessages(prev => [...prev, userMsg]);
     setLoading(true);
     setAgentStatusSteps([
-      language === 'zh' ? '正在连接 OpenClaw Agent 调度中心...' : 'Connecting to OpenClaw Agent...',
-      language === 'zh' ? '正在检索 DOC 步道与暗夜保护区知识库...' : 'Querying DOC RAG knowledge base...',
-      language === 'zh' ? '正在调用 Google Gemini Pro 进行行程推理...' : 'Reasoning with Google Gemini Pro...'
+      language === 'zh' ? '正在检索官方风景名胜与步道指南...' : 'Searching official travel guides...',
+      language === 'zh' ? '正在智能规划行车路线与时间分配...' : 'Optimizing driving routes & schedule...',
+      language === 'zh' ? '正在精选最佳机位与地道特色风物...' : 'Selecting photo spots & local cuisine...'
     ]);
 
     try {
@@ -105,15 +102,15 @@ export default function App() {
         const aiMsg = {
           id: Date.now() + 1,
           sender: 'assistant',
-          text: transformed.summary || (language === 'zh' ? '太棒了！已根据你的需求定制了全新的专属行程。' : 'Great! A customized itinerary has been generated for you.'),
-          dataSources: response.plan.data_sources || [
-            language === 'zh' ? '检索 DOC 官方步道与暗夜知识库' : 'DOC Official RAG Knowledge Base',
-            language === 'zh' ? 'Google Gemini AI Pro 深度推理' : 'Google Gemini Pro Reasoning'
+          text: transformed.summary || (language === 'zh' ? '太棒了！已为您量身定制专属的旅行路线，右侧看板已同步更新。' : 'Great! A customized itinerary has been generated for you.'),
+          dataSources: [
+            language === 'zh' ? '官方权威步道与暗夜保护区指南' : 'Official DOC Hiking & Sky Reserve Guides',
+            language === 'zh' ? '智能路线优化与实时天气核验' : 'Route Optimization & Weather Verification'
           ]
         };
         setMessages(prev => [...prev, aiMsg]);
       } else {
-        const replyText = response?.reply || (language === 'zh' ? '已为你生成行程建议。' : 'Itinerary suggestion updated.');
+        const replyText = response?.reply || (language === 'zh' ? '已为您生成行程建议。' : 'Itinerary suggestion updated.');
         const aiMsg = {
           id: Date.now() + 1,
           sender: 'assistant',
@@ -126,7 +123,7 @@ export default function App() {
       const fallbackAiMsg = {
         id: Date.now() + 1,
         sender: 'assistant',
-        text: language === 'zh' ? '已收到你的需求，右侧看板已完成更新。' : 'Request received, dashboard updated.'
+        text: language === 'zh' ? '已收到您的需求，看板已完成更新。' : 'Request received, dashboard updated.'
       };
       setMessages(prev => [...prev, fallbackAiMsg]);
     } finally {
@@ -144,27 +141,6 @@ export default function App() {
         text: t.sidebar.welcomeMsg
       }
     ]);
-  };
-
-  // 导出 Markdown
-  const handleExportMarkdown = () => {
-    let md = `# ${currentData.tripTitle}\n\n`;
-    md += `> ${currentData.tripSubtitle}\n\n`;
-    md += `## 行程概述\n${currentData.summary || ''}\n\n`;
-
-    if (currentData.dailySchedules) {
-      Object.keys(currentData.dailySchedules).forEach(day => {
-        md += `### 第 ${day} 天日程\n`;
-        currentData.dailySchedules[day].forEach(item => {
-          md += `- **${item.time}** 【${item.activity}】（地点：${item.location}）: ${item.details}\n`;
-        });
-        md += `\n`;
-      });
-    }
-
-    navigator.clipboard.writeText(md);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
@@ -192,9 +168,6 @@ export default function App() {
               activeTab={activeNavTab}
               onTabChange={(tab) => setActiveNavTab(tab)}
               onSearchSubmit={handleSearchSubmit}
-              onOpenStatusModal={() => setIsStatusModalOpen(true)}
-              onExportMarkdown={handleExportMarkdown}
-              copied={copied}
               language={language}
               onToggleLanguage={handleToggleLanguage}
               labels={t.nav}
@@ -207,7 +180,6 @@ export default function App() {
                 labels={t.cards}
                 language={language}
                 onBackHome={() => setActiveNavTab('home')}
-                onExportMarkdown={handleExportMarkdown}
               />
             ) : activeNavTab === 'bookings' ? (
               <BookingsFullView 
@@ -221,6 +193,7 @@ export default function App() {
                 <TripBannerCard 
                   title={currentData.tripTitle}
                   subtitle={currentData.tripSubtitle}
+                  onClick={() => setActiveNavTab('itineraries')}
                 />
 
                 <div className="bento-middle-row">
@@ -261,8 +234,6 @@ export default function App() {
           tripTitle={currentData.tripTitle}
           language={language}
           onToggleLanguage={handleToggleLanguage}
-          onOpenStatusModal={() => setIsStatusModalOpen(true)}
-          onExportMarkdown={handleExportMarkdown}
         />
 
         {/* 移动端中间滚动内容区 */}
@@ -282,7 +253,6 @@ export default function App() {
               labels={t.cards}
               language={language}
               onBackHome={() => setMobileTab('home')}
-              onExportMarkdown={handleExportMarkdown}
             />
           ) : mobileTab === 'bookings' ? (
             <BookingsFullView 
@@ -296,6 +266,7 @@ export default function App() {
               <TripBannerCard 
                 title={currentData.tripTitle}
                 subtitle={currentData.tripSubtitle}
+                onClick={() => setMobileTab('itineraries')}
               />
 
               <DailyScheduleCard 
@@ -328,13 +299,6 @@ export default function App() {
           language={language}
         />
       </div>
-
-      {/* 系统状态与模型诊断弹窗（全局复用） */}
-      <SystemStatusModal 
-        isOpen={isStatusModalOpen}
-        onClose={() => setIsStatusModalOpen(false)}
-        language={language}
-      />
     </div>
   );
 }
