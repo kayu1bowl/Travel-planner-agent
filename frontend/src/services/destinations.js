@@ -314,64 +314,129 @@ export const DESTINATION_DATASETS = {
 };
 
 /**
- * 将后端返回的 TravelPlanResponse 动态转换为前端 Bento Grid 卡片所需的数据结构
+ * 将后端返回的数据动态转换为前端 Bento Grid 卡片所需的数据结构
+ * 兼容 OpenClaw Agent 规范 (plan.summary + plan.daily_plan) 与原生 TravelPlanResponse (itineraries)
  */
-export function transformBackendPlan(apiPlan, language = 'zh') {
-  if (!apiPlan || !apiPlan.itineraries || apiPlan.itineraries.length === 0) {
-    return null;
+export function transformBackendPlan(apiData, language = 'zh') {
+  if (!apiData) return null;
+
+  // 兼容 openclaw_agent 的 plan 包装或顶层响应
+  const plan = apiData.plan || apiData;
+
+  // 1. 如果是 OpenClaw Agent 规范结构 (daily_plan)
+  if (plan.daily_plan && Array.isArray(plan.daily_plan) && plan.daily_plan.length > 0) {
+    const dailySchedules = {};
+    plan.daily_plan.forEach((dp) => {
+      const dayNum = dp.day || 1;
+      const title = dp.title || `Day ${dayNum}`;
+      const content = dp.content || "";
+      
+      const sentences = content.split(/[。；;\n]+/).filter(s => s.trim().length > 0);
+      dailySchedules[dayNum] = [
+        {
+          time: "09:00",
+          activity: sentences[0] || (language === 'zh' ? "上午观光出发" : "Morning Departure"),
+          location: title.split(/[\s>➔\-—]+/)[0] || title,
+          details: sentences.length > 1 ? sentences[1] : (language === 'zh' ? "地道景观与人文体验" : "Local sightseeing")
+        },
+        {
+          time: "14:00",
+          activity: sentences.length > 2 ? sentences[2] : (sentences[1] || (language === 'zh' ? "下午深度漫游" : "Afternoon Tour")),
+          location: title.split(/[\s>➔\-—]+/)[1] || title,
+          details: plan.tips && plan.tips[dayNum % plan.tips.length] ? `${language === 'zh' ? '贴士: ' : 'Tips: '}${plan.tips[dayNum % plan.tips.length]}` : (language === 'zh' ? "风景探索与打卡" : "Scenic exploration")
+        },
+        {
+          time: "19:00",
+          activity: sentences.length > 3 ? sentences[3] : (language === 'zh' ? "傍晚日落拍摄与特色晚宴" : "Sunset & Dining"),
+          location: language === 'zh' ? "特色餐厅 / 观景点" : "Local Restaurant / Viewpoint",
+          details: language === 'zh' ? "品尝地道风味，欣赏夜景" : "Enjoy local cuisine and evening views"
+        }
+      ];
+    });
+
+    const summaryObj = plan.summary || {};
+    const tripTitle = summaryObj.title || (language === 'zh' ? "新西兰深度自驾与摄影之旅" : "New Zealand Self-Drive & Photo Tour");
+    const dayCount = summaryObj.days || Object.keys(dailySchedules).length;
+    const routeText = summaryObj.route ? ` | ${summaryObj.route}` : '';
+    const budgetText = summaryObj.budget ? ` · ${summaryObj.budget}` : '';
+
+    return {
+      tripTitle,
+      tripSubtitle: `${dayCount} ${language === 'zh' ? '天定制行程' : 'Days Plan'}${routeText}${budgetText}`,
+      summary: summaryObj.route ? `${language === 'zh' ? '推荐路线: ' : 'Route: '}${summaryObj.route}。${language === 'zh' ? '预算参考: ' : 'Budget: '}${summaryObj.budget || (language === 'zh' ? '适中' : 'Moderate')}。` : (plan.tips ? plan.tips.join('；') : ''),
+      dailySchedules,
+      mustVisit: (plan.tips || []).slice(0, 3).map((tip, idx) => ({
+        name: `${language === 'zh' ? '实用避坑指南' : 'Travel Tip'} ${idx + 1}`,
+        image: idx === 0 
+          ? "https://images.unsplash.com/photo-1507699622108-4be3abd695ad?w=800&auto=format&fit=crop&q=80"
+          : idx === 1
+          ? "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=800&auto=format&fit=crop&q=80"
+          : "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800&auto=format&fit=crop&q=80",
+        recommendations: tip,
+        tipsEmoji: "💡🚗",
+        category: language === 'zh' ? "出行指南" : "Travel Guide"
+      })),
+      photoGuides: undefined,
+      dataSources: ["OpenClaw Agent 智能体调度", "ChromaDB 向量知识库", "全网实时搜索"]
+    };
   }
 
-  const dailySchedules = {};
-  apiPlan.itineraries.forEach((itin) => {
-    const dayNum = itin.day || 1;
-    dailySchedules[dayNum] = [
-      {
-        time: "09:00",
-        activity: itin.morning || (language === 'zh' ? "上午景点探索" : "Morning Exploration"),
-        location: itin.theme || (language === 'zh' ? "核心观光区" : "Scenic Area"),
-        details: itin.transport ? `${language === 'zh' ? '交通: ' : 'Transport: '}${itin.transport}` : (language === 'zh' ? "特色观光与人文漫步" : "Sightseeing & Walk")
-      },
-      {
-        time: "14:00",
-        activity: itin.afternoon || (language === 'zh' ? "下午深度体验" : "Afternoon Experience"),
-        location: itin.theme || (language === 'zh' ? "地标体验区" : "Landmark"),
-        details: itin.tips ? `${language === 'zh' ? '贴士: ' : 'Tips: '}${itin.tips}` : (language === 'zh' ? "深度自然探索" : "Nature Exploration")
-      },
-      {
-        time: "19:00",
-        activity: itin.evening || (language === 'zh' ? "晚间特色美食与夜景" : "Evening Dining & Skyline"),
-        location: language === 'zh' ? "特色风味街区 / 观景台" : "Local Cuisine & Skyline",
-        details: language === 'zh' ? "打卡特色餐饮，观赏都市夜景" : "Sample local dining and enjoy views"
-      }
-    ];
-  });
+  // 2. 如果是 TravelPlanResponse 规范结构 (itineraries)
+  if (plan.itineraries && Array.isArray(plan.itineraries) && plan.itineraries.length > 0) {
+    const dailySchedules = {};
+    plan.itineraries.forEach((itin) => {
+      const dayNum = itin.day || 1;
+      dailySchedules[dayNum] = [
+        {
+          time: "09:00",
+          activity: itin.morning || (language === 'zh' ? "上午景点探索" : "Morning Exploration"),
+          location: itin.theme || (language === 'zh' ? "核心观光区" : "Scenic Area"),
+          details: itin.transport ? `${language === 'zh' ? '交通: ' : 'Transport: '}${itin.transport}` : (language === 'zh' ? "特色观光与人文漫步" : "Sightseeing & Walk")
+        },
+        {
+          time: "14:00",
+          activity: itin.afternoon || (language === 'zh' ? "下午深度体验" : "Afternoon Experience"),
+          location: itin.theme || (language === 'zh' ? "地标体验区" : "Landmark"),
+          details: itin.tips ? `${language === 'zh' ? '贴士: ' : 'Tips: '}${itin.tips}` : (language === 'zh' ? "深度自然探索" : "Nature Exploration")
+        },
+        {
+          time: "19:00",
+          activity: itin.evening || (language === 'zh' ? "晚间特色美食与夜景" : "Evening Dining & Skyline"),
+          location: language === 'zh' ? "特色风味街区 / 观景台" : "Local Cuisine & Skyline",
+          details: language === 'zh' ? "打卡特色餐饮，观赏都市夜景" : "Sample local dining and enjoy views"
+        }
+      ];
+    });
 
-  const mustVisit = (apiPlan.must_visit_spots || []).map((spot) => ({
-    name: spot.name,
-    image: spot.image || "https://images.unsplash.com/photo-1507699622108-4be3abd695ad?w=800&auto=format&fit=crop&q=80",
-    recommendations: spot.highlight || (language === 'zh' ? "当地必打卡体验" : "Top recommended experience"),
-    tipsEmoji: (spot.category?.includes("美食") || spot.category?.includes("小吃") || spot.category?.toLowerCase().includes("food")) ? "🍲🥢" : "🏛️✨",
-    category: spot.category || (language === 'zh' ? "经典地标" : "Landmark")
-  }));
+    const mustVisit = (plan.must_visit_spots || []).map((spot) => ({
+      name: spot.name,
+      image: spot.image || "https://images.unsplash.com/photo-1507699622108-4be3abd695ad?w=800&auto=format&fit=crop&q=80",
+      recommendations: spot.highlight || (language === 'zh' ? "当地必打卡体验" : "Top recommended experience"),
+      tipsEmoji: (spot.category?.includes("美食") || spot.category?.includes("小吃") || spot.category?.toLowerCase().includes("food")) ? "🍲🥢" : "🏛️✨",
+      category: spot.category || (language === 'zh' ? "经典地标" : "Landmark")
+    }));
 
-  const photoGuides = (apiPlan.photo_guides || []).map((photo, idx) => ({
-    id: idx + 1,
-    title: `${idx + 1}. ${photo.location}`,
-    subtitle: photo.composition_tips || (language === 'zh' ? "经典机位与构图指南" : "Composition & Lighting guide"),
-    image: photo.image || "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=800&auto=format&fit=crop&q=80",
-    tipsAvatars: ["📷", "🌅"],
-    params: photo.best_time ? `${language === 'zh' ? '最佳时段: ' : 'Best time: '}${photo.best_time}` : (photo.outfit_color || "14-24mm f/2.8")
-  }));
+    const photoGuides = (plan.photo_guides || []).map((photo, idx) => ({
+      id: idx + 1,
+      title: `${idx + 1}. ${photo.location}`,
+      subtitle: photo.composition_tips || (language === 'zh' ? "经典机位与构图指南" : "Composition & Lighting guide"),
+      image: photo.image || "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=800&auto=format&fit=crop&q=80",
+      tipsAvatars: ["📷", "🌅"],
+      params: photo.best_time ? `${language === 'zh' ? '最佳时段: ' : 'Best time: '}${photo.best_time}` : (photo.outfit_color || "14-24mm f/2.8")
+    }));
 
-  const dayCount = Object.keys(dailySchedules).length;
+    const dayCount = Object.keys(dailySchedules).length;
 
-  return {
-    tripTitle: apiPlan.title || (language === 'zh' ? "定制智能旅行规划" : "Custom Travel Plan"),
-    tripSubtitle: `${dayCount} ${language === 'zh' ? '天定制行程' : 'Days Plan'} | ${apiPlan.summary ? apiPlan.summary.slice(0, 36) + '...' : ''}`,
-    summary: apiPlan.summary || "",
-    dailySchedules,
-    mustVisit: mustVisit.length > 0 ? mustVisit : undefined,
-    photoGuides: photoGuides.length > 0 ? photoGuides : undefined,
-    dataSources: apiPlan.data_sources || []
-  };
+    return {
+      tripTitle: plan.title || (language === 'zh' ? "定制智能旅行规划" : "Custom Travel Plan"),
+      tripSubtitle: `${dayCount} ${language === 'zh' ? '天定制行程' : 'Days Plan'} | ${plan.summary ? plan.summary.slice(0, 36) + '...' : ''}`,
+      summary: plan.summary || "",
+      dailySchedules,
+      mustVisit: mustVisit.length > 0 ? mustVisit : undefined,
+      photoGuides: photoGuides.length > 0 ? photoGuides : undefined,
+      dataSources: plan.data_sources || []
+    };
+  }
+
+  return null;
 }

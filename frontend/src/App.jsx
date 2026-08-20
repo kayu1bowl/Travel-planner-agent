@@ -115,14 +115,41 @@ export default function App() {
     }, 900);
 
     let backendSources = [];
+    let customAiReplyText = null;
+    let customAiPills = null;
+
     try {
-      // 尝试调用后端 API
-      const apiRes = await fetchTravelPlan(userQuery);
-      if (apiRes && apiRes.itineraries && apiRes.itineraries.length > 0) {
-        const transformed = transformBackendPlan(apiRes, language);
-        if (transformed) {
-          setDynamicCustomPlan(transformed);
-          backendSources = apiRes.data_sources || [];
+      // 构建历史会话数据给后端
+      const convHistory = messages.map(m => ({
+        role: m.sender === 'user' ? 'user' : 'assistant',
+        content: m.text
+      }));
+
+      // 调用后端 API (优先 8080 OpenClaw Agent)
+      const apiRes = await fetchTravelPlan(userQuery, convHistory);
+
+      if (apiRes) {
+        if (apiRes.needs_more_info && apiRes.follow_up_question) {
+          // 触发智能追问模式
+          customAiReplyText = apiRes.follow_up_question;
+          customAiPills = [
+            language === 'zh' ? '❓ 需要补充行程细节' : '❓ More details needed',
+            language === 'zh' ? '💬 OpenClaw 智能追问' : '💬 Interactive Clarification'
+          ];
+        } else {
+          const transformed = transformBackendPlan(apiRes, language);
+          if (transformed) {
+            setDynamicCustomPlan(transformed);
+            backendSources = transformed.dataSources || apiRes.data_sources || [];
+            if (apiRes.plan && apiRes.plan.summary && apiRes.plan.summary.title) {
+              customAiReplyText = language === 'zh'
+                ? `已为你完成【${apiRes.plan.summary.title}】的深度规划！总天数 ${apiRes.plan.summary.days || '多'} 天，路线涵盖 ${apiRes.plan.summary.route || '精选景点'}。右侧便士网格已同步更新。`
+                : `Your customized plan "${apiRes.plan.summary.title}" is ready! Total ${apiRes.plan.summary.days || ''} days covering ${apiRes.plan.summary.route || 'key scenic spots'}. Bento Grid is updated.`;
+            }
+          } else {
+            setCurrentDatasetKey(targetKey);
+            setDynamicCustomPlan(null);
+          }
         }
       } else {
         setCurrentDatasetKey(targetKey);
@@ -134,10 +161,10 @@ export default function App() {
       setDynamicCustomPlan(null);
     } finally {
       setTimeout(() => {
-        let aiText = targetKey === 'tokyo' ? t.sidebar.aiReplyTokyo : t.sidebar.aiReplyNZ;
-        let aiPills = targetKey === 'tokyo' 
+        let aiText = customAiReplyText || (targetKey === 'tokyo' ? t.sidebar.aiReplyTokyo : t.sidebar.aiReplyNZ);
+        let aiPills = customAiPills || (targetKey === 'tokyo' 
           ? [t.sidebar.ragTokyoPill1, t.sidebar.ragTokyoPill2]
-          : [t.sidebar.ragStatusPill1, t.sidebar.ragStatusPill2];
+          : [t.sidebar.ragStatusPill1, t.sidebar.ragStatusPill2]);
 
         if (backendSources.length > 0) {
           aiPills = backendSources.map(src => `✨ ${src}`);
