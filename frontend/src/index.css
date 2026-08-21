@@ -2975,9 +2975,9 @@ body {
   left: 0;
   width: 100vw;
   height: 72px;
-  background: rgba(3, 7, 18, 0.65);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
+  background: rgba(3, 7, 18, 0.38);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   z-index: 1000;
   display: flex;
@@ -3003,7 +3003,7 @@ body {
   width: 38px;
   height: 38px;
   border-radius: 12px;
-  background: rgba(11, 17, 32, 0.9);
+  background: rgba(11, 17, 32, 0.65);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -3072,7 +3072,8 @@ body {
   padding: 7px 16px;
   border-radius: 20px;
   border: 1px solid rgba(255, 255, 255, 0.15);
-  background: rgba(15, 23, 42, 0.6);
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(10px);
   color: #94A3B8;
   font-size: 0.84rem;
   font-weight: 700;
@@ -3081,7 +3082,7 @@ body {
 }
 
 .fullbleed-lang-btn:hover {
-  background: rgba(30, 41, 59, 0.8);
+  background: rgba(30, 41, 59, 0.6);
   border-color: rgba(255, 255, 255, 0.35);
   color: #FFFFFF;
 }
@@ -3149,13 +3150,13 @@ body {
 .stage-overlay-darken {
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 50% 50%, rgba(3, 7, 18, 0.6) 0%, rgba(3, 7, 18, 0.92) 100%);
+  background: radial-gradient(circle at 50% 50%, rgba(3, 7, 18, 0.35) 0%, rgba(3, 7, 18, 0.82) 100%);
 }
 
 .stage-overlay-vignette {
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 50% 50%, rgba(3, 7, 18, 0.25) 0%, rgba(3, 7, 18, 0.88) 100%);
+  background: radial-gradient(circle at 50% 50%, rgba(3, 7, 18, 0.15) 0%, rgba(3, 7, 18, 0.78) 100%);
 }
 
 .stage-headline-block {
@@ -3224,13 +3225,13 @@ body {
 .slide-overlay-gradient {
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 50% 40%, rgba(3, 7, 18, 0.4) 0%, rgba(3, 7, 18, 0.9) 85%);
+  background: radial-gradient(circle at 50% 40%, rgba(3, 7, 18, 0.22) 0%, rgba(3, 7, 18, 0.78) 85%);
 }
 
 .hero-vignette {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(3, 7, 18, 0.7) 0%, transparent 25%, transparent 75%, rgba(3, 7, 18, 0.95) 100%);
+  background: linear-gradient(180deg, rgba(3, 7, 18, 0.55) 0%, transparent 25%, transparent 75%, rgba(3, 7, 18, 0.88) 100%);
   z-index: 2;
   pointer-events: none;
 }
@@ -3242,7 +3243,7 @@ body {
   width: 50px;
   height: 50px;
   border-radius: 50%;
-  background: rgba(3, 7, 18, 0.5);
+  background: rgba(3, 7, 18, 0.35);
   backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.15);
   color: #FFFFFF;
@@ -3289,11 +3290,11 @@ body {
   font-weight: 900;
   font-size: 1.1rem;
   color: #FFFFFF;
-  background: rgba(3, 7, 18, 0.65);
+  background: rgba(3, 7, 18, 0.38);
   padding: 4px 14px;
   border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(12px);
 }
 
 .counter-curr {
@@ -3318,11 +3319,11 @@ body {
   font-size: 0.8rem;
   font-weight: 700;
   color: #E2E8F0;
-  background: rgba(3, 7, 18, 0.65);
+  background: rgba(3, 7, 18, 0.38);
   padding: 6px 14px;
   border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(12px);
 }
 
 .photo-source-badge {
@@ -3355,7 +3356,8 @@ body {
   gap: 8px;
   padding: 7px 20px;
   border-radius: 30px;
-  background: rgba(16, 185, 129, 0.12);
+  background: rgba(16, 185, 129, 0.08);
+  backdrop-filter: blur(12px);
   border: 1px solid rgba(16, 185, 129, 0.35);
   color: #34D399;
   font-size: 0.84rem;
@@ -3385,23 +3387,24 @@ body {
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.6);
 }
 
-/* 悬浮磨砂钛金智能指令舱 */
+/* 悬浮磨砂钛金智能指令舱 (通透玻璃设计，背景绝景清晰可辨) */
 .hero-floating-capsule {
   width: 100%;
-  background: rgba(11, 17, 32, 0.75);
-  backdrop-filter: blur(28px);
-  -webkit-backdrop-filter: blur(28px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(11, 17, 32, 0.38);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 28px;
   padding: 26px;
-  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.08);
+  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.08);
   text-align: left;
   transition: all 0.3s ease;
 }
 
 .hero-floating-capsule:focus-within {
+  background: rgba(11, 17, 32, 0.52);
   border-color: rgba(16, 185, 129, 0.7);
-  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8), 0 0 36px rgba(16, 185, 129, 0.25);
+  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.75), 0 0 36px rgba(16, 185, 129, 0.25);
 }
 
 .capsule-form {
@@ -3427,7 +3430,7 @@ body {
 }
 
 .capsule-textarea::placeholder {
-  color: #64748B;
+  color: #94A3B8;
 }
 
 /* 居中放置偏好小框，不显示“标签”文本 */
@@ -3445,8 +3448,9 @@ body {
 .capsule-tag-chip {
   padding: 7px 16px;
   border-radius: 18px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(30, 41, 59, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(8px);
   color: #E2E8F0;
   font-size: 0.84rem;
   font-weight: 700;
@@ -3455,14 +3459,14 @@ body {
 }
 
 .capsule-tag-chip:hover {
-  background: rgba(51, 65, 85, 0.95);
-  border-color: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.35);
   color: #FFFFFF;
   transform: translateY(-1px);
 }
 
 .capsule-tag-chip.active {
-  background: rgba(16, 185, 129, 0.2);
+  background: rgba(16, 185, 129, 0.25);
   border-color: #10B981;
   color: #34D399;
   box-shadow: 0 0 14px rgba(16, 185, 129, 0.25);
@@ -3478,7 +3482,7 @@ body {
 
 .capsule-hint-text {
   font-size: 0.82rem;
-  color: #94A3B8;
+  color: #CBD5E1;
 }
 
 .capsule-primary-btn {
@@ -3525,11 +3529,11 @@ body {
   font-weight: 700;
   color: #E2E8F0;
   letter-spacing: 0.02em;
-  background: rgba(3, 7, 18, 0.5);
+  background: rgba(3, 7, 18, 0.28);
   padding: 6px 14px;
   border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(10px);
 }
 
 .telemetry-live-dot {
@@ -3576,16 +3580,17 @@ body {
 }
 
 .spatial-route-viewport {
-  background: rgba(11, 17, 32, 0.8);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(11, 17, 32, 0.42);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 28px;
   padding: 36px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   min-height: 480px;
-  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.4);
 }
 
 .spatial-live-badge {
@@ -3611,7 +3616,7 @@ body {
 
 .spatial-route-sub {
   font-size: 0.95rem;
-  color: #94A3B8;
+  color: #CBD5E1;
   line-height: 1.5;
 }
 
@@ -3619,8 +3624,9 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: rgba(15, 23, 42, 0.9);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 24px;
   padding: 24px 28px;
   margin-top: 40px;
@@ -3662,7 +3668,7 @@ body {
 .timeline-connector {
   flex: 1;
   height: 3px;
-  background: #334155;
+  background: rgba(255, 255, 255, 0.15);
   margin: 0 12px;
 }
 
@@ -3678,15 +3684,16 @@ body {
 }
 
 .spatial-deck-card {
-  background: rgba(11, 17, 32, 0.75);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(11, 17, 32, 0.38);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 24px;
   padding: 30px 28px;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.3);
 }
 
 .deck-num-row {
@@ -3711,7 +3718,7 @@ body {
 
 .deck-desc {
   font-size: 0.88rem;
-  color: #94A3B8;
+  color: #CBD5E1;
   line-height: 1.5;
 }
 
@@ -3799,9 +3806,10 @@ body {
   gap: 8px;
   padding: 8px 18px;
   border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(11, 17, 32, 0.75);
-  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(11, 17, 32, 0.45);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   color: #94A3B8;
   font-size: 0.84rem;
   font-weight: 700;
@@ -3810,13 +3818,13 @@ body {
 }
 
 .vision-spot-capsule:hover {
-  background: rgba(59, 130, 246, 0.18);
-  border-color: rgba(59, 130, 246, 0.4);
+  background: rgba(59, 130, 246, 0.25);
+  border-color: rgba(59, 130, 246, 0.5);
   color: #FFFFFF;
 }
 
 .vision-spot-capsule.active {
-  background: rgba(59, 130, 246, 0.25);
+  background: rgba(59, 130, 246, 0.35);
   border-color: #3B82F6;
   color: #93C5FD;
   box-shadow: 0 0 20px rgba(59, 130, 246, 0.35);
@@ -3836,13 +3844,13 @@ body {
   width: 440px;
   max-width: calc(100vw - 96px);
   z-index: 20;
-  background: rgba(3, 7, 18, 0.82);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(3, 7, 18, 0.48);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 24px;
   padding: 22px 26px;
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.06);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.08);
   display: flex;
   flex-direction: column;
   gap: 14px;
@@ -3921,8 +3929,8 @@ body {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 10px;
-  background: rgba(15, 23, 42, 0.65);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(15, 23, 42, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 16px;
   padding: 12px 14px;
 }
@@ -4034,13 +4042,13 @@ body {
 
 .architecture-showcase-card {
   display: flex;
-  background: rgba(11, 17, 32, 0.85);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(11, 17, 32, 0.48);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 24px;
   overflow: hidden;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
   transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
   min-height: 220px;
 }
