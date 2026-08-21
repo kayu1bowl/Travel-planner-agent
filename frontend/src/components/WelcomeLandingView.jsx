@@ -466,7 +466,6 @@ export default function WelcomeLandingView({
           <div className="hero-slide-desc">
             <MapPin size={13} color="#10B981" />
             <span>{GLOBAL_SCENIC_CAROUSEL[heroSlideIndex]?.location}</span>
-            <span className="photo-source-badge">📸 Unsplash</span>
           </div>
         </div>
 
@@ -719,27 +718,24 @@ export default function WelcomeLandingView({
               <span>{currentSpot.spotType}</span>
             </div>
             
-            <div className="hud-header-right-badges">
-              <span className="hud-source-badge">📸 Unsplash</span>
-              {/* 自动播放/暂停开关 */}
-              <button 
-                className="hud-play-toggle-btn"
-                onClick={() => setIsVisionAutoPlaying(!isVisionAutoPlaying)}
-                title={isVisionAutoPlaying ? "暂停自动轮播" : "恢复自动轮播"}
-              >
-                {isVisionAutoPlaying ? (
-                  <>
-                    <Pause size={12} color="#10B981" />
-                    <span className="play-state-text">AUTO</span>
-                  </>
-                ) : (
-                  <>
-                    <Play size={12} color="#94A3B8" />
-                    <span className="play-state-text">PAUSED</span>
-                  </>
-                )}
-              </button>
-            </div>
+            {/* 自动播放/暂停开关 */}
+            <button 
+              className="hud-play-toggle-btn"
+              onClick={() => setIsVisionAutoPlaying(!isVisionAutoPlaying)}
+              title={isVisionAutoPlaying ? "暂停自动轮播" : "恢复自动轮播"}
+            >
+              {isVisionAutoPlaying ? (
+                <>
+                  <Pause size={12} color="#10B981" />
+                  <span className="play-state-text">AUTO</span>
+                </>
+              ) : (
+                <>
+                  <Play size={12} color="#94A3B8" />
+                  <span className="play-state-text">PAUSED</span>
+                </>
+              )}
+            </button>
           </div>
 
           <h3 className="hud-spot-title">{currentSpot.name}</h3>
@@ -881,10 +877,7 @@ export default function WelcomeLandingView({
                 />
                 <div className="card-gradient-layer"></div>
                 <div className="card-meta-box">
-                  <div className="card-top-tag-row">
-                    <span className="card-tag">{item.tag}</span>
-                    <span className="card-source-tag">📸 Unsplash</span>
-                  </div>
+                  <span className="card-tag">{item.tag}</span>
                   <h3 className="card-title">{item.title}</h3>
                   <p className="card-desc">{item.query}</p>
                   <div className="card-cta-row">
@@ -934,7 +927,7 @@ export default function WelcomeLandingView({
 
         <div className="fullbleed-bottom-credits">
           <span>© 2026 Roam AI Travel Planner · OpenClaw Agent Intelligence</span>
-          <span>Photos & Imagery via Unsplash Free License · DOC Official Knowledge Base Verified · Extended Thinking Enabled</span>
+          <span>{language === 'zh' ? '本站所有风光影像均来自 Unsplash 官方开源图库授权 · 路线及安全指南经新西兰环保署 (DOC) 知识底座官方核验' : 'All scenic imagery sourced via Unsplash Creative License · Route telemetry verified with DOC knowledge base'}</span>
         </div>
       </footer>
 
