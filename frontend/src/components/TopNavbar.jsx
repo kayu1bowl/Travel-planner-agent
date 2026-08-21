@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, BookOpen, Plane, Search, Languages } from 'lucide-react';
+import { Home, BookOpen, Plane, Search, Languages, Sparkles } from 'lucide-react';
 
 export default function TopNavbar({ 
   activeTab = 'home', 
@@ -8,6 +8,7 @@ export default function TopNavbar({
   onSearchSubmit,
   language = 'zh',
   onToggleLanguage,
+  onNewTrip,
   labels = {}
 }) {
   const handleKeyDown = (e) => {
@@ -60,6 +61,18 @@ export default function TopNavbar({
             onKeyDown={handleKeyDown}
           />
         </div>
+
+        {/* 新建行程按钮 */}
+        {onNewTrip && (
+          <button
+            className="navbar-new-trip-btn"
+            onClick={onNewTrip}
+            title={language === 'zh' ? '开启新的旅行规划' : 'Start a new trip plan'}
+          >
+            <Sparkles size={14} className="text-emerald-400" />
+            <span>{labels.newTrip || (language === 'zh' ? '新建行程' : 'New Trip')}</span>
+          </button>
+        )}
 
         {/* 中英文切换按钮 */}
         <button 

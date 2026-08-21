@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import WelcomeLandingView from './components/WelcomeLandingView';
 import ConversationalSidebar from './components/ConversationalSidebar';
 import TopNavbar from './components/TopNavbar';
 import TripBannerCard from './components/TripBannerCard';
@@ -15,6 +16,7 @@ import { TRANSLATIONS } from './services/i18n';
 import { fetchTravelPlan } from './services/api';
 
 export default function App() {
+  const [viewMode, setViewMode] = useState('welcome'); // 'welcome' | 'dashboard'
   const [language, setLanguage] = useState('zh'); // 默认中文
   const [currentDatasetKey, setCurrentDatasetKey] = useState('newzealand');
   const [dynamicCustomPlan, setDynamicCustomPlan] = useState(null);
@@ -26,26 +28,12 @@ export default function App() {
 
   const t = TRANSLATIONS[language] || TRANSLATIONS.zh;
 
-  // 初始对话历史（贴合普通用户的自然用语）
+  // 初始对话历史
   const [messages, setMessages] = useState([
     {
       id: 1,
       sender: 'assistant',
       text: TRANSLATIONS.zh.sidebar.welcomeMsg
-    },
-    {
-      id: 2,
-      sender: 'user',
-      text: TRANSLATIONS.zh.sidebar.userDefaultMsg
-    },
-    {
-      id: 3,
-      sender: 'assistant',
-      text: TRANSLATIONS.zh.sidebar.aiDefaultReply,
-      dataSources: [
-        '新西兰 DOC 官方权威步道与暗夜保护区指南',
-        '实时路况与气象核验：特卡波湖晴朗，SH8 公路畅通'
-      ]
     }
   ]);
 
@@ -61,7 +49,7 @@ export default function App() {
     setLanguage(prev => prev === 'zh' ? 'en' : 'zh');
   };
 
-  // 处理搜索
+  // 处理搜索与目的地切换
   const handleSearchSubmit = (keyword) => {
     const kw = (keyword || '').toLowerCase();
     if (kw.includes('tokyo') || kw.includes('东京') || kw.includes('日本') || kw.includes('japan')) {
@@ -76,7 +64,7 @@ export default function App() {
   };
 
   // 处理消息发送与 Agent 调用
-  const handleSendMessage = async (queryText) => {
+  const handleSendMessage = async (queryText, fromWelcome = false) => {
     if (!queryText || !queryText.trim()) return;
 
     const userMsg = {
@@ -87,7 +75,7 @@ export default function App() {
     setMessages(prev => [...prev, userMsg]);
     setLoading(true);
     setAgentStatusSteps([
-      language === 'zh' ? '正在检索官方风景名胜与步道指南...' : 'Searching official travel guides...',
+      language === 'zh' ? '正在检索官方风景名胜与私有知识库...' : 'Searching official travel guides...',
       language === 'zh' ? '正在智能规划行车路线与时间分配...' : 'Optimizing driving routes & schedule...',
       language === 'zh' ? '正在精选最佳机位与地道特色风物...' : 'Selecting photo spots & local cuisine...'
     ]);
@@ -121,7 +109,7 @@ export default function App() {
         };
         setMessages(prev => [...prev, aiMsg]);
       } else {
-        const replyText = response?.reply || response?.error || (language === 'zh' ? '已收到您的需求，看板已完成更新。' : 'Request received, dashboard updated.');
+        const replyText = response?.reply || response?.error || (language === 'zh' ? '已收到您的旅行需求，看板已完成更新。' : 'Request received, dashboard updated.');
         const aiMsg = {
           id: Date.now() + 1,
           sender: 'assistant',
@@ -140,7 +128,20 @@ export default function App() {
     } finally {
       setLoading(false);
       setAgentStatusSteps([]);
+      if (fromWelcome) {
+        setViewMode('dashboard');
+      }
     }
+  };
+
+  // 直接进入精选标杆看板
+  const handleDirectExplore = () => {
+    setViewMode('dashboard');
+  };
+
+  // 新建行程（返回欢迎页）
+  const handleNewTrip = () => {
+    setViewMode('welcome');
   };
 
   // 重置对话
@@ -154,6 +155,27 @@ export default function App() {
     ]);
   };
 
+  // 如果处于欢迎引导模式，优先渲染欢迎页
+  if (viewMode === 'welcome') {
+    return (
+      <div className="bento-app-viewport">
+        <WelcomeLandingView 
+          language={language}
+          onToggleLanguage={handleToggleLanguage}
+          onStartPlanning={(q) => handleSendMessage(q, true)}
+          onDirectExplore={handleDirectExplore}
+          isGenerating={loading}
+          generatingSteps={agentStatusSteps}
+          currentDestination={currentDatasetKey}
+          onSelectDestination={(dest) => {
+            setCurrentDatasetKey(dest);
+            setDynamicCustomPlan(null);
+          }}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="bento-app-viewport">
       {/* =========================================================================
@@ -164,7 +186,7 @@ export default function App() {
           {/* 左侧：无门槛自然语言交互面板 (Conversational Sidebar) */}
           <ConversationalSidebar 
             messages={messages}
-            onSendMessage={handleSendMessage}
+            onSendMessage={(q) => handleSendMessage(q, false)}
             onResetChat={handleResetChat}
             loading={loading}
             agentStatusSteps={agentStatusSteps}
@@ -181,6 +203,7 @@ export default function App() {
               onSearchSubmit={handleSearchSubmit}
               language={language}
               onToggleLanguage={handleToggleLanguage}
+              onNewTrip={handleNewTrip}
               labels={t.nav}
             />
 
