@@ -2948,390 +2948,1041 @@ body {
 }
 
 /* =========================================================================
-   11. 欢迎引导页样式 (Welcome Landing View Styles)
+   11. 旗舰级首页样式 (Flagship Landing View - Industrial Tech Aesthetics)
    ========================================================================= */
 
-.welcome-landing-wrapper {
+.flagship-welcome-root {
   width: 100%;
   min-height: 100vh;
-  background: radial-gradient(circle at 50% 15%, rgba(16, 185, 129, 0.08) 0%, transparent 60%),
-              radial-gradient(circle at 85% 75%, rgba(79, 70, 229, 0.06) 0%, transparent 50%),
-              linear-gradient(180deg, #F8FAFC 0%, #F1F5F9 100%);
-  display: flex;
-  flex-direction: column;
-  color: #1E293B;
-  position: relative;
+  background-color: #030712;
+  color: #F8FAFC;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "PingFang SC", "Segoe UI", Roboto, sans-serif;
   overflow-x: hidden;
+  position: relative;
 }
 
-/* 顶部极简导航 */
-.welcome-header {
-  height: 64px;
-  padding: 0 36px;
+/* 顶部高透钛金磨砂导航栏 */
+.flagship-header {
+  position: sticky;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 68px;
+  background: rgba(3, 7, 18, 0.75);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+}
+
+.flagship-nav-inner {
+  max-width: 1280px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 32px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid rgba(226, 232, 240, 0.8);
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(16px);
-  position: sticky;
-  top: 0;
-  z-index: 40;
 }
 
-.welcome-logo-group {
+.flagship-logo-group {
   display: flex;
   align-items: center;
   gap: 10px;
+  cursor: pointer;
 }
 
-.welcome-logo-icon {
+.flagship-logo-icon {
   width: 36px;
   height: 36px;
   border-radius: 10px;
-  background: #0F172A;
+  background: #0B1120;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.15);
-  border: 1px solid rgba(16, 185, 129, 0.3);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  box-shadow: 0 0 16px rgba(16, 185, 129, 0.15);
 }
 
-.welcome-logo-icon svg {
-  display: block;
-}
-
-.welcome-brand {
+.flagship-brand {
   display: flex;
   align-items: baseline;
-  gap: 6px;
+  gap: 8px;
 }
 
-.welcome-brand-name {
-  font-size: 1.15rem;
+.flagship-brand-name {
+  font-size: 1.2rem;
   font-weight: 800;
   letter-spacing: -0.02em;
-  color: #0F172A;
+  color: #FFFFFF;
 }
 
-.welcome-brand-badge {
+.flagship-agent-pill {
   font-size: 0.7rem;
   font-weight: 700;
-  color: #059669;
+  color: #10B981;
   background: rgba(16, 185, 129, 0.12);
-  padding: 2px 6px;
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  padding: 2px 7px;
   border-radius: 6px;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 
-.welcome-header-actions {
+.flagship-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+
+.nav-anchor-link {
+  background: transparent;
+  border: none;
+  color: #94A3B8;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: 0.02em;
+  transition: all 0.2s ease;
+  padding: 6px 0;
+}
+
+.nav-anchor-link:hover {
+  color: #FFFFFF;
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+}
+
+.flagship-header-actions {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
-.welcome-lang-btn {
+.flagship-lang-btn {
   display: flex;
   align-items: center;
   gap: 6px;
   padding: 6px 14px;
   border-radius: 20px;
-  border: 1px solid #CBD5E1;
-  background: #FFFFFF;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(15, 23, 42, 0.6);
+  color: #94A3B8;
   font-size: 0.82rem;
   font-weight: 600;
-  color: #475569;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
-.welcome-lang-btn:hover {
-  background: #F8FAFC;
-  border-color: #94A3B8;
+.flagship-lang-btn:hover {
+  background: rgba(30, 41, 59, 0.8);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: #FFFFFF;
 }
 
-/* 主体容器 */
-.welcome-main-container {
-  max-width: 880px;
+.flagship-enter-btn {
+  padding: 7px 18px;
+  border-radius: 20px;
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  background: rgba(16, 185, 129, 0.1);
+  color: #10B981;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.flagship-enter-btn:hover {
+  background: #10B981;
+  color: #030712;
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+  transform: translateY(-1px);
+}
+
+/* =========================================================================
+   SECTION 1: 沉浸式临场感主屏 (Hero)
+   ========================================================================= */
+
+.flagship-hero-section {
+  position: relative;
+  min-height: calc(100vh - 68px);
+  padding: 60px 24px 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  overflow: hidden;
+  background: radial-gradient(circle at 50% 20%, rgba(16, 185, 129, 0.12) 0%, transparent 60%),
+              radial-gradient(circle at 80% 80%, rgba(59, 130, 246, 0.08) 0%, transparent 50%),
+              #030712;
+}
+
+.hero-ambient-glow {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(120px);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.glow-top {
+  width: 500px;
+  height: 500px;
+  background: rgba(16, 185, 129, 0.15);
+  top: -150px;
+  left: calc(50% - 250px);
+}
+
+.glow-right {
+  width: 400px;
+  height: 400px;
+  background: rgba(59, 130, 246, 0.1);
+  bottom: 10%;
+  right: 5%;
+}
+
+.hero-grid-pattern {
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 60px 60px;
+  mask-image: radial-gradient(circle at 50% 40%, black 30%, transparent 80%);
+  -webkit-mask-image: radial-gradient(circle at 50% 40%, black 30%, transparent 80%);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.hero-content-wrapper {
+  position: relative;
+  z-index: 10;
+  max-width: 920px;
   width: 100%;
-  margin: 0 auto;
-  padding: 48px 24px 64px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  text-align: center;
 }
 
-/* AI 微标 */
-.welcome-ai-badge {
+.hero-badge-pill {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
+  padding: 6px 18px;
+  border-radius: 30px;
   background: rgba(16, 185, 129, 0.08);
-  border: 1px solid rgba(16, 185, 129, 0.25);
-  color: #047857;
-  padding: 5px 14px;
-  border-radius: 20px;
-  font-size: 0.78rem;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  color: #34D399;
+  font-size: 0.82rem;
   font-weight: 700;
-  letter-spacing: 0.02em;
-  margin-bottom: 20px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 24px;
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.1);
 }
 
-/* 大标题与副标题 */
-.welcome-hero-title {
-  font-size: 2.75rem;
+.hero-master-title {
+  font-size: 3.8rem;
   font-weight: 900;
-  letter-spacing: -0.03em;
-  color: #0F172A;
-  line-height: 1.2;
-  margin-bottom: 14px;
-  background: linear-gradient(135deg, #0F172A 30%, #047857 100%);
+  line-height: 1.15;
+  letter-spacing: -0.04em;
+  color: #FFFFFF;
+  margin-bottom: 18px;
+  background: linear-gradient(180deg, #FFFFFF 20%, #94A3B8 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
-.welcome-hero-subtitle {
-  font-size: 1.05rem;
-  line-height: 1.6;
-  color: #64748B;
-  max-width: 660px;
-  margin-bottom: 36px;
+.hero-master-subtitle {
+  font-size: 1.15rem;
+  line-height: 1.65;
+  color: #94A3B8;
+  max-width: 680px;
+  margin-bottom: 44px;
 }
 
-/* 核心输入卡片 */
-.welcome-input-card {
+/* 核心智能指令舱 */
+.hero-command-capsule {
   width: 100%;
-  background: #FFFFFF;
-  border: 1px solid rgba(226, 232, 240, 0.9);
-  border-radius: 24px;
-  padding: 20px;
-  box-shadow: 0 12px 36px rgba(15, 23, 42, 0.06), 0 2px 8px rgba(0, 0, 0, 0.02);
-  transition: all 0.3s ease;
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 28px;
+  padding: 24px;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05);
   text-align: left;
+  transition: all 0.3s ease;
 }
 
-.welcome-input-card:focus-within {
-  border-color: rgba(16, 185, 129, 0.5);
-  box-shadow: 0 16px 44px rgba(16, 185, 129, 0.12), 0 2px 10px rgba(0, 0, 0, 0.03);
+.hero-command-capsule:focus-within {
+  border-color: rgba(16, 185, 129, 0.6);
+  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.6), 0 0 30px rgba(16, 185, 129, 0.2);
 }
 
-.welcome-form {
+.capsule-form {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 16px;
 }
 
-.welcome-textarea-container {
+.capsule-textarea-box {
   width: 100%;
 }
 
-.welcome-textarea {
+.capsule-textarea {
   width: 100%;
   border: none;
   outline: none;
-  font-size: 1.02rem;
-  line-height: 1.6;
-  color: #0F172A;
   background: transparent;
+  color: #FFFFFF;
+  font-size: 1.05rem;
+  line-height: 1.6;
   resize: none;
   font-family: inherit;
 }
 
-.welcome-textarea::placeholder {
-  color: #94A3B8;
+.capsule-textarea::placeholder {
+  color: #64748B;
 }
 
-/* 偏好标签 */
-.welcome-tags-bar {
+.capsule-preferences-bar {
   display: flex;
   align-items: center;
   gap: 10px;
   flex-wrap: wrap;
-  padding-top: 8px;
-  border-top: 1px solid #F1F5F9;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.welcome-tags-label {
+.capsule-pref-label {
   font-size: 0.76rem;
   font-weight: 700;
-  color: #94A3B8;
+  color: #64748B;
   text-transform: uppercase;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.04em;
 }
 
-.welcome-tags-list {
+.capsule-pref-chips {
   display: flex;
-  gap: 6px;
+  gap: 8px;
   flex-wrap: wrap;
 }
 
-.welcome-preference-chip {
-  padding: 4px 10px;
-  border-radius: 12px;
-  border: 1px solid #E2E8F0;
-  background: #F8FAFC;
-  font-size: 0.78rem;
+.capsule-chip {
+  padding: 5px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(30, 41, 59, 0.6);
+  color: #94A3B8;
+  font-size: 0.8rem;
   font-weight: 600;
-  color: #475569;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all 0.2s ease;
 }
 
-.welcome-preference-chip:hover {
-  background: #F1F5F9;
-  border-color: #CBD5E1;
-  color: #1E293B;
+.capsule-chip:hover {
+  background: rgba(51, 65, 85, 0.8);
+  color: #FFFFFF;
+  border-color: rgba(255, 255, 255, 0.25);
 }
 
-.welcome-preference-chip.active {
-  background: rgba(16, 185, 129, 0.1);
+.capsule-chip.active {
+  background: rgba(16, 185, 129, 0.15);
   border-color: #10B981;
-  color: #047857;
+  color: #34D399;
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.2);
 }
 
-/* 卡片底栏 */
-.welcome-card-footer {
+.capsule-footer-bar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-top: 10px;
-  gap: 12px;
+  padding-top: 8px;
+  gap: 16px;
 }
 
-.welcome-hint-text {
-  font-size: 0.78rem;
-  color: #94A3B8;
+.capsule-hint {
+  font-size: 0.8rem;
+  color: #64748B;
 }
 
-.welcome-submit-btn {
+.capsule-submit-cta {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 12px 24px;
-  border-radius: 16px;
+  padding: 13px 28px;
+  border-radius: 18px;
   border: none;
-  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
   color: #FFFFFF;
   font-size: 0.95rem;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 4px 16px rgba(5, 150, 105, 0.3);
+  box-shadow: 0 4px 20px rgba(16, 185, 129, 0.35);
   white-space: nowrap;
 }
 
-.welcome-submit-btn:hover:not(:disabled) {
+.capsule-submit-cta:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 6px 22px rgba(5, 150, 105, 0.4);
+  box-shadow: 0 8px 28px rgba(16, 185, 129, 0.5);
 }
 
-.welcome-submit-btn:disabled {
-  opacity: 0.6;
+.capsule-submit-cta:disabled {
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
-.welcome-submit-btn.generating {
-  background: linear-gradient(135deg, #4F46E5 0%, #3730A3 100%);
+.capsule-submit-cta.generating {
+  background: linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%);
 }
 
-/* 灵感卡片区 */
-.welcome-inspirations-section {
+.hero-telemetry-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-top: 40px;
+}
+
+.telemetry-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #94A3B8;
+  letter-spacing: 0.02em;
+}
+
+.telemetry-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #10B981;
+  box-shadow: 0 0 8px #10B981;
+}
+
+/* =========================================================================
+   通用功能 Section 容器与排版
+   ========================================================================= */
+
+.flagship-feature-section {
+  max-width: 1280px;
   width: 100%;
-  margin-top: 36px;
-  text-align: left;
+  margin: 0 auto;
+  padding: 100px 32px;
 }
 
-.welcome-section-header {
-  font-size: 0.84rem;
-  font-weight: 700;
-  color: #64748B;
+.section-header-block {
+  text-align: center;
+  max-width: 760px;
+  margin: 0 auto 56px;
+}
+
+.section-category-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #10B981;
   margin-bottom: 12px;
 }
 
-.welcome-inspirations-grid {
+.section-headline {
+  font-size: 2.6rem;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  color: #FFFFFF;
+  line-height: 1.2;
+  margin-bottom: 14px;
+}
+
+.section-subheadline {
+  font-size: 1.05rem;
+  line-height: 1.6;
+  color: #94A3B8;
+}
+
+/* =========================================================================
+   SECTION 2: 4D 时空路线推演引擎 (Spatial-Temporal Autonomous Routing)
+   ========================================================================= */
+
+.spatial-dashboard-card {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
+  grid-template-columns: 1.4fr 0.6fr;
+  gap: 24px;
+  background: #0B1120;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 28px;
+  padding: 24px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
 }
 
-.welcome-inspiration-card {
-  background: #FFFFFF;
-  border: 1px solid #E2E8F0;
-  border-radius: 16px;
-  padding: 14px 16px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  text-align: left;
+.spatial-visual-col {
+  position: relative;
+  border-radius: 20px;
+  overflow: hidden;
+  min-height: 420px;
 }
 
-.welcome-inspiration-card:hover {
-  border-color: #10B981;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 18px rgba(16, 185, 129, 0.08);
+.spatial-map-visual {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 420px;
 }
 
-.welcome-insp-title {
-  font-size: 0.9rem;
-  font-weight: 700;
-  color: #0F172A;
+.spatial-route-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.spatial-route-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(3, 7, 18, 0.3) 0%, rgba(3, 7, 18, 0.85) 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 28px;
+}
+
+.spatial-telemetry-hud .hud-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #10B981;
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  padding: 3px 10px;
+  border-radius: 20px;
+  margin-bottom: 8px;
+}
+
+.hud-route-name {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #FFFFFF;
   margin-bottom: 4px;
 }
 
-.welcome-insp-preview {
-  font-size: 0.78rem;
-  color: #64748B;
+.hud-route-path {
+  font-size: 0.85rem;
+  color: #94A3B8;
+}
+
+.spatial-timeline-scrubber {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 18px;
+  padding: 16px 20px;
+}
+
+.scrubber-waypoint {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.wp-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #475569;
+}
+
+.scrubber-waypoint.active .wp-dot {
+  background: #10B981;
+  box-shadow: 0 0 10px #10B981;
+}
+
+.wp-label {
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: #94A3B8;
+}
+
+.scrubber-waypoint.active .wp-label {
+  color: #FFFFFF;
+}
+
+.scrubber-line {
+  flex: 1;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.15);
+  margin: 0 10px;
+}
+
+.spatial-metrics-col {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.spatial-metric-box {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.metric-value-row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.metric-number {
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: #10B981;
+  line-height: 1;
+}
+
+.metric-label {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #FFFFFF;
+}
+
+.metric-desc {
+  font-size: 0.8rem;
+  color: #94A3B8;
   line-height: 1.4;
 }
 
-/* 信任背书栏 */
-.welcome-trust-row {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
-  width: 100%;
-  margin-top: 36px;
+/* =========================================================================
+   SECTION 3: 大师级星空与风光影像系统 (Pro Optics & Viewfinder HUD)
+   ========================================================================= */
+
+.vision-viewfinder-matrix {
+  background: #0B1120;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 28px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
-.welcome-trust-card {
-  background: rgba(255, 255, 255, 0.6);
-  border: 1px solid #E2E8F0;
+.vision-tabs-bar {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.vision-spot-tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(15, 23, 42, 0.6);
+  color: #94A3B8;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.vision-spot-tab.active {
+  background: rgba(59, 130, 246, 0.15);
+  border-color: #3B82F6;
+  color: #60A5FA;
+  box-shadow: 0 0 16px rgba(59, 130, 246, 0.2);
+}
+
+.tab-idx {
+  font-size: 0.75rem;
+  opacity: 0.6;
+}
+
+.viewfinder-main-frame {
+  position: relative;
+  width: 100%;
+  height: 520px;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.viewfinder-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.hud-overlay-grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 24px;
+}
+
+/* 九宫格构图线与中心准星 */
+.hud-crosshair-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 24px;
+  height: 24px;
+  transform: translate(-50%, -50%);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.hud-crosshair-center::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 4px;
+  height: 4px;
+  background: #EF4444;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+}
+
+.hud-third-line {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.h-line1 { top: 33.33%; left: 0; right: 0; height: 1px; }
+.h-line2 { top: 66.66%; left: 0; right: 0; height: 1px; }
+.v-line1 { left: 33.33%; top: 0; bottom: 0; width: 1px; }
+.v-line2 { left: 66.66%; top: 0; bottom: 0; width: 1px; }
+
+.hud-top-dials {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(3, 7, 18, 0.75);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 14px;
-  padding: 12px;
+  padding: 10px 18px;
+}
+
+.hud-lens-tag {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: #FFFFFF;
+}
+
+.hud-params-strip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: monospace;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #FFFFFF;
+}
+
+.hud-divider {
+  color: #475569;
+}
+
+.hud-param.highlight {
+  color: #F59E0B;
+}
+
+.hud-bottom-info {
+  position: relative;
+  z-index: 5;
+  background: rgba(3, 7, 18, 0.8);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  padding: 14px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.hud-window-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #F59E0B;
+}
+
+.hud-tip-text {
+  font-size: 0.86rem;
+  color: #E2E8F0;
+  line-height: 1.45;
+}
+
+/* =========================================================================
+   SECTION 4: OpenClaw 全球知识底盘架构 (Hyper-Intellect Architecture)
+   ========================================================================= */
+
+.knowledge-stack-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.knowledge-layer-card {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  background: #0B1120;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 24px 28px;
+  transition: all 0.25s ease;
+}
+
+.knowledge-layer-card:hover {
+  border-color: rgba(16, 185, 129, 0.4);
+  transform: translateX(6px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.layer-num-badge {
+  font-size: 1.4rem;
+  font-weight: 900;
+  color: #10B981;
+  font-family: monospace;
+}
+
+.layer-body {
+  flex: 1;
+}
+
+.layer-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #FFFFFF;
+  margin-bottom: 4px;
+}
+
+.layer-desc {
+  font-size: 0.85rem;
+  color: #94A3B8;
+}
+
+.layer-status-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #10B981;
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  padding: 4px 10px;
+  border-radius: 12px;
+  letter-spacing: 0.04em;
+}
+
+/* =========================================================================
+   SECTION 5: 灵感全景画廊 (Inspiration Matrix)
+   ========================================================================= */
+
+.inspirations-matrix-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+.inspiration-master-card {
+  position: relative;
+  height: 280px;
+  border-radius: 24px;
+  overflow: hidden;
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.inspiration-master-card:hover {
+  transform: translateY(-4px);
+  border-color: #10B981;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(16, 185, 129, 0.15);
+}
+
+.insp-bg-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.inspiration-master-card:hover .insp-bg-img {
+  transform: scale(1.06);
+}
+
+.insp-card-gradient {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(3, 7, 18, 0.1) 0%, rgba(3, 7, 18, 0.9) 100%);
+}
+
+.insp-card-content {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 24px;
+}
+
+.insp-tag-badge {
+  align-self: flex-start;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #10B981;
+  background: rgba(3, 7, 18, 0.8);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  padding: 3px 8px;
+  border-radius: 6px;
+  margin-bottom: 8px;
+}
+
+.insp-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #FFFFFF;
+  margin-bottom: 4px;
+}
+
+.insp-query-preview {
+  font-size: 0.78rem;
+  color: #94A3B8;
+  line-height: 1.4;
+  margin-bottom: 12px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.insp-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #10B981;
+}
+
+/* =========================================================================
+   SECTION 6: 底部旗舰号召行动栏 (Grand Action Footer)
+   ========================================================================= */
+
+.flagship-grand-footer {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: #020617;
+  padding: 80px 32px 40px;
+}
+
+.footer-callout-box {
+  max-width: 800px;
+  margin: 0 auto 60px;
   text-align: center;
 }
 
-.welcome-trust-title {
-  font-size: 0.84rem;
+.footer-title {
+  font-size: 2.2rem;
+  font-weight: 900;
+  color: #FFFFFF;
+  margin-bottom: 12px;
+}
+
+.footer-subtitle {
+  font-size: 1rem;
+  color: #94A3B8;
+  margin-bottom: 32px;
+}
+
+.footer-actions-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 18px;
+}
+
+.footer-start-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 32px;
+  border-radius: 20px;
+  border: none;
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  color: #FFFFFF;
+  font-size: 0.95rem;
   font-weight: 700;
-  color: #0F172A;
-  margin-bottom: 3px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 20px rgba(16, 185, 129, 0.35);
 }
 
-.welcome-trust-desc {
-  font-size: 0.72rem;
-  color: #64748B;
+.footer-start-cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(16, 185, 129, 0.5);
 }
 
-/* 底部直接探索链接 */
-.welcome-bottom-direct {
-  margin-top: 28px;
-}
-
-.welcome-direct-link-btn {
+.footer-demo-link {
   background: transparent;
   border: none;
-  color: #059669;
-  font-size: 0.88rem;
-  font-weight: 700;
+  color: #94A3B8;
+  font-size: 0.9rem;
+  font-weight: 600;
   cursor: pointer;
   text-decoration: underline;
   text-underline-offset: 4px;
   transition: all 0.2s ease;
 }
 
-.welcome-direct-link-btn:hover {
-  color: #047857;
+.footer-demo-link:hover {
+  color: #FFFFFF;
+}
+
+.footer-bottom-bar {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding-top: 32px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.76rem;
+  color: #64748B;
 }
 
 /* 顶部导航栏新建行程按钮 */
@@ -3360,23 +4011,23 @@ body {
 .welcome-generating-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(15, 23, 42, 0.6);
-  backdrop-filter: blur(8px);
+  background: rgba(3, 7, 18, 0.85);
+  backdrop-filter: blur(16px);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 100;
+  z-index: 200;
   padding: 20px;
 }
 
 .welcome-generating-modal {
-  max-width: 480px;
+  max-width: 500px;
   width: 100%;
-  background: #FFFFFF;
-  border: 1px solid rgba(226, 232, 240, 0.9);
-  border-radius: 24px;
-  padding: 32px 28px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+  background: #0B1120;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: 28px;
+  padding: 36px 32px;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.7), 0 0 30px rgba(16, 185, 129, 0.15);
   text-align: center;
   display: flex;
   flex-direction: column;
@@ -3384,27 +4035,28 @@ body {
 }
 
 .generating-icon-pulse {
-  width: 56px;
-  height: 56px;
-  border-radius: 18px;
-  background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(79, 70, 229, 0.15) 100%);
+  width: 60px;
+  height: 60px;
+  border-radius: 20px;
+  background: rgba(16, 185, 129, 0.12);
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 16px;
+  margin-bottom: 18px;
+  border: 1px solid rgba(16, 185, 129, 0.3);
 }
 
 .generating-title {
-  font-size: 1.25rem;
+  font-size: 1.35rem;
   font-weight: 800;
-  color: #0F172A;
+  color: #FFFFFF;
   margin-bottom: 6px;
 }
 
 .generating-subtitle {
-  font-size: 0.84rem;
-  color: #64748B;
-  margin-bottom: 24px;
+  font-size: 0.85rem;
+  color: #94A3B8;
+  margin-bottom: 26px;
 }
 
 .generating-steps-list {
@@ -3412,7 +4064,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  margin-bottom: 24px;
+  margin-bottom: 26px;
   text-align: left;
 }
 
@@ -3422,17 +4074,17 @@ body {
   gap: 10px;
   font-size: 0.84rem;
   font-weight: 600;
-  color: #334155;
-  background: #F8FAFC;
-  padding: 10px 14px;
-  border-radius: 12px;
-  border: 1px solid #E2E8F0;
+  color: #E2E8F0;
+  background: rgba(15, 23, 42, 0.8);
+  padding: 12px 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .generating-bar-track {
   width: 100%;
   height: 6px;
-  background: #E2E8F0;
+  background: rgba(255, 255, 255, 0.1);
   border-radius: 6px;
   overflow: hidden;
   position: relative;
@@ -3442,44 +4094,68 @@ body {
   position: absolute;
   top: 0;
   bottom: 0;
-  width: 40%;
-  background: linear-gradient(90deg, #10B981 0%, #4F46E5 100%);
+  width: 45%;
+  background: linear-gradient(90deg, #10B981 0%, #3B82F6 100%);
   border-radius: 6px;
   animation: shimmerMove 1.5s infinite ease-in-out;
 }
 
 @keyframes shimmerMove {
-  0% { left: -40%; }
+  0% { left: -45%; }
   100% { left: 100%; }
 }
 
 /* 响应式断点 */
-@media (max-width: 768px) {
-  .welcome-header {
-    padding: 0 16px;
+@media (max-width: 1024px) {
+  .hero-master-title {
+    font-size: 2.8rem;
   }
-  .welcome-dest-pills {
-    display: none;
-  }
-  .welcome-hero-title {
-    font-size: 1.85rem;
-  }
-  .welcome-hero-subtitle {
-    font-size: 0.9rem;
-    margin-bottom: 24px;
-  }
-  .welcome-inspirations-grid {
+  .spatial-dashboard-card {
     grid-template-columns: 1fr;
   }
-  .welcome-trust-row {
-    grid-template-columns: repeat(2, 1fr);
+  .inspirations-matrix-grid {
+    grid-template-columns: 1fr;
   }
-  .welcome-card-footer {
+  .flagship-nav-links {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .flagship-header {
+    padding: 0 16px;
+  }
+  .hero-master-title {
+    font-size: 2.1rem;
+  }
+  .hero-master-subtitle {
+    font-size: 0.95rem;
+  }
+  .section-headline {
+    font-size: 1.9rem;
+  }
+  .capsule-footer-bar {
     flex-direction: column;
     align-items: stretch;
   }
-  .welcome-submit-btn {
+  .capsule-submit-cta {
     justify-content: center;
     width: 100%;
   }
+  .viewfinder-main-frame {
+    height: 380px;
+  }
+  .hud-params-strip {
+    font-size: 0.74rem;
+    gap: 6px;
+  }
+  .footer-actions-row {
+    flex-direction: column;
+  }
+  .footer-bottom-bar {
+    flex-direction: column;
+    gap: 8px;
+    text-align: center;
+  }
 }
+

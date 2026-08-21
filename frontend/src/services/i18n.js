@@ -11,35 +11,102 @@ export const TRANSLATIONS = {
       newTrip: "新建行程"
     },
     welcome: {
-      badge: "OpenClaw Agent",
-      heroTitle: "探索世界，从一句话开始",
-      heroSubtitle: "AI 智能规划您的专属梦想旅程 · 融合官方权威指南、实时天气路况与专业摄影机位",
+      nav: {
+        planner: "智能规划",
+        spatial: "时空引擎",
+        vision: "影像机位",
+        knowledge: "知识底座",
+        enterDashboard: "进入看板 →"
+      },
+      badge: "OpenClaw Agent · 极智旅行规划系统",
+      heroTitle: "理想之旅，一语成行",
+      heroSubtitle: "融合官方权威指南、毫秒级路况气象与专业摄影机位，让每一次出发都从容不迫。",
       inputPlaceholder: "想去哪里？比如：带父母新西兰南岛自驾7天，不想太累，想看暗夜星空与吃三文鱼...",
       generateBtn: "开始智能规划",
       generatingBtn: "AI 正在全网与知识库推演中...",
       preferencesTitle: "偏好标签",
       preferences: [
         { label: "🚗 深度自驾", tag: "自驾" },
-        { label: "📸 风光摄影", tag: "摄影与暗夜星空" },
-        { label: "🍜 特色美食", tag: "地道风味与美食" },
-        { label: "🏔️ 经典徒步", tag: "轻度徒步与自然" },
-        { label: "👨‍👩‍👧 亲子家庭", tag: "亲子家庭与轻松节奏" },
-        { label: "✨ 奢享度假", tag: "高品质度假酒店" }
+        { label: "🌌 暗夜星空", tag: "摄影与暗夜星空" },
+        { label: "📸 大师机位", tag: "专业风光机位" },
+        { label: "🍜 地道风物", tag: "地道风味与美食" },
+        { label: "🏔️ 冰川徒步", tag: "轻度徒步与自然" },
+        { label: "👨‍👩‍👧 亲子度假", tag: "亲子家庭与轻松节奏" }
       ],
-      inspirationTitle: "💡 快速灵感探索：",
-      inspirations: [
-        { title: "🇳🇿 新西兰南岛 7 天自驾与暗夜星空", query: "计划新西兰南岛7天自驾之旅，重点特卡波暗夜星空、库克山胡克谷冰川与皇后镇美食，包含专业摄影机位" },
-        { title: "🗼 东京 7 天动漫圣地与米其林漫游", query: "计划东京7天深度游，涵盖浅草古刹、涩谷十字路口夜景、秋叶原动漫与筑地海鲜市场美食" },
-        { title: "🇨🇭 瑞士阿尔卑斯 10 天全景列车", query: "瑞士10天黄金列车与冰川快车全景游，游览少女峰、马特洪峰与日内瓦湖" },
-        { title: "🇨🇳 贵州 5 天喀斯特瀑布与苗寨秘境", query: "贵州5天自驾摄影游，涵盖黄果树大瀑布、荔波小七孔与西江千户苗寨" }
+      telemetry: [
+        "100% DOC 官方知识库",
+        "毫秒级实时气象路况",
+        "Extended Thinking 深度推演",
+        "避坑防雷指南"
       ],
-      trustItems: [
-        { title: "🏔️ 权威指南", desc: "DOC 官方步道与交规核验" },
-        { title: "🌐 实时核验", desc: "即时气象与全网路况同步" },
-        { title: "📸 专业机位", desc: "黄金时刻与相机镜头参数" },
-        { title: "🛡️ 避坑保障", desc: "实用地道避坑防雷贴士" }
-      ],
-      exploreDemoBtn: "或直接浏览精选标杆看板 →"
+      spatialEngine: {
+        badge: "SPATIAL-TEMPORAL ROUTING ENGINE",
+        title: "4D 时空推演，让每一公里都充满确定性",
+        subtitle: "深度解构地形高差、行车节奏与自然采光窗口，为每一次转弯提供最优解。",
+        metrics: [
+          { value: "0", label: "危险盲区规避", desc: "自动避开季节性积雪与险峻陡坡" },
+          { value: "1:1", label: "官方步道核验", desc: "直连 DOC 官方安全分级与耗时" },
+          { value: "100%", label: "黄金采光窗口", desc: "日出日落晨昏光线精准计算" }
+        ],
+        cardTitle: "自驾行车流态与高差剖面推演",
+        cardDesc: "基督城 ➔ 特卡波湖 (SH80) ➔ 库克山冰川 ➔ 瓦纳卡 ➔ 皇后镇"
+      },
+      proVision: {
+        badge: "PRO OPTICS & ASTROPHOTOGRAPHY",
+        title: "每一处风景，都是大场面",
+        subtitle: "内置专业摄影师机位数据库，精确到焦段、曝光参数与银河起落时刻。",
+        spots: [
+          {
+            name: "好牧羊人教堂 · 暗夜银河",
+            lens: "14-24mm f/2.8",
+            params: "14mm · f/2.8 · 20s · ISO 3200",
+            window: "银河升起 23:30 - 03:15",
+            tip: "超广角低机位仰拍，石砌教堂作为前景纳整片银河拱桥。"
+          },
+          {
+            name: "罗伊斯山峰 · 晨光云海",
+            lens: "24-70mm f/4",
+            params: "35mm · f/8 · 1/200s · ISO 100",
+            window: "黄金时刻 06:15 - 07:00",
+            tip: "逆光拍摄山脊延伸至瓦纳卡湖，使用 CPL 偏振镜消除水面杂光。"
+          },
+          {
+            name: "米尔福德峡湾 · 冠峰倒影",
+            lens: "16-35mm + CPL",
+            params: "16mm · f/11 · 30s · ISO 100",
+            window: "蓝调时刻 07:20 - 08:00",
+            tip: "利用退潮沙滩水面长曝光消除水波，捕捉倒映在冰川海水的雪山。"
+          }
+        ]
+      },
+      knowledgeMesh: {
+        badge: "HYPER-INTELLECT ARCHITECTURE",
+        title: "双引擎驱动的知识底盘体系",
+        subtitle: "从权威私有 RAG 向量库到大模型拓展思考推理，构筑不可动摇的事实基石。",
+        layers: [
+          { num: "04", name: "Bento Grid 便士网格可视化层", desc: "日程安排、地标风物与机位指南秒级响应呈现" },
+          { num: "03", name: "Gemini 3.7 Flash 拓展深度思考", desc: "多步严密逻辑推演，权衡车程体能与游玩节奏" },
+          { num: "02", name: "全网实时气象与交通路况总线", desc: "即时核验公路畅通度与高精度小时级天气预报" },
+          { num: "01", name: "DOC 官方步道与暗夜保护区知识库", desc: "ChromaDB 严苛事实锚定，彻底消除幻觉" }
+        ]
+      },
+      inspirations: {
+        badge: "INSPIRATION MATRIX",
+        title: "探索全球灵感画廊",
+        subtitle: "点击任意精选路线，立即一键载入 AI 规划舱。",
+        items: [
+          { title: "🇳🇿 新西兰南岛 7 天自驾与暗夜星空", query: "计划新西兰南岛7天自驾之旅，重点特卡波暗夜星空、库克山胡克谷冰川与皇后镇美食，包含专业摄影机位", tag: "风光自驾" },
+          { title: "🗼 东京 7 天动漫圣地与米其林漫游", query: "计划东京7天深度游，涵盖浅草古刹、涩谷十字路口夜景、秋叶原动漫与筑地海鲜市场美食", tag: "城市人文" },
+          { title: "🇨🇭 瑞士阿尔卑斯 10 天全景列车", query: "瑞士10天黄金列车与冰川快车全景游，游览少女峰、马特洪峰与日内瓦湖", tag: "雪山列车" },
+          { title: "🇨🇳 贵州 5 天喀斯特瀑布与苗寨秘境", query: "贵州5天自驾摄影游，涵盖黄果树大瀑布、荔波小七孔与西江千户苗寨", tag: "秘境探索" }
+        ]
+      },
+      bottomCta: {
+        title: "准备好开启您的梦想之旅了吗？",
+        subtitle: "告诉 OpenClaw Agent 您的想法，3 秒内为您呈现完整可落地的定制方案。",
+        startBtn: "立即开启智能规划",
+        demoBtn: "直接浏览精选标杆看板 →"
+      }
     },
     sidebar: {
       title: "Roam 智能向导",
@@ -91,35 +158,102 @@ export const TRANSLATIONS = {
       newTrip: "New Trip"
     },
     welcome: {
-      badge: "OpenClaw Agent",
-      heroTitle: "Explore the World, Starting with a Sentence",
-      heroSubtitle: "AI-Powered Travel Planning · Integrated with Official DOC Guides, Real-Time Weather & Pro Photography Spots",
+      nav: {
+        planner: "Planner",
+        spatial: "Spatial Engine",
+        vision: "Pro Vision",
+        knowledge: "Architecture",
+        enterDashboard: "Dashboard →"
+      },
+      badge: "OpenClaw Agent · Autonomous Travel Planner",
+      heroTitle: "Every Journey, A Masterpiece",
+      heroSubtitle: "Empowered by Official DOC Knowledge Base, Real-Time Telemetry & Pro Photospot Matrix for effortless adventures.",
       inputPlaceholder: "Where do you want to go? e.g. 7-day self-drive in NZ South Island with parents, relax pace, stargazing & salmon...",
       generateBtn: "Generate AI Itinerary",
       generatingBtn: "AI is reasoning with RAG & Web Search...",
-      preferencesTitle: "Style & Preference Tags",
+      preferencesTitle: "Preferences",
       preferences: [
         { label: "🚗 Self-Drive", tag: "Self-drive" },
-        { label: "📸 Photography", tag: "Photography & Stargazing" },
+        { label: "🌌 Dark Sky", tag: "Photography & Stargazing" },
+        { label: "📸 Pro Spots", tag: "Photography spots" },
         { label: "🍜 Gourmet Food", tag: "Local Food & Dining" },
-        { label: "🏔️ Light Hiking", tag: "Nature & Hiking" },
-        { label: "👨‍👩‍👧 Family", tag: "Family Friendly & Relaxed" },
-        { label: "✨ Luxury", tag: "Luxury Resort & Hotels" }
+        { label: "🏔️ Glacier Hike", tag: "Nature & Hiking" },
+        { label: "👨‍👩‍👧 Family Resort", tag: "Family Friendly & Relaxed" }
       ],
-      inspirationTitle: "💡 Quick Inspirations:",
-      inspirations: [
-        { title: "🇳🇿 NZ South Island 7D Road Trip & Dark Sky", query: "Plan a 7-day NZ South Island road trip with Lake Tekapo stargazing, Mt Cook Hooker Valley glacier hike, Queenstown cuisine and photography spots" },
-        { title: "🗼 Tokyo 7D Autumn Escape & Michelin Dining", query: "Plan a 7-day Tokyo trip covering Asakusa temple, Shibuya Crossing night view, Akihabara anime and Tsukiji seafood dining" },
-        { title: "🇨🇭 Swiss Alps 10D Panoramic Train Tour", query: "10-day Switzerland panoramic train tour visiting Jungfrau, Matterhorn and Lake Geneva" },
-        { title: "🇨🇳 Guizhou 5D Karst Waterfalls & Ethnic Villages", query: "5-day Guizhou self-drive photography tour covering Huangguoshu Waterfall, Libo and Miao Village" }
+      telemetry: [
+        "100% DOC Official Guides",
+        "Live Weather & Highway Telemetry",
+        "Extended Thinking Deep Reasoner",
+        "Anti-Pitfall Radar"
       ],
-      trustItems: [
-        { title: "🏔️ Official Guides", desc: "DOC Hiking & Driving Rules" },
-        { title: "🌐 Live Verification", desc: "Live Weather & Highway Status" },
-        { title: "📸 Pro Photo Spots", desc: "Golden Hour & Camera Settings" },
-        { title: "🛡️ Smart Tips", desc: "Authentic Local Avoid-Pitfall Advice" }
-      ],
-      exploreDemoBtn: "Or explore featured demo dashboard →"
+      spatialEngine: {
+        badge: "SPATIAL-TEMPORAL ROUTING ENGINE",
+        title: "4D Spatial Engine for Absolute Certainty",
+        subtitle: "Deconstructing elevation profiles, drive pacing, and natural lighting windows for the optimal route.",
+        metrics: [
+          { value: "0", label: "Blindspot Avoidance", desc: "Auto-routes away from snow blocks & steep grades" },
+          { value: "1:1", label: "DOC Official Trail Sync", desc: "Directly verified safety grades & durations" },
+          { value: "100%", label: "Golden Hour Match", desc: "Precise dawn, dusk & blue hour alignment" }
+        ],
+        cardTitle: "Drive Pacing & Elevation Profile",
+        cardDesc: "Christchurch ➔ Lake Tekapo (SH80) ➔ Mount Cook ➔ Wanaka ➔ Queenstown"
+      },
+      proVision: {
+        badge: "PRO OPTICS & ASTROPHOTOGRAPHY",
+        title: "Every Landscape, A Grand Stage",
+        subtitle: "Curated pro photographer photo spots with focal lengths, exposure parameters, and celestial windows.",
+        spots: [
+          {
+            name: "Good Shepherd Church · Milky Way",
+            lens: "14-24mm f/2.8",
+            params: "14mm · f/2.8 · 20s · ISO 3200",
+            window: "Milky Way Rise 23:30 - 03:15",
+            tip: "Ultra-wide low angle facing stone church framed under the starry arch."
+          },
+          {
+            name: "Roys Peak · Golden Sunrise",
+            lens: "24-70mm f/4",
+            params: "35mm · f/8 · 1/200s · ISO 100",
+            window: "Golden Hour 06:15 - 07:00",
+            tip: "Backlit ridge leading toward Lake Wanaka; use CPL to cut lake glare."
+          },
+          {
+            name: "Milford Sound · Mitre Peak Reflection",
+            lens: "16-35mm + CPL",
+            params: "16mm · f/11 · 30s · ISO 100",
+            window: "Blue Hour 07:20 - 08:00",
+            tip: "Low tide beach long exposure smoothing tidal water to reflect snow peak."
+          }
+        ]
+      },
+      knowledgeMesh: {
+        badge: "HYPER-INTELLECT ARCHITECTURE",
+        title: "Dual-Engine Grounded Intelligence",
+        subtitle: "From authoritative RAG vector store to Extended Thinking reasoning for unbreakable factual ground.",
+        layers: [
+          { num: "04", name: "Bento Grid Visualization Matrix", desc: "Instantaneous rendering of schedules, sights & dining" },
+          { num: "03", name: "Gemini 3.7 Flash Extended Thinking", desc: "Multi-step rigorous deduction balancing drive fatigue & rhythm" },
+          { num: "02", name: "Live Weather & Highway Telemetry Bus", desc: "Real-time road viability checks & hourly meteorological forecast" },
+          { num: "01", name: "DOC Official Trail & Dark Sky Vector Base", desc: "ChromaDB precision grounding eliminating hallucinations" }
+        ]
+      },
+      inspirations: {
+        badge: "INSPIRATION MATRIX",
+        title: "Explore Global Inspiration Gallery",
+        subtitle: "Click any flagship itinerary to load directly into the AI Planner.",
+        items: [
+          { title: "🇳🇿 NZ South Island 7D Road Trip & Dark Sky", query: "Plan a 7-day NZ South Island road trip with Lake Tekapo stargazing, Mt Cook Hooker Valley glacier hike, Queenstown cuisine and photography spots", tag: "Scenic Drive" },
+          { title: "🗼 Tokyo 7D Autumn Escape & Michelin Dining", query: "Plan a 7-day Tokyo trip covering Asakusa temple, Shibuya Crossing night view, Akihabara anime and Tsukiji seafood dining", tag: "Urban Culture" },
+          { title: "🇨🇭 Swiss Alps 10D Panoramic Train Tour", query: "10-day Switzerland panoramic train tour visiting Jungfrau, Matterhorn and Lake Geneva", tag: "Alpine Train" },
+          { title: "🇨🇳 Guizhou 5D Karst Waterfalls & Ethnic Villages", query: "5-day Guizhou self-drive photography tour covering Huangguoshu Waterfall, Libo and Miao Village", tag: "Hidden Gem" }
+        ]
+      },
+      bottomCta: {
+        title: "Ready to Begin Your Dream Journey?",
+        subtitle: "Tell OpenClaw Agent your vision and get an actionable tailored master plan in seconds.",
+        startBtn: "Launch AI Planner Now",
+        demoBtn: "Explore Featured Demo Dashboard →"
+      }
     },
     sidebar: {
       title: "Roam Copilot",
