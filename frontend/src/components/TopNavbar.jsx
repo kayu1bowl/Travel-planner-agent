@@ -82,7 +82,7 @@ export default function TopNavbar({
         >
           <Languages size={15} color="#4F46E5" />
           <span className="lang-text">
-            {language === 'zh' ? '中文' : 'EN'}
+            {language === 'zh' ? 'EN' : '中文'}
           </span>
         </button>
       </div>
