@@ -18,8 +18,8 @@ class AgentRouter:
         self.rag_service = RAGService()
         self.search_service = WebSearchService()
         self.gemini_native = GeminiNativeService()
-        self.openai_api_key = os.getenv("OPENAI_API_KEY", "gemini-local")
-        self.openai_api_base = os.getenv("OPENAI_API_BASE", "http://localhost:10000/v1")
+        self.openai_api_key = os.getenv("OPENAI_API_KEY", os.getenv("LLM_API_KEY", ""))
+        self.openai_api_base = os.getenv("OPENAI_API_BASE", os.getenv("LLM_API_BASE", "https://api.hisunalan.me/v1"))
         self.model_name = os.getenv("LLM_MODEL", "gemini-3.7-flash")
 
     def plan_trip(self, user_query: str, preferences: dict = None) -> TravelPlanResponse:
@@ -150,6 +150,7 @@ class AgentRouter:
             }
             endpoints = [
                 self.openai_api_base,
+                "https://api.hisunalan.me/v1",
                 "http://localhost:10000/v1",
                 "http://localhost:8000/v1",
             ]

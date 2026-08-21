@@ -10,6 +10,12 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.append(str(PROJECT_ROOT))
 
+try:
+    from dotenv import load_dotenv
+    load_dotenv(dotenv_path=PROJECT_ROOT / ".env")
+except ImportError:
+    pass
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from backend.api.v1.plan import router as plan_router

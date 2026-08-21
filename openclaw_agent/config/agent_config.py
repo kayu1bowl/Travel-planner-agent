@@ -13,15 +13,24 @@ import os
 from pathlib import Path
 from typing import Optional
 
+try:
+    from dotenv import load_dotenv
+    env_path = Path(__file__).resolve().parents[2] / ".env"
+    if env_path.exists():
+        load_dotenv(dotenv_path=env_path)
+    else:
+        load_dotenv()
+except ImportError:
+    pass
+
 # ============================================================
 # LLM 配置（OpenAI 兼容接口）
 # ============================================================
 
-# API 地址（优先检测本地 Gemini OpenAI 兼容服务）
-has_gemini_cookies = Path(r"D:\SJTU\编程\gemini-API\cookies.json").exists()
-default_base = "http://localhost:10000/v1" if has_gemini_cookies else "https://api.deepseek.com/v1"
-default_model = "gemini-3.7-flash" if has_gemini_cookies else "deepseek-chat"
-default_key = "gemini-local" if has_gemini_cookies else ""
+# API 地址（优先使用已部署的生产端点）
+default_base = "https://api.hisunalan.me/v1"
+default_model = "gemini-3.7-flash"
+default_key = ""
 
 LLM_API_BASE = os.getenv("LLM_API_BASE", default_base)
 LLM_API_KEY = os.getenv("LLM_API_KEY", default_key)
