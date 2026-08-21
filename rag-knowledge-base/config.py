@@ -50,6 +50,8 @@ def apply_build_mode():
             "ENABLE_PRECISION": "false",
             "ENABLE_ADVANCED_SUMMARY": "false",
             "USE_HYDE": "false",
+            "USE_BM25": "false",
+            "SEMANTIC_CHUNKING": "true",
             "NUM_QUERY_VARIANTS": "1",
             "ENABLE_RERANK": "false",
         },
@@ -63,6 +65,8 @@ def apply_build_mode():
             "ENABLE_PRECISION": "true",
             "ENABLE_ADVANCED_SUMMARY": "true",
             "USE_HYDE": "true",
+            "USE_BM25": "true",
+            "SEMANTIC_CHUNKING": "true",
             "NUM_QUERY_VARIANTS": "3",
             "ENABLE_RERANK": "true",
         },
@@ -76,6 +80,8 @@ def apply_build_mode():
             "ENABLE_PRECISION": "true",
             "ENABLE_ADVANCED_SUMMARY": "true",
             "USE_HYDE": "true",
+            "USE_BM25": "true",
+            "SEMANTIC_CHUNKING": "true",
             "NUM_QUERY_VARIANTS": "5",
             "ENABLE_RERANK": "true",
         },
@@ -99,7 +105,13 @@ if BUILD_MODE != "balanced":
 
 # ===== 检索策略 =====
 NUM_QUERY_VARIANTS = int(os.getenv("NUM_QUERY_VARIANTS", "3"))
-USE_HYDE = os.getenv("USE_HYDE", "true").lower() == "true"
+USE_HYDE = os.getenv("USE_HYDE", "false").lower() == "true"  # 默认关闭（原实现为空壳）
+USE_BM25 = os.getenv("USE_BM25", "true").lower() == "true"  # 混合检索：BM25 + Dense
+
+# ===== 语义分片开关（默认开启） =====
+# 开启时：按标题→逻辑段落分层切片，保留语义边界
+# 关闭时：沿用旧的纯 token 切分
+SEMANTIC_CHUNKING = os.getenv("SEMANTIC_CHUNKING", "true").lower() == "true"
 
 # ===== 分片策略 =====
 CHUNK_SIZE = int(os.getenv("CHUNK_SIZE", "512"))
@@ -200,7 +212,38 @@ RERANK_TOP_K = int(os.getenv("RERANK_TOP_K", "5"))
 # "chroma" | "faiss"
 VECTOR_BACKEND = os.getenv("VECTOR_BACKEND", "faiss")
 
-COLLECTION_NAME = os.getenv("CHROMA_COLLECTION", "nz_travel_kb")
+COLLECTION_NAME = os.getenv("CHROMA_COLLECTION", "travel_kb")
+
+# ===== 多国支持 =====
+# 零硬编码：国家代码完全由 LLM 模型自主识别
+# 每个国家拥有独立的向量库子目录（vector_db/nz/ vector_db/jp/ ...）
+
+CURRENT_COUNTRY = os.getenv("COUNTRY", "nz")
+
+# 是否启用自动国家检测（默认开）
+ENABLE_COUNTRY_DETECTION = os.getenv("ENABLE_COUNTRY_DETECTION", "true").lower() == "true"
+
+
+def get_vector_dir(country: str = None) -> Path:
+    """获取指定国家的向量库目录（每个国家独立子目录）
+    
+    子目录名取自 LLM 输出的 ISO 代码（小写），不设白名单。
+    任何非空字符串都视为合法国家键。
+    """
+    c = (country or CURRENT_COUNTRY or "nz").lower().strip()
+    if not c:
+        c = "nz"
+    sub = VECTOR_DIR / c
+    sub.mkdir(parents=True, exist_ok=True)
+    return sub
+
+
+def get_all_country_dirs() -> List[Path]:
+    """扫描 vector_db 下所有子目录，返回已有向量库的目录列表"""
+    if not VECTOR_DIR.exists():
+        return []
+    return [child for child in VECTOR_DIR.iterdir() if child.is_dir()]
+
 
 # ===== Qwen3-14B 智能模型配置 =====
 # 使用 HuggingFace model ID，从默认缓存加载
