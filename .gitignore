@@ -1,6 +1,7 @@
 # Environment & API Keys & Credentials
 .env
 .env.*
+!.env.example
 *.env
 .env.local
 *.key
