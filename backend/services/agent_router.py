@@ -146,7 +146,8 @@ class AgentRouter:
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": user_prompt}
                 ],
-                "temperature": 0.7
+                "temperature": 0.7,
+                "extended_thinking": True
             }
             endpoints = [
                 self.openai_api_base,

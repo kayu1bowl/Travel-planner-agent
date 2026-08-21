@@ -127,11 +127,12 @@ class GeminiNativeService:
         full_prompt = f"{system_instruction}\n\n=== 用户需求 ===\n{query}\n\n=== 参考资料 ===\n{context}\n\n请直接输出 JSON："
 
         try:
-            print(f"🤖 [GeminiNative] 正在使用标准模型 [{self.default_model}] 投递 Prompt 给真实 Google Gemini 大模型...")
-            # 按照规范传递标准模型名称与参数
+            print(f"🤖 [GeminiNative] 正在使用标准模型 [{self.default_model}] (开启 Extended Thinking 拓展思考) 投递 Prompt...")
+            # 按照规范传递标准模型名称与参数，默认开启拓展思考模式
             res = await self._pool.generate_content(
                 full_prompt,
-                model=self.default_model
+                model=self.default_model,
+                extended_thinking=True
             )
             raw_text = res.text if hasattr(res, "text") else str(res)
             if not raw_text and hasattr(res, "candidates") and res.candidates:

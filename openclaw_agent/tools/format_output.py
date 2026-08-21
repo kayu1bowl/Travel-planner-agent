@@ -118,6 +118,7 @@ from openclaw_agent.config.agent_config import (
   LLM_MODEL,
   LLM_TEMPERATURE,
   LLM_MAX_TOKENS,
+  LLM_EXTENDED_THINKING,
 )
 
 
@@ -150,7 +151,11 @@ def call_llm(messages: list[dict], system_prompt: Optional[str] = None) -> str:
       async def _ask():
         await svc.ensure_init()
         if svc._pool:
-          res = await svc._pool.generate_content(combined_prompt, model=LLM_MODEL)
+          res = await svc._pool.generate_content(
+            combined_prompt,
+            model=LLM_MODEL,
+            extended_thinking=LLM_EXTENDED_THINKING
+          )
           return res.text if hasattr(res, "text") else str(res)
         return None
 
@@ -186,6 +191,7 @@ def call_llm(messages: list[dict], system_prompt: Optional[str] = None) -> str:
     "messages": full_messages,
     "temperature": LLM_TEMPERATURE,
     "max_tokens": LLM_MAX_TOKENS,
+    "extended_thinking": LLM_EXTENDED_THINKING,
   }
 
   try:
