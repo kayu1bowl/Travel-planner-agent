@@ -158,16 +158,14 @@ export default function App() {
   // 如果处于欢迎引导模式，优先渲染欢迎页
   if (viewMode === 'welcome') {
     return (
-      <div className="bento-app-viewport">
-        <WelcomeLandingView 
-          language={language}
-          onToggleLanguage={handleToggleLanguage}
-          onStartPlanning={(q) => handleSendMessage(q, true)}
-          onDirectExplore={handleDirectExplore}
-          isGenerating={loading}
-          generatingSteps={agentStatusSteps}
-        />
-      </div>
+      <WelcomeLandingView 
+        language={language}
+        onToggleLanguage={handleToggleLanguage}
+        onStartPlanning={(q) => handleSendMessage(q, true)}
+        onDirectExplore={handleDirectExplore}
+        isGenerating={loading}
+        generatingSteps={agentStatusSteps}
+      />
     );
   }
 

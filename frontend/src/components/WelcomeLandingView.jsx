@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Sparkles, 
   Compass, 
@@ -15,12 +15,17 @@ import {
   Maximize2,
   Sliders,
   ChevronRight,
+  ChevronDown,
   Sun,
   Moon,
   Clock,
   MapPin,
   Flame,
-  Award
+  Award,
+  Crosshair,
+  Wifi,
+  Cpu,
+  Radio
 } from 'lucide-react';
 import { TRANSLATIONS } from '../services/i18n';
 
@@ -35,50 +40,95 @@ export default function WelcomeLandingView({
   const [inputText, setInputText] = useState('');
   const [selectedTags, setSelectedTags] = useState([]);
   const [activePhotoSpotIndex, setActivePhotoSpotIndex] = useState(0);
+  const [heroSlideIndex, setHeroSlideIndex] = useState(0);
   const inputRef = useRef(null);
 
   const t = TRANSLATIONS[language]?.welcome || TRANSLATIONS.zh.welcome;
 
-  // 摄影机位图源与取景预设
-  const photoSpotsData = [
+  // Hero 全屏 4K 背景多大片轮播图源 (无缝交叉淡入淡出)
+  const heroBackgrounds = [
     {
-      image: "https://images.unsplash.com/photo-1507699622108-4be3abd695ad?w=1200&auto=format&fit=crop&q=80",
-      alt: "Good Shepherd Church Lake Tekapo",
-      overlayTag: "ASTRO VIEWPORT 01",
-      iso: "ISO 3200",
-      shutter: "20s",
-      aperture: "f/2.8",
-      focal: "14mm"
+      url: "https://images.unsplash.com/photo-1507699622108-4be3abd695ad?w=1920&auto=format&fit=crop&q=85",
+      title: "Lake Tekapo Dark Sky Reserve",
+      location: "新西兰特卡波湖 · 国际暗夜星空保护区"
     },
     {
-      image: "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=1200&auto=format&fit=crop&q=80",
-      alt: "Roys Peak Lake Wanaka",
-      overlayTag: "GOLDEN HOUR 02",
-      iso: "ISO 100",
-      shutter: "1/200s",
-      aperture: "f/8.0",
-      focal: "35mm"
+      url: "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=1920&auto=format&fit=crop&q=85",
+      title: "Southern Alps Scenic Highway",
+      location: "新西兰南岛 8 号国道 · 纵贯南阿尔卑斯山脉"
     },
     {
-      image: "https://images.unsplash.com/photo-1433086966358-54859d0ed716?w=1200&auto=format&fit=crop&q=80",
-      alt: "Milford Sound Mitre Peak",
-      overlayTag: "BLUE HOUR 03",
-      iso: "ISO 100",
-      shutter: "30s",
-      aperture: "f/11",
-      focal: "16mm"
+      url: "https://images.unsplash.com/photo-1433086966358-54859d0ed716?w=1920&auto=format&fit=crop&q=85",
+      title: "Milford Sound Fiordland",
+      location: "米尔福德峡湾 · 世界自然遗产地"
+    },
+    {
+      url: "https://images.unsplash.com/photo-1530122037265-a5f1f91d3b99?w=1920&auto=format&fit=crop&q=85",
+      title: "Swiss Alps Panoramic Railway",
+      location: "瑞士阿尔卑斯 · 冰川快车全景路线"
     }
   ];
 
-  // 灵感卡片专属超清背景
-  const inspirationImages = [
-    "https://images.unsplash.com/photo-1507699622108-4be3abd695ad?w=800&auto=format&fit=crop&q=80",
-    "https://images.unsplash.com/photo-1503899036084-c55cdd92da26?w=800&auto=format&fit=crop&q=80",
-    "https://images.unsplash.com/photo-1530122037265-a5f1f91d3b99?w=800&auto=format&fit=crop&q=80",
-    "https://images.unsplash.com/photo-1542051841857-5f90071e7989?w=800&auto=format&fit=crop&q=80"
+  // 摄影机位图源与取景预设 (全屏覆盖)
+  const photoSpotsData = [
+    {
+      image: "https://images.unsplash.com/photo-1507699622108-4be3abd695ad?w=1920&auto=format&fit=crop&q=85",
+      name: "好牧羊人教堂 · 暗夜银河拱桥",
+      spotType: "ASTROPHOTOGRAPHY HUD 01",
+      iso: "ISO 3200",
+      shutter: "20s",
+      aperture: "f/2.8",
+      focal: "14mm GM",
+      elevation: "710m",
+      bortle: "Class 1 (极黑)",
+      window: "银河升起 23:30 - 03:15",
+      tip: "超广角低机位仰拍，石砌教堂作为前景纳整片银河拱桥，避开小镇杂光。"
+    },
+    {
+      image: "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=1920&auto=format&fit=crop&q=85",
+      name: "罗伊斯山峰 · 晨光云海脊线",
+      spotType: "GOLDEN HOUR HUD 02",
+      iso: "ISO 100",
+      shutter: "1/200s",
+      aperture: "f/8.0",
+      focal: "35mm F1.4",
+      elevation: "1578m",
+      bortle: "日出逆光",
+      window: "黄金时刻 06:15 - 07:00",
+      tip: "逆光拍摄山脊延伸至瓦纳卡湖，使用 CPL 偏振镜消除湖面反光与杂色。"
+    },
+    {
+      image: "https://images.unsplash.com/photo-1433086966358-54859d0ed716?w=1920&auto=format&fit=crop&q=85",
+      name: "米尔福德峡湾 · 冠峰镜面倒影",
+      spotType: "BLUE HOUR HUD 03",
+      iso: "ISO 100",
+      shutter: "30s (ND64)",
+      aperture: "f/11",
+      focal: "16-35mm + CPL",
+      elevation: "海平面",
+      bortle: "晨雾蓝调",
+      window: "蓝调时刻 07:20 - 08:00",
+      tip: "利用退潮沙滩水面长曝光消除水波，捕捉倒映在深色海水中的教皇冠峰。"
+    }
   ];
 
-  // 点击偏好标签时追加到输入框或切换高亮
+  // 灵感卡片全屏高清背景
+  const inspirationImages = [
+    "https://images.unsplash.com/photo-1507699622108-4be3abd695ad?w=1200&auto=format&fit=crop&q=85",
+    "https://images.unsplash.com/photo-1503899036084-c55cdd92da26?w=1200&auto=format&fit=crop&q=85",
+    "https://images.unsplash.com/photo-1530122037265-a5f1f91d3b99?w=1200&auto=format&fit=crop&q=85",
+    "https://images.unsplash.com/photo-1542051841857-5f90071e7989?w=1200&auto=format&fit=crop&q=85"
+  ];
+
+  // 自动轮播 Hero 背景大片 (每 6 秒平滑切换)
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setHeroSlideIndex(prev => (prev + 1) % heroBackgrounds.length);
+    }, 6000);
+    return () => clearInterval(timer);
+  }, [heroBackgrounds.length]);
+
+  // 点击偏好标签追加到输入框
   const handleToggleTag = (tagObj) => {
     const isSelected = selectedTags.includes(tagObj.tag);
     let newTags;
@@ -95,7 +145,7 @@ export default function WelcomeLandingView({
     }
   };
 
-  // 点击灵感示例胶囊
+  // 点击灵感示例一键载入
   const handleSelectInspiration = (insp) => {
     setInputText(insp.query);
     if (inputRef.current) {
@@ -111,7 +161,7 @@ export default function WelcomeLandingView({
     onStartPlanning(inputText.trim());
   };
 
-  // 锚点平滑滚动
+  // 页面锚点平滑滚动
   const scrollToSection = (id) => {
     const el = document.getElementById(id);
     if (el) {
@@ -120,50 +170,53 @@ export default function WelcomeLandingView({
   };
 
   return (
-    <div className="flagship-welcome-root">
-      {/* 顶部高透钛金磨砂导航栏 */}
-      <header className="flagship-header">
-        <div className="flagship-nav-inner">
-          <div className="flagship-logo-group" onClick={() => scrollToSection('hero-section')}>
-            <div className="flagship-logo-icon">
-              <Compass size={20} color="#10B981" strokeWidth={2.4} />
+    <div className="fullbleed-welcome-root">
+      {/* 顶部高透钛金悬浮导航栏 (100% 满屏贯穿) */}
+      <header className="fullbleed-header">
+        <div className="fullbleed-nav-inner">
+          <div className="fullbleed-logo-group" onClick={() => scrollToSection('stage-hero')}>
+            <div className="fullbleed-logo-icon">
+              <Compass size={22} color="#10B981" strokeWidth={2.4} />
             </div>
-            <div className="flagship-brand">
-              <span className="flagship-brand-name">Roam AI</span>
-              <span className="flagship-agent-pill">OpenClaw Agent</span>
+            <div className="fullbleed-brand">
+              <span className="fullbleed-brand-name">Roam AI</span>
+              <span className="fullbleed-agent-pill">OpenClaw Agent</span>
             </div>
           </div>
 
-          {/* 页面锚点快速导览 */}
-          <nav className="flagship-nav-links">
-            <button onClick={() => scrollToSection('hero-section')} className="nav-anchor-link">
+          {/* 全局特色锚点导航 */}
+          <nav className="fullbleed-nav-links">
+            <button onClick={() => scrollToSection('stage-hero')} className="fullbleed-nav-anchor">
               {t.nav.planner}
             </button>
-            <button onClick={() => scrollToSection('spatial-section')} className="nav-anchor-link">
+            <button onClick={() => scrollToSection('stage-spatial')} className="fullbleed-nav-anchor">
               {t.nav.spatial}
             </button>
-            <button onClick={() => scrollToSection('vision-section')} className="nav-anchor-link">
+            <button onClick={() => scrollToSection('stage-vision')} className="fullbleed-nav-anchor">
               {t.nav.vision}
             </button>
-            <button onClick={() => scrollToSection('knowledge-section')} className="nav-anchor-link">
+            <button onClick={() => scrollToSection('stage-knowledge')} className="fullbleed-nav-anchor">
               {t.nav.knowledge}
+            </button>
+            <button onClick={() => scrollToSection('stage-inspirations')} className="fullbleed-nav-anchor">
+              {language === 'zh' ? '全球画廊' : 'Gallery'}
             </button>
           </nav>
 
-          <div className="flagship-header-actions">
+          <div className="fullbleed-header-actions">
             {/* 语言切换 */}
             <button 
-              className="flagship-lang-btn"
+              className="fullbleed-lang-btn"
               onClick={onToggleLanguage}
               title={language === 'zh' ? 'Switch to English' : '切换为中文'}
             >
-              <Globe size={14} color="#94A3B8" />
+              <Globe size={15} color="#94A3B8" />
               <span>{language === 'zh' ? 'EN' : '中文'}</span>
             </button>
 
             {/* 进入看板 */}
             <button 
-              className="flagship-enter-btn"
+              className="fullbleed-enter-btn"
               onClick={onDirectExplore}
             >
               <span>{t.nav.enterDashboard}</span>
@@ -173,33 +226,60 @@ export default function WelcomeLandingView({
       </header>
 
       {/* =========================================================================
-          SECTION 1: 沉浸式临场感主屏 (Cinematic Ambient Hero)
+          STAGE 1: 100vw × 100vh 全屏流媒体 Hero 主屏 (Cinematic Carousel Stage)
           ========================================================================= */}
-      <section id="hero-section" className="flagship-hero-section">
-        {/* 动态氛围光影与网格背景 */}
-        <div className="hero-ambient-glow glow-top"></div>
-        <div className="hero-ambient-glow glow-right"></div>
-        <div className="hero-grid-pattern"></div>
+      <section id="stage-hero" className="fullbleed-stage hero-stage">
+        {/* 多张 4K 风光大片平滑交叉淡入淡出轮播背景 */}
+        <div className="hero-carousel-container">
+          {heroBackgrounds.map((bg, idx) => (
+            <div 
+              key={idx} 
+              className={`hero-carousel-slide ${heroSlideIndex === idx ? 'active' : ''}`}
+              style={{ backgroundImage: `url(${bg.url})` }}
+            >
+              <div className="slide-overlay-gradient"></div>
+            </div>
+          ))}
+        </div>
 
-        <div className="hero-content-wrapper">
-          {/* AI 旗舰徽标 */}
-          <div className="hero-badge-pill">
+        {/* 动态暗角与流光光效 */}
+        <div className="hero-vignette"></div>
+
+        {/* 轮播图指示器与机位信息 */}
+        <div className="hero-slide-meta">
+          <div className="hero-slide-pills">
+            {heroBackgrounds.map((_, idx) => (
+              <button 
+                key={idx}
+                className={`slide-indicator-pill ${heroSlideIndex === idx ? 'active' : ''}`}
+                onClick={() => setHeroSlideIndex(idx)}
+              />
+            ))}
+          </div>
+          <div className="hero-slide-desc">
+            <MapPin size={13} color="#10B981" />
+            <span>{heroBackgrounds[heroSlideIndex]?.location}</span>
+          </div>
+        </div>
+
+        {/* Hero 主体内容 (居中极智指令舱) */}
+        <div className="hero-stage-content">
+          <div className="hero-badge-capsule">
             <Sparkles size={14} color="#10B981" className="animate-pulse" />
             <span>{t.badge}</span>
           </div>
 
-          {/* 工业美学大标题与副标题 */}
-          <h1 className="hero-master-title">
+          <h1 className="hero-giant-title">
             {t.heroTitle}
           </h1>
-          <p className="hero-master-subtitle">
+          <p className="hero-giant-subtitle">
             {t.heroSubtitle}
           </p>
 
-          {/* 核心智能指令舱 (Floating Command Capsule) */}
-          <div className="hero-command-capsule">
+          {/* 悬浮磨砂智能指令舱 */}
+          <div className="hero-floating-capsule">
             <form onSubmit={handleSubmit} className="capsule-form">
-              <div className="capsule-textarea-box">
+              <div className="capsule-textarea-wrap">
                 <textarea
                   ref={inputRef}
                   className="capsule-textarea"
@@ -218,16 +298,16 @@ export default function WelcomeLandingView({
               </div>
 
               {/* 快捷偏好标签 */}
-              <div className="capsule-preferences-bar">
-                <span className="capsule-pref-label">{t.preferencesTitle}:</span>
-                <div className="capsule-pref-chips">
+              <div className="capsule-tags-row">
+                <span className="capsule-tags-label">{t.preferencesTitle}:</span>
+                <div className="capsule-tags-group">
                   {t.preferences.map((tagObj, idx) => {
                     const active = selectedTags.includes(tagObj.tag);
                     return (
                       <button
                         key={idx}
                         type="button"
-                        className={`capsule-chip ${active ? 'active' : ''}`}
+                        className={`capsule-tag-chip ${active ? 'active' : ''}`}
                         onClick={() => handleToggleTag(tagObj)}
                         disabled={isGenerating}
                       >
@@ -238,15 +318,15 @@ export default function WelcomeLandingView({
                 </div>
               </div>
 
-              {/* 指令舱底栏 */}
-              <div className="capsule-footer-bar">
-                <div className="capsule-hint">
-                  {language === 'zh' ? '💡 支持自由输入全球任意国家、天数、同行偏好与自驾预算' : '💡 Feel free to input any global destination, days, style or budget'}
+              {/* 卡片底栏操作区 */}
+              <div className="capsule-action-footer">
+                <div className="capsule-hint-text">
+                  {language === 'zh' ? '💡 支持自由输入全球任意国家、天数、同行偏好与自驾预算' : '💡 Feel free to input any global destination, duration or travel style'}
                 </div>
 
                 <button
                   type="submit"
-                  className={`capsule-submit-cta ${isGenerating ? 'generating' : ''}`}
+                  className={`capsule-primary-btn ${isGenerating ? 'generating' : ''}`}
                   disabled={!inputText.trim() || isGenerating}
                 >
                   {isGenerating ? (
@@ -266,162 +346,197 @@ export default function WelcomeLandingView({
             </form>
           </div>
 
-          {/* 实时遥测数据引力带 (Telemetry Ticker) */}
-          <div className="hero-telemetry-row">
+          {/* 实时遥测数据引力带 */}
+          <div className="hero-telemetry-strip">
             {t.telemetry.map((item, idx) => (
-              <div key={idx} className="telemetry-item">
-                <div className="telemetry-dot"></div>
+              <div key={idx} className="telemetry-pill">
+                <div className="telemetry-live-dot"></div>
                 <span>{item}</span>
               </div>
             ))}
           </div>
         </div>
+
+        {/* 向下滚动提示 */}
+        <button className="hero-scroll-indicator" onClick={() => scrollToSection('stage-spatial')}>
+          <span>EXPLORE FEATURES</span>
+          <ChevronDown size={18} className="animate-bounce" />
+        </button>
       </section>
 
       {/* =========================================================================
-          SECTION 2: 4D 时空路线推演引擎 (Spatial-Temporal Autonomous Routing)
+          STAGE 2: 100vw × 100vh 4D 时空路线推演全屏舞台 (Spatial Routing Stage)
           ========================================================================= */}
-      <section id="spatial-section" className="flagship-feature-section spatial-bg">
-        <div className="section-header-block">
-          <div className="section-category-tag">
-            <Navigation size={13} color="#10B981" />
-            <span>{t.spatialEngine.badge}</span>
-          </div>
-          <h2 className="section-headline">{t.spatialEngine.title}</h2>
-          <p className="section-subheadline">{t.spatialEngine.subtitle}</p>
+      <section id="stage-spatial" className="fullbleed-stage spatial-stage">
+        {/* 全屏拟真自驾公路背景大片 */}
+        <div 
+          className="stage-fullscreen-bg"
+          style={{ backgroundImage: `url('https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=1920&auto=format&fit=crop&q=85')` }}
+        >
+          <div className="stage-overlay-darken"></div>
         </div>
 
-        <div className="spatial-dashboard-card">
-          {/* 左侧：4D 路线推演动态可视化 */}
-          <div className="spatial-visual-col">
-            <div className="spatial-map-visual">
-              {/* 高画质拟真自驾公路背景 */}
-              <img 
-                src="https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=1200&auto=format&fit=crop&q=80" 
-                alt="Highway scenic drive" 
-                className="spatial-route-img"
-              />
-              <div className="spatial-route-overlay">
-                <div className="spatial-telemetry-hud">
-                  <div className="hud-badge">
-                    <Activity size={12} color="#10B981" />
-                    <span>REAL-TIME PACING SIMULATOR</span>
-                  </div>
-                  <div className="hud-route-name">{t.spatialEngine.cardTitle}</div>
-                  <div className="hud-route-path">{t.spatialEngine.cardDesc}</div>
-                </div>
+        <div className="stage-content-container">
+          <div className="stage-headline-block">
+            <div className="stage-tag-badge">
+              <Navigation size={14} color="#10B981" />
+              <span>{t.spatialEngine.badge}</span>
+            </div>
+            <h2 className="stage-giant-title">{t.spatialEngine.title}</h2>
+            <p className="stage-giant-subtitle">{t.spatialEngine.subtitle}</p>
+          </div>
 
-                {/* 动态路线航点进度条 */}
-                <div className="spatial-timeline-scrubber">
-                  <div className="scrubber-waypoint active">
-                    <span className="wp-dot"></span>
-                    <span className="wp-label">基督城 (起)</span>
-                  </div>
-                  <div className="scrubber-line"></div>
-                  <div className="scrubber-waypoint active">
-                    <span className="wp-dot"></span>
-                    <span className="wp-label">特卡波湖 (暗夜)</span>
-                  </div>
-                  <div className="scrubber-line"></div>
-                  <div className="scrubber-waypoint active">
-                    <span className="wp-dot"></span>
-                    <span className="wp-label">库克山 (冰川)</span>
-                  </div>
-                  <div className="scrubber-line"></div>
-                  <div className="scrubber-waypoint">
-                    <span className="wp-dot"></span>
-                    <span className="wp-label">皇后镇 (终)</span>
-                  </div>
+          {/* 理想智驾级 4D 时空推演全景大卡片 */}
+          <div className="spatial-panoramic-matrix">
+            {/* 左侧：动态公路流态与高差剖面 */}
+            <div className="spatial-route-viewport">
+              <div className="spatial-hud-top">
+                <div className="spatial-live-badge">
+                  <Activity size={13} color="#10B981" />
+                  <span>AUTONOMOUS SPATIAL TELEMETRY</span>
+                </div>
+                <div className="spatial-route-title">{t.spatialEngine.cardTitle}</div>
+                <div className="spatial-route-sub">{t.spatialEngine.cardDesc}</div>
+              </div>
+
+              {/* 拟真动态航点进度条 */}
+              <div className="spatial-interactive-timeline">
+                <div className="timeline-node active">
+                  <span className="node-pulse"></span>
+                  <span className="node-label">基督城 (起)</span>
+                  <span className="node-sub">提车补给 0km</span>
+                </div>
+                <div className="timeline-connector active"></div>
+                <div className="timeline-node active">
+                  <span className="node-pulse"></span>
+                  <span className="node-label">特卡波湖 (暗夜)</span>
+                  <span className="node-sub">暗夜银河 225km</span>
+                </div>
+                <div className="timeline-connector active"></div>
+                <div className="timeline-node active">
+                  <span className="node-pulse"></span>
+                  <span className="node-label">库克山 (冰川)</span>
+                  <span className="node-sub">胡克谷步道 330km</span>
+                </div>
+                <div className="timeline-connector"></div>
+                <div className="timeline-node">
+                  <span className="node-pulse inactive"></span>
+                  <span className="node-label">皇后镇 (终)</span>
+                  <span className="node-sub">高山跳伞 650km</span>
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* 右侧：关键参数指标 */}
-          <div className="spatial-metrics-col">
-            {t.spatialEngine.metrics.map((m, idx) => (
-              <div key={idx} className="spatial-metric-box">
-                <div className="metric-value-row">
-                  <span className="metric-number">{m.value}</span>
-                  <span className="metric-label">{m.label}</span>
+            {/* 右侧：3 大数字化指标 */}
+            <div className="spatial-metrics-deck">
+              {t.spatialEngine.metrics.map((m, idx) => (
+                <div key={idx} className="spatial-deck-card">
+                  <div className="deck-num-row">
+                    <span className="deck-num">{m.value}</span>
+                    <span className="deck-label">{m.label}</span>
+                  </div>
+                  <div className="deck-desc">{m.desc}</div>
                 </div>
-                <div className="metric-desc">{m.desc}</div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       </section>
 
       {/* =========================================================================
-          SECTION 3: 大师级星空与风光影像系统 (Pro Optics & Viewfinder HUD)
+          STAGE 3: 100vw × 100vh 大疆级 Pro 影像 HUD 全屏舞台 (Pro Vision Stage)
           ========================================================================= */}
-      <section id="vision-section" className="flagship-feature-section vision-bg">
-        <div className="section-header-block">
-          <div className="section-category-tag">
-            <Camera size={13} color="#3B82F6" />
-            <span>{t.proVision.badge}</span>
-          </div>
-          <h2 className="section-headline">{t.proVision.title}</h2>
-          <p className="section-subheadline">{t.proVision.subtitle}</p>
+      <section id="stage-vision" className="fullbleed-stage vision-stage">
+        {/* 全屏摄影大片背景 (随机位点击无缝切换) */}
+        <div 
+          className="stage-fullscreen-bg"
+          style={{ backgroundImage: `url('${photoSpotsData[activePhotoSpotIndex]?.image}')` }}
+        >
+          <div className="stage-overlay-vignette"></div>
         </div>
 
-        <div className="vision-viewfinder-matrix">
-          {/* 取景器交互式机位切换器 */}
-          <div className="vision-tabs-bar">
+        {/* 视口全屏相机 HUD 取景器线框与准星 */}
+        <div className="viewport-camera-hud">
+          {/* 四角取景器瞄准框 */}
+          <div className="hud-corner top-left"></div>
+          <div className="hud-corner top-right"></div>
+          <div className="hud-corner bottom-left"></div>
+          <div className="hud-corner bottom-right"></div>
+
+          {/* 九宫格构图参考线 */}
+          <div className="hud-grid-line h-1"></div>
+          <div className="hud-grid-line h-2"></div>
+          <div className="hud-grid-line v-1"></div>
+          <div className="hud-grid-line v-2"></div>
+
+          {/* 中心红点对焦准星 */}
+          <div className="hud-center-crosshair">
+            <Crosshair size={28} color="rgba(239, 68, 68, 0.85)" />
+          </div>
+        </div>
+
+        <div className="stage-content-container z-relative">
+          <div className="stage-headline-block">
+            <div className="stage-tag-badge">
+              <Camera size={14} color="#3B82F6" />
+              <span>{t.proVision.badge}</span>
+            </div>
+            <h2 className="stage-giant-title">{t.proVision.title}</h2>
+            <p className="stage-giant-subtitle">{t.proVision.subtitle}</p>
+          </div>
+
+          {/* 交互式机位切换选择器 */}
+          <div className="vision-spots-selector">
             {t.proVision.spots.map((spot, idx) => (
               <button
                 key={idx}
-                className={`vision-spot-tab ${activePhotoSpotIndex === idx ? 'active' : ''}`}
+                className={`vision-spot-capsule ${activePhotoSpotIndex === idx ? 'active' : ''}`}
                 onClick={() => setActivePhotoSpotIndex(idx)}
               >
-                <span className="tab-idx">0{idx + 1}</span>
-                <span className="tab-name">{spot.name}</span>
+                <span className="capsule-num">0{idx + 1}</span>
+                <span className="capsule-title">{spot.name}</span>
               </button>
             ))}
           </div>
 
-          {/* 大疆级相机 HUD 取景器主视窗 */}
-          <div className="viewfinder-main-frame">
-            <img 
-              src={photoSpotsData[activePhotoSpotIndex]?.image} 
-              alt={photoSpotsData[activePhotoSpotIndex]?.alt}
-              className="viewfinder-photo" 
-            />
-
-            {/* HUD 界面准星与构图线 */}
-            <div className="hud-overlay-grid">
-              <div className="hud-crosshair-center"></div>
-              <div className="hud-third-line h-line1"></div>
-              <div className="hud-third-line h-line2"></div>
-              <div className="hud-third-line v-line1"></div>
-              <div className="hud-third-line v-line2"></div>
-
-              {/* HUD 顶部曝光参数 */}
-              <div className="hud-top-dials">
-                <div className="hud-lens-tag">
-                  <Camera size={12} color="#FFFFFF" />
-                  <span>{photoSpotsData[activePhotoSpotIndex]?.overlayTag}</span>
-                </div>
-                <div className="hud-params-strip">
-                  <span className="hud-param">{photoSpotsData[activePhotoSpotIndex]?.focal}</span>
-                  <span className="hud-divider">|</span>
-                  <span className="hud-param">{photoSpotsData[activePhotoSpotIndex]?.aperture}</span>
-                  <span className="hud-divider">|</span>
-                  <span className="hud-param">{photoSpotsData[activePhotoSpotIndex]?.shutter}</span>
-                  <span className="hud-divider">|</span>
-                  <span className="hud-param highlight">{photoSpotsData[activePhotoSpotIndex]?.iso}</span>
-                </div>
+          {/* HUD 参数仪表板 */}
+          <div className="vision-hud-dashboard">
+            <div className="hud-top-telemetry">
+              <div className="hud-lens-badge">
+                <Camera size={14} color="#60A5FA" />
+                <span>{photoSpotsData[activePhotoSpotIndex]?.spotType}</span>
               </div>
 
-              {/* HUD 底部专家贴士与窗口 */}
-              <div className="hud-bottom-info">
-                <div className="hud-window-tag">
-                  <Clock size={12} color="#F59E0B" />
-                  <span>{t.proVision.spots[activePhotoSpotIndex]?.window}</span>
+              <div className="hud-optical-strip">
+                <div className="optical-item">
+                  <span className="opt-label">FOCAL</span>
+                  <span className="opt-val">{photoSpotsData[activePhotoSpotIndex]?.focal}</span>
                 </div>
-                <div className="hud-tip-text">
-                  {t.proVision.spots[activePhotoSpotIndex]?.tip}
+                <div className="optical-divider"></div>
+                <div className="optical-item">
+                  <span className="opt-label">APERTURE</span>
+                  <span className="opt-val">{photoSpotsData[activePhotoSpotIndex]?.aperture}</span>
                 </div>
+                <div className="optical-divider"></div>
+                <div className="optical-item">
+                  <span className="opt-label">SHUTTER</span>
+                  <span className="opt-val">{photoSpotsData[activePhotoSpotIndex]?.shutter}</span>
+                </div>
+                <div className="optical-divider"></div>
+                <div className="optical-item highlight">
+                  <span className="opt-label">ISO</span>
+                  <span className="opt-val">{photoSpotsData[activePhotoSpotIndex]?.iso}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="hud-bottom-tip-card">
+              <div className="tip-window-tag">
+                <Clock size={13} color="#F59E0B" />
+                <span>{t.proVision.spots[activePhotoSpotIndex]?.window}</span>
+              </div>
+              <div className="tip-text-content">
+                {t.proVision.spots[activePhotoSpotIndex]?.tip}
               </div>
             </div>
           </div>
@@ -429,86 +544,96 @@ export default function WelcomeLandingView({
       </section>
 
       {/* =========================================================================
-          SECTION 4: OpenClaw 全球知识底盘架构 (Hyper-Intellect Architecture)
+          STAGE 4: 100vw × 100vh 澎湃OS 级知识架构全屏舞台 (Architecture Stage)
           ========================================================================= */}
-      <section id="knowledge-section" className="flagship-feature-section architecture-bg">
-        <div className="section-header-block">
-          <div className="section-category-tag">
-            <Layers size={13} color="#10B981" />
-            <span>{t.knowledgeMesh.badge}</span>
-          </div>
-          <h2 className="section-headline">{t.knowledgeMesh.title}</h2>
-          <p className="section-subheadline">{t.knowledgeMesh.subtitle}</p>
-        </div>
+      <section id="stage-knowledge" className="fullbleed-stage architecture-stage">
+        {/* 全屏深空神经网络科技背景 */}
+        <div className="architecture-grid-bg"></div>
 
-        <div className="knowledge-stack-layout">
-          {t.knowledgeMesh.layers.map((layer, idx) => (
-            <div key={idx} className="knowledge-layer-card">
-              <div className="layer-num-badge">{layer.num}</div>
-              <div className="layer-body">
-                <h3 className="layer-title">{layer.name}</h3>
-                <p className="layer-desc">{layer.desc}</p>
-              </div>
-              <div className="layer-status-pill">
-                <CheckCircle2 size={14} color="#10B981" />
-                <span>ONLINE</span>
-              </div>
+        <div className="stage-content-container z-relative">
+          <div className="stage-headline-block">
+            <div className="stage-tag-badge">
+              <Layers size={14} color="#10B981" />
+              <span>{t.knowledgeMesh.badge}</span>
             </div>
-          ))}
-        </div>
-      </section>
-
-      {/* =========================================================================
-          SECTION 5: 灵感全景画廊 (Inspiration Matrix)
-          ========================================================================= */}
-      <section className="flagship-feature-section inspirations-bg">
-        <div className="section-header-block">
-          <div className="section-category-tag">
-            <Sparkles size={13} color="#F59E0B" />
-            <span>{t.inspirations.badge}</span>
+            <h2 className="stage-giant-title">{t.knowledgeMesh.title}</h2>
+            <p className="stage-giant-subtitle">{t.knowledgeMesh.subtitle}</p>
           </div>
-          <h2 className="section-headline">{t.inspirations.title}</h2>
-          <p className="section-subheadline">{t.inspirations.subtitle}</p>
-        </div>
 
-        <div className="inspirations-matrix-grid">
-          {t.inspirations.items.map((item, idx) => (
-            <div 
-              key={idx} 
-              className="inspiration-master-card"
-              onClick={() => handleSelectInspiration(item)}
-            >
-              <img 
-                src={inspirationImages[idx % inspirationImages.length]} 
-                alt={item.title} 
-                className="insp-bg-img"
-              />
-              <div className="insp-card-gradient"></div>
-              <div className="insp-card-content">
-                <span className="insp-tag-badge">{item.tag}</span>
-                <h3 className="insp-title">{item.title}</h3>
-                <p className="insp-query-preview">{item.query}</p>
-                <div className="insp-action-btn">
-                  <span>{language === 'zh' ? '导入并智能规划' : 'Load & Plan'}</span>
-                  <ChevronRight size={14} />
+          {/* 4 层悬浮透光科技底座 */}
+          <div className="architecture-layers-deck">
+            {t.knowledgeMesh.layers.map((layer, idx) => (
+              <div key={idx} className="architecture-layer-plaque">
+                <div className="layer-num-hex">{layer.num}</div>
+                <div className="layer-content-main">
+                  <h3 className="layer-main-title">{layer.name}</h3>
+                  <p className="layer-main-desc">{layer.desc}</p>
+                </div>
+                <div className="layer-live-status">
+                  <div className="status-indicator-dot"></div>
+                  <span>ACTIVE KERNEL</span>
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </section>
 
       {/* =========================================================================
-          SECTION 6: 底部旗舰号召行动栏 (Grand Action Footer)
+          STAGE 5: 100vw × 100vh 全球灵感全景画廊 (Inspiration Matrix Stage)
           ========================================================================= */}
-      <footer className="flagship-grand-footer">
-        <div className="footer-callout-box">
-          <h2 className="footer-title">{t.bottomCta.title}</h2>
-          <p className="footer-subtitle">{t.bottomCta.subtitle}</p>
+      <section id="stage-inspirations" className="fullbleed-stage inspirations-stage">
+        <div className="stage-content-container z-relative">
+          <div className="stage-headline-block">
+            <div className="stage-tag-badge">
+              <Sparkles size={14} color="#F59E0B" />
+              <span>{t.inspirations.badge}</span>
+            </div>
+            <h2 className="stage-giant-title">{t.inspirations.title}</h2>
+            <p className="stage-giant-subtitle">{t.inspirations.subtitle}</p>
+          </div>
+
+          {/* 全屏展开式 4 大目的地大片卡片 */}
+          <div className="inspirations-full-grid">
+            {t.inspirations.items.map((item, idx) => (
+              <div 
+                key={idx} 
+                className="inspiration-fullscreen-card"
+                onClick={() => handleSelectInspiration(item)}
+              >
+                <div 
+                  className="card-bg-layer"
+                  style={{ backgroundImage: `url('${inspirationImages[idx % inspirationImages.length]}')` }}
+                />
+                <div className="card-gradient-layer"></div>
+                <div className="card-meta-box">
+                  <span className="card-tag">{item.tag}</span>
+                  <h3 className="card-title">{item.title}</h3>
+                  <p className="card-desc">{item.query}</p>
+                  <div className="card-cta-row">
+                    <span>{language === 'zh' ? '一键载入并智能规划' : 'Load & Plan'}</span>
+                    <ArrowRight size={14} />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* =========================================================================
+          STAGE 6: 终极启程行动舞台 (Grand Finale Footer Stage)
+          ========================================================================= */}
+      <footer className="fullbleed-stage finale-stage">
+        <div className="finale-vignette-overlay"></div>
+
+        <div className="finale-content-box">
+          <h2 className="finale-title">{t.bottomCta.title}</h2>
+          <p className="finale-subtitle">{t.bottomCta.subtitle}</p>
           
-          <div className="footer-actions-row">
+          <div className="finale-btn-group">
             <button 
-              className="footer-start-cta"
+              className="finale-launch-btn"
               onClick={() => {
                 if (inputRef.current) {
                   inputRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -516,12 +641,13 @@ export default function WelcomeLandingView({
                 }
               }}
             >
-              <Sparkles size={16} color="#FFFFFF" />
+              <Sparkles size={18} color="#FFFFFF" />
               <span>{t.bottomCta.startBtn}</span>
+              <ArrowRight size={16} color="#FFFFFF" />
             </button>
 
             <button 
-              className="footer-demo-link"
+              className="finale-demo-btn"
               onClick={onDirectExplore}
             >
               <span>{t.bottomCta.demoBtn}</span>
@@ -529,7 +655,7 @@ export default function WelcomeLandingView({
           </div>
         </div>
 
-        <div className="footer-bottom-bar">
+        <div className="fullbleed-bottom-credits">
           <span>© 2026 Roam AI Travel Planner · OpenClaw Agent Intelligence</span>
           <span>DOC Official Knowledge Base Verified · Extended Thinking Enabled</span>
         </div>
@@ -539,17 +665,15 @@ export default function WelcomeLandingView({
       {isGenerating && (
         <div className="welcome-generating-overlay">
           <div className="welcome-generating-modal">
-            <div className="generating-header">
-              <div className="generating-icon-pulse">
-                <Sparkles size={28} color="#10B981" className="animate-spin" />
-              </div>
-              <h3 className="generating-title">
-                {language === 'zh' ? 'AI 正在智能规划您的专属行程' : 'AI is Crafting Your Travel Plan'}
-              </h3>
-              <p className="generating-subtitle">
-                {language === 'zh' ? 'OpenClaw Agent 拓展思考多维推理中...' : 'OpenClaw Agent Reasoning with Extended Thinking...'}
-              </p>
+            <div className="generating-icon-pulse">
+              <Sparkles size={32} color="#10B981" className="animate-spin" />
             </div>
+            <h3 className="generating-title">
+              {language === 'zh' ? 'AI 正在智能规划您的专属行程' : 'AI is Crafting Your Travel Plan'}
+            </h3>
+            <p className="generating-subtitle">
+              {language === 'zh' ? 'OpenClaw Agent 拓展思考多维推理中...' : 'OpenClaw Agent Reasoning with Extended Thinking...'}
+            </p>
 
             <div className="generating-steps-list">
               {(generatingSteps && generatingSteps.length > 0 ? generatingSteps : [
