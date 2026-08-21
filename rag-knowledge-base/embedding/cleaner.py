@@ -1,26 +1,24 @@
 """
-文本清洗器 — CRAG 三级评估 + 批量 R3 智能筛选
+文本清洗器 — LLM Prompt 驱动三级清洗（零硬编码关键词）
 
-清洗策略（从快到慢，三级体系）：
+设计原理：
+  CRAG (arXiv:2401.15884) 提出的检索评估框架，结合 FILCO (arXiv:2309.04772) 
+  的上下文过滤思想，用 LLM 替代规则关键词对文本进行质量评估。
 
-Level 1 (R1): 规则级 — 零模型，模式匹配噪声过滤
-Level 2 (R2): 质量评分级 — 零模型，CRAG 三级评分 (Correct/Ambiguous/Incorrect)
-              含丰富的新西兰旅游专用信号，大幅减少 R3 调用
-Level 3 (R3): Qwen3-14B 智能级 — 攒批评估，一次推理处理多行
+  三级体系：
+    R1: 纯结构过滤（空行、纯符号）— 非语义，仅物理层
+    R2: LLM Prompt 驱动质量评分 — 按 BUILD_MODE 使用不同强度的 Prompt
+    R3: LLM 批量评估 — 攒批推理
 
-可选模式：
-  - backend="rule":  仅 R1+R2（快速，适合大批量预处理）
-  - backend="qwen3": R1+R2+R3（完整三级，默认）
+  三个构建强度：
+    fast     → Qwen2.5-1.5B + 最短 Prompt（是/否判断）
+    balanced → Qwen2.5-1.5B + 中等 Prompt（含具体标准）
+    precise  → Qwen3-14B + 完整 Prompt（含 Few-shot 示例 + 细化标准）
 
-模型从 HuggingFace 默认缓存加载，通过环境变量控制：
-  QWEN3_MODEL / MODEL_CACHE_DIR / MODEL_DEVICE / MODEL_DTYPE
-
-运行时调优环境变量：
-  CLEANER_THRESHOLD  — R2→R3 阈值默认0.5，调高=更少R3
-  CLEANER_BATCH_SIZE — R3 批大小默认8，调小=更快反馈
-  CLEANER_PARALLEL   — 多文件并行数默认2，调大=更快批量
-
-参考论文: CRAG - Corrective Retrieval Augmented Generation (arXiv:2401.15884)
+  参考：
+    - Yan et al. "Corrective Retrieval Augmented Generation" (arXiv:2401.15884)
+    - Wang et al. "FILCO: Filtering-based Context Selection in RAG" (arXiv:2309.04772)
+    - Sarthi et al. "RAPTOR: Recursive Abstractive Processing for Tree-Organized Retrieval" (arXiv:2401.18059)
 """
 
 import json
@@ -31,7 +29,7 @@ import time
 from pathlib import Path
 from typing import List, Optional, Tuple, Dict, Any, Callable
 
-# 直接加载 config，绕过 rag_knowledge_base.__init__
+# 直接加载 config
 def _find_project_root(path: Path) -> Path:
     for p in [path, *path.parents]:
         if (p / "rag_knowledge_base").is_dir():
@@ -47,229 +45,217 @@ if _config_path.exists():
     CLEANED_DIR = _cfg.CLEANED_DIR
     CLEANER_BACKEND = getattr(_cfg, "CLEANER_BACKEND", "qwen3")
     CLEANER_THRESHOLD = getattr(_cfg, "CLEANER_THRESHOLD", 0.5)
+    BUILD_MODE = os.environ.get("BUILD_MODE", "balanced").lower()
 else:
     _project_root = str(_find_project_root(Path(__file__).resolve()))
     if _project_root not in sys.path:
         sys.path.insert(0, _project_root)
     from rag_knowledge_base.config import RAW_DIR, CLEANED_DIR, CLEANER_BACKEND, CLEANER_THRESHOLD
+    BUILD_MODE = os.environ.get("BUILD_MODE", "balanced").lower()
+
+# ===================================================================
+# 三级 Prompt 模板（由 BUILD_MODE 选择，零关键词硬编码）
+# ===================================================================
+#
+# Prompt 设计原则：
+# 1. 不说"请用以下关键词判断"，而是让 LLM 用自己的语言理解能力判断
+# 2. 三档强度仅通过 prompt 长度/复杂度/示例数量控制
+# 3. 不预设任何具体关键词（不写 "包含 price/地址 等关键词"）
+# ===================================================================
+
+_FAST_R2_PROMPT = """你是一个文本质量评估器。快速判断下面这段文本是否包含有用的旅游信息。
+
+输出一个数字（0.0~1.0）：
+- 0.9~1.0 = 有实质旅游信息
+- 0.3~0.8 = 可能有，不确定
+- 0.0~0.2 = 纯噪声/导航/广告
+
+只输出数字，不要其他文字。
+
+文本：{text}
+
+得分："""
+
+_BALANCED_R2_PROMPT = """你是一个文本质量评估器。判断下面这段文本是否包含有实质内容的旅游信息。
+
+评分标准（0.0~1.0）：
+0.9~1.0 — 有实质旅行信息（地点描述、路线、费用、建议、经验等）
+0.6~0.8 — 有一定信息量，但较笼统
+0.3~0.5 — 可能相关但模糊
+0.0~0.2 — 导航文字、广告、免责声明、空白内容
+
+输出格式：一个数字，不要其他文字。
+
+文本：{text}
+
+得分："""
+
+_PRECISE_R2_PROMPT = """你是一个专业的旅行文本质量评估专家。请仔细评估以下文本是否包含有价值的旅行信息。
+
+评估维度：
+1. 信息密度 — 是否包含具体的事实性内容（地名、路线、费用、时间等）
+2. 实用性 — 是否能帮助读者规划或了解旅行
+3. 完整性 — 是否有上下文，还是孤立片段
+
+评分标准（0.0~1.0）：
+0.95~1.0 — 高质量旅行信息：具体的地点+体验+实用建议
+0.8~0.94 — 良好旅行信息：有实质内容，可能缺少细节
+0.6~0.79 — 有一定信息但较笼统
+0.4~0.59 — 边界情况：可能有少量有用信息混在噪声中
+0.1~0.39 — 大多是噪声/广告/导航不相关内容
+0.0~0.09 — 纯噪声
+
+示例：
+文本："今天去了Queenstown，风景太美了！" → 0.55（情感>信息）
+文本："从Queenstown到Milford Sound约4小时车程，建议早上6点出发" → 0.95
+文本："back to my results cookies privacy" → 0.05
+
+只输出数字，不要解释。
+
+文本：{text}
+
+得分："""
+
+# R3 批量评估 Prompt（三档）
+_FAST_R3_PROMPT = """你是一个文本分类器。判断每段文本是否包含有用的旅游信息。
+
+对每段输出一行：
+[N] CORRECT — 有旅游信息
+[N] INCORRECT — 无实质内容
+
+文本：
+{items}
+
+逐行输出："""
+
+_BALANCED_R3_PROMPT = """你是一个旅行文本筛选系统。每段文本带编号，判断是否包含实质旅游信息。
+
+规则：
+- CORRECT = 有具体旅游信息，值得保留
+- INCORRECT = 无实质内容、导航、广告、噪声
+
+对每段输出一行（严格格式）：
+[N] CORRECT
+[N] INCORRECT
+
+不需要解释。
+
+文本：
+{items}
+
+逐行输出："""
+
+_PRECISE_R3_PROMPT = """你是一个专业的旅行文本筛选系统。下面有多段文本，每段有编号。请逐段判断是否包含有价值的旅行信息。
+
+判断准则：
+CORRECT — 符合以下任一：
+  · 描述旅行目的地/景点/路线/交通
+  · 包含实用建议/费用/时间/经验分享
+  · 有具体地理或事实信息
+  · 有效的行程规划内容
+
+INCORRECT — 以下情况丢弃：
+  · 纯导航/菜单/广告/促销
+  · 法律声明/cookie通知
+  · 空白或极短无意义文本
+  · 纯情感抒发无事实信息
+
+输出格式（每行一个，严格遵循）：
+[N] CORRECT
+[N] INCORRECT
+
+示例：
+[1] CORRECT
+[2] INCORRECT
+
+文本：
+{items}
+
+逐行输出："""
+
+
+def _get_r2_prompt() -> str:
+    """根据 BUILD_MODE 返回 R2 Prompt 模板"""
+    mode = os.environ.get("BUILD_MODE", "balanced").lower()
+    if mode == "fast":
+        return _FAST_R2_PROMPT
+    elif mode == "precise":
+        return _PRECISE_R2_PROMPT
+    return _BALANCED_R2_PROMPT
+
+
+def _get_r3_prompt() -> str:
+    """根据 BUILD_MODE 返回 R3 批量 Prompt 模板"""
+    mode = os.environ.get("BUILD_MODE", "balanced").lower()
+    if mode == "fast":
+        return _FAST_R3_PROMPT
+    elif mode == "precise":
+        return _PRECISE_R3_PROMPT
+    return _BALANCED_R3_PROMPT
 
 
 # ===================================================================
-# Level 1: 规则级过滤 — 零模型，纯模式匹配
+# Level 1: 纯结构过滤（非语义，仅物理层）
 # ===================================================================
 
-_NAV_NOISE = [
-    r"(?i)^back to my results$",
-    r"(?i)^long.arrow.right$",
-    r"(?i)^image information$",
-    r"(?i)^find experiences and deals$",
-    r"(?i)^learn more about",
-    r"(?i)^read more$",
-    r"(?i)^view all$",
-    r"(?i)^share this$",
-    r"(?i)^save this$",
-    r"(?i)^print this$",
-    r"(?i)^email this$",
-    r"(?i)^follow us$",
-    r"(?i)^subscribe$",
-    r"(?i)^newsletter$",
-    r"(?i)^cookie",
-    r"(?i)^privacy policy$",
-    r"(?i)^terms of use$",
-    r"(?i)^all rights reserved$",
-    r"^[\s\-–—*•·■●◦✓✕✗✘☐☑☒\+]+$",
-    r"^[0-9\s/\-+\|·■●]+$",
-    r"^\s*$",
-    # 英文导航片段
-    r"(?i)^(menu|navigation|breadcrumb|skip to)",
-    r"(?i)^loading\.\.\.$",
-    r"(?i)^more (options|results|information)",
-    r"(?i)^powered by",
-    r"(?i)^©",
-    # 页眉页脚
-    r"(?i)^page \d+",
-    r"(?i)^\d+ of \d+$",
-    # 广告/促销信号
-    r"(?i)^((limited|special|exclusive)\s+)?(time|offer|deal|sale|discount|save|book now)(\s+(today|now|online))?!?$",
-    r"(?i)^click (here|now|this link|to learn|for more)",
-    r"(?i)^sign up|^subscribe|^register|^join now",
-    r"(?i)^(call|text|email|visit) (us|today|now)",
-]
-
-_BOILERPLATE = [
-    r"(?i)disclaimer",
-    r"(?i)while every effort",
-    r"(?i)information is subject to change",
-    r"(?i)last updated",
-    r"(?i)all information is believed to be",
-    r"(?i)prices are subject to change",
-    r"(?i)we recommend checking",
-    r"(?i)this website uses",
-    r"(?i)by using our site",
-    r"(?i)we use cookies",
-]
-
-
-def _is_rule_noise(para: str) -> bool:
-    """R1 规则级噪声检测"""
-    return any(re.match(p, para.strip()) for p in _NAV_NOISE)
-
-
-def _is_boilerplate(para: str) -> bool:
-    return bool(re.search('|'.join(_BOILERPLATE), para))
+def _is_structural_noise(para: str) -> bool:
+    """R1 结构级过滤 — 仅检测纯物理特征，不涉及语义"""
+    stripped = para.strip()
+    if not stripped:
+        return True
+    # 标题行保留
+    if stripped.startswith('#'):
+        return False
+    # 纯符号行
+    if re.match(r'^[\s\-–—*•·■●◦✓✕✗✘☐☑☒\+=\\/|_~]+$', stripped):
+        return True
+    if re.match(r'^[0-9\s/\-+\|·■●]+$', stripped):
+        return True
+    return False
 
 
 # ===================================================================
-# Level 2: CRAG 三级质量评分 — 零模型，加强版信号
+# Level 2: LLM Prompt 驱动质量评分（R2）
 # ===================================================================
 
-# 新西兰主要城镇/城市（行首识别用）
-_NZ_PLACES = [
-    "Auckland", "Wellington", "Christchurch", "Queenstown", "Rotorua",
-    "Hamilton", "Tauranga", "Dunedin", "Napier", "Hastings",
-    "New Plymouth", "Whangarei", "Invercargill", "Nelson", "Blenheim",
-    "Timaru", "Palmerston North", "Gisborne", "Whanganui", "Taupo",
-    "Picton", "Kaikoura", "Wanaka", "Franz Josef", "Fox Glacier",
-    "Mount Cook", "Tekapo", "Waitomo", "Coromandel", "Bay of Islands",
-    "Paihia", "Waitangi", "Russell", "Kerikeri", "Matamata",
-    "Hobbiton", "Tongariro", "Abel Tasman", "Milford Sound", "Doubtful Sound",
-    "Stewart Island", "Waiheke", "Rangitoto", "White Island", "Lake Taupo",
-    "Lake Wanaka", "Lake Wakatipu", "Lake Tekapo", "Mackenzie", "Canterbury",
-    "Otago", "Fiordland", "Marlborough", "Waikato", "Northland",
-    "Bay of Plenty", "Hawke", "Manawatu", "Wairarapa", "West Coast",
-    "Aoraki", "Tasman", "Hokitika", "Greymouth", "Oamaru",
-    "Gore", "Te Anau", "Murchison", "Motueka", "Kaikoura",
-]
+def _llm_score(text: str, tokenizer, model) -> float:
+    """用 LLM 评估单段文本质量，返回 0~1 分数
+    无模型时使用纯物理结构降级（字符长度，不涉及语义关键词）
+    """
+    if tokenizer is None or model is None:
+        # 降级：纯长度判断（唯一的结构特征，不涉及语义关键词）
+        t = text.strip()
+        if len(t) < 15:
+            return 0.1
+        if len(t) >= 200:
+            return 0.7
+        if len(t) >= 50:
+            return 0.6
+        return 0.4
 
-# 新西兰常见毛利语/特有词汇
-_NZ_WORDS = [
-    "iwi", "hapu", "whanau", "marae", "tangata whenua",
-    "kiwi", "kaka", "pukeko", "tui", "kea",
-    "DOC", "NZTA", "SH\d", "State Highway",
-    "Great Walk", "Great Walks",
-    "Department of Conservation",
-    "Freedom Camping", "self-contained",
-    "kiwifruit", "pavlova", "lamington",
-    "bach", "crib", "tramping", "tramp",
-    "four-wheel drive", "4WD",
-    "hut", "huts", "backcountry",
-    "sanctuary", "pest-free", "predator-free",
-    "Māori", "Maori",
-]
-
-# 中文新西兰地名关键词
-_NZ_CN_KEYWORDS = [
-    "新西兰", "奥克兰", "惠灵顿", "基督城", "皇后镇",
-    "罗托鲁瓦", "但尼丁", "尼尔森", "皮克顿",
-    "库克山", "特卡波", "福克斯冰川", "弗朗兹约瑟夫",
-    "米尔福德", "神奇峡湾", "阿贝尔塔斯曼",
-    "霍比屯", "玛塔玛塔", "怀托摩",
-    "北岛", "南岛", "斯图尔特岛",
-    "凯库拉", "瓦纳卡", "瓦卡蒂普",
-    "汤加里罗", "峡湾", "国家公园",
-    "步道", "徒步", "营地", "自驾",
-]
-
-# 构建行首地名正则
-_PLACE_START_PATTERN = r"^(?:" + "|".join(_NZ_PLACES) + r")\b"
-
-_SIGNAL_POSITIVE = {
-    "has_number": lambda t: bool(re.search(r'\d+', t)),
-    "starts_with_place": lambda t: bool(re.match(_PLACE_START_PATTERN, t.strip())),
-    "has_proper_en": lambda t: len(re.findall(r'\b[A-Z][a-z]{2,}\b', t)) >= 2,
-    "has_proper_cn": lambda t: bool(re.findall(r'[\u4e00-\u9fff]{2,}(?:公园|岛|山|湖|河|镇|城|市|区|路|桥|博物馆|广场|海滩|峡湾|冰川|瀑布|温泉|国家公园|机场|港|湾|步道|营地)', t)),
-    "has_nz_word": lambda t: any(re.search(r'\b' + w.replace(' ', r'\s+') + r'\b', t, re.I)
-                                  for w in _NZ_WORDS if re.match(r'[A-Za-z]', w)),
-    "has_nz_cn": lambda t: any(w in t for w in _NZ_CN_KEYWORDS),
-    "has_actionable": lambda t: bool(re.search(
-        r'(?i)(recommend|suggest|tip|best|top|must|essential|'
-        r'开|开放|门票|价格|费用|预订|电话|地址|交通|路线|距离|'
-        r'驾车|步行|航班|住宿|餐厅|酒店|攻略|游记|推荐)', t)),
-    "has_duration": lambda t: bool(re.search(
-        r'\d+\s*(h|hr|min|分钟|小时|天|day|days|km|km/h|kph|'
-        r'NZD|\$|米|meters|公里|公里/小时)', t, re.I)),
-    "has_travel_word": lambda t: bool(re.search(
-        r'(?i)(drive|walk|fly|ferry|bus|train|scenic|view|'
-        r'coast|beach|lake|mountain|island|trail|track|road|route|'
-        r'visit|tour|trip|journey|flight|accommodation|hotel)', t)),
-    "has_verb_phrase": lambda t: bool(re.search(
-        r'(?i)(you can|you will|you should|you need|you must|'
-        r'enjoy|explore|discover|experience|visit|see|find|'
-        r'located|situated|offers|features|provides)', t)),
-    "has_direction": lambda t: bool(re.search(
-        r'(?i)(north of|south of|east of|west of|'
-        r'between|along|near|next to|opposite|'
-        r'in the heart|minutes from|km from|drive from)', t)),
-    "has_list_marker": lambda t: bool(re.match(
-        r'\s*(?:\d+[\.\)]\s|[-*•·]\s|•\s)', t)),
-    "has_geography": lambda t: bool(re.search(
-        r'(?i)(coast|harbour|harbor|peninsula|isthmus|'
-        r'bay|beach|cliff|valley|ridge|peak|volcano|'
-        r'glacier|fjord|fiord|waterfall|hot spring|geyser)', t)),
-}
-
-_SIGNAL_NEGATIVE = {
-    "too_short": lambda t: len(t) < 20,
-    "too_long": lambda t: len(t) > 3000,
-    "only_links": lambda t: len(t.split('\n')) > 3 and all(
-        '/' in l or l.startswith('-') for l in t.split('\n') if l.strip()),
-    "boilerplate": lambda t: _is_boilerplate(t),
-    "too_many_caps": lambda t: len(re.findall(r'\b[A-Z]{3,}\b', t)) > 5,
-    "all_short_lines": lambda t: len(t.split('\n')) > 5 and all(
-        len(l.strip()) < 10 for l in t.split('\n') if l.strip()),
-}
+    prompt = _get_r2_prompt().format(text=text[:2000])
+    try:
+        messages = [{"role": "user", "content": prompt}]
+        inputs = tokenizer.apply_chat_template(
+            messages, tokenize=True, add_generation_prompt=True,
+            return_tensors="pt"
+        ).to(model.device)
+        outputs = model.generate(
+            **inputs, max_new_tokens=8,
+            do_sample=False, use_cache=True,
+        )
+        response = tokenizer.decode(
+            outputs[0][inputs["input_ids"].shape[1]:], skip_special_tokens=True
+        ).strip()
+        # 解析数字
+        score = float(re.search(r'[\d.]+', response).group()) if re.search(r'[\d.]+', response) else 0.5
+        return min(max(score, 0.0), 1.0)
+    except Exception:
+        return 0.5
 
 
-def _crag_score(para: str) -> Tuple[float, Dict]:
-    """CRAG 三级评分：返回 (score, signal_dict)"""
-    text = para.strip()
-    if not text:
-        return 0.0, {}
-    signals = {}
-    pos_score = 0.0
-    pos_count = 0
-    for name, fn in _SIGNAL_POSITIVE.items():
-        if fn(text):
-            signals[name] = True
-            pos_score += 0.12
-            pos_count += 1
-    # 高分奖金：小幅补贴，避免通用词广告绕过R3
-    if pos_count >= 5:
-        pos_score += 0.08
-    elif pos_count >= 4:
-        pos_score += 0.05
-
-    neg_score = 0.0
-    for name, fn in _SIGNAL_NEGATIVE.items():
-        if fn(text):
-            signals[name] = True
-            if name == "too_short":
-                neg_score -= 0.3
-            elif name == "too_long":
-                neg_score -= 0.1
-            elif name == "boilerplate":
-                neg_score -= 0.25
-            elif name == "too_many_caps":
-                neg_score -= 0.2
-            elif name == "all_short_lines":
-                neg_score -= 0.25
-            else:
-                neg_score -= 0.2
-
-    length = len(text)
-    if 200 <= length <= 1500:
-        pos_score += 0.1
-    elif 80 <= length <= 200:
-        pos_score += 0.05
-    if text.startswith('#'):
-        pos_score += 0.3
-
-    score = 0.5 + pos_score + neg_score
-    score = min(max(score, 0.0), 1.0)
-    return score, signals
-
-
-def _crag_level(score: float) -> str:
+def _llm_level(score: float) -> str:
+    """将 LLM 分数映射为 CORRECT/AMBIGUOUS/INCORRECT"""
     if score >= 0.6:
         return "CORRECT"
     elif score >= 0.3:
@@ -279,84 +265,30 @@ def _crag_level(score: float) -> str:
 
 
 # ===================================================================
-# Level 3: Qwen3-14B 批量评估 — 简化输出格式
+# Level 3: 批量 LLM 评估（R3）
 # ===================================================================
 
-from rag_knowledge_base.config import load_model, load_qwen3, CLEANER_MODEL_ID, QWEN3_MODEL_ID
-
-# 新版批量 prompt：编号+简化输出，编号匹配消除错位
-# 分类 prompt（用于14B，只输出 CORRECT/INCORRECT）
-_BATCH_CLASSIFY_PROMPT = """你是一个旅游文本分类器。下面有多段文本，每段有编号，请快速判断每段是否包含实际新西兰旅游信息。
-
-对每段，只输出（严格按此格式，一行一个）：
-[N] CORRECT   — 包含旅游信息
-[N] INCORRECT — 纯噪声
-
-规则：
-- **每行输出 [编号] + CORRECT/INCORRECT**，不要多余文字
-- 输出顺序不需要和输入一致，但编号必须正确
-- 快速判断，每段3秒内决定
-
-输入文本：
-{items}
-
-逐行输出：
-"""
-
-
-# 完整 JSON 输出 prompt（用于1.5B，输出 judgement + 提取文本）
-_BATCH_R3_PROMPT = """你是一个旅游文本提取筛选系统。下面有多段文本，每段有编号。请判断每段是否包含实际新西兰旅游信息，如果包含则提取有用内容，如果只有噪声则标记丢弃。
-
-对每段，输出一行 JSON（严格一行一个）：
-{{"idx": 编号, "judgment": "CORRECT|INCORRECT", "output": "保留的有用文本（噪声则空字符串）"}}
-
-规则：
-- CORRECT = 有实际旅游信息 → output 写去除噪声后的文本
-- INCORRECT = 纯噪声 → output 写 ""
-- 快速判断，每段3秒内决定
-- 输出纯 JSON，不要多余文字
-
-输入文本：
-{items}
-
-逐行输出：
-"""
+from rag_knowledge_base.config import load_model, CLEANER_MODEL_ID, QWEN3_MODEL_ID
 
 
 def _batch_r3_evaluate(
-    batch_items: List[Tuple[int, str]],  # [(行号索引, stripped_text), ...]
+    batch_items: List[Tuple[int, str]],
     tokenizer,
     model,
-) -> List[Tuple[str, str, bool]]:  # [(judgment, output_text, is_kept)]
-    """
-    批量评估一组 AMBIGUOUS 行。
-    根据模型大小自动选择策略：
-      14B: 纯分类 [N] CORRECT/INCORRECT（节省 token）
-      1.5B: 完整 JSON（模型小，生成成本低）
-    """
+) -> List[Tuple[str, str, bool]]:
+    """用 LLM 批量评估 AMBIGUOUS 行"""
     if tokenizer is None or model is None or not batch_items:
-        return [(_crag_level(_crag_score(t)[0]), t, _crag_score(t)[0] >= 0.3)
-                for _, t in batch_items]
+        return [("AMBIGUOUS", t, True) for _, t in batch_items]
 
-    # 根据模型大小自动选择策略：14B 用纯分类省 token，小模型用完整 JSON
-    model_name = getattr(model, "_name_or_path", "").lower()
-    use_classification = "14b" in model_name  # 14B慢→纯分类省token; 1.5B快→JSON提取更准
-
-    # 构造批量 prompt
+    prompt_template = _get_r3_prompt()
     lines = []
     for idx, stripped in batch_items:
-        text = stripped[:300]  # 每行截短
+        text = stripped[:300]
         lines.append(f"[{idx}] {text}")
 
     items_text = "\n---\n".join(lines)
-
-    # 根据策略选择模板和 token 预算
-    if use_classification:
-        prompt = _BATCH_CLASSIFY_PROMPT.format(total=len(batch_items), items=items_text)
-        max_new_tokens = min(300, 8 * len(batch_items) + 32)
-    else:
-        prompt = _BATCH_R3_PROMPT.format(total=len(batch_items), items=items_text)
-        max_new_tokens = min(600, 40 * len(batch_items) + 80)
+    prompt = prompt_template.format(items=items_text)
+    max_new_tokens = min(300, 8 * len(batch_items) + 32)
 
     try:
         messages = [{"role": "user", "content": prompt}]
@@ -364,68 +296,45 @@ def _batch_r3_evaluate(
             messages, tokenize=True, add_generation_prompt=True,
             return_tensors="pt"
         ).to(model.device)
-
-        # 根据策略选择生成的 token 数
         outputs = model.generate(
             **inputs,
             max_new_tokens=max_new_tokens,
             do_sample=False,
+            use_cache=True,
         )
         response = tokenizer.decode(
             outputs[0][inputs["input_ids"].shape[1]:], skip_special_tokens=True
         ).strip()
 
-        # 解析输出：严格用 [N] CORRECT/INCORRECT 格式匹配
-        # 支持 [N] CORRECT、[N]INCORRECT、N:CORRECT 等变体
         results = {}
         for line in response.split('\n'):
             line = line.strip()
             if not line:
                 continue
-            if use_classification:
-                # [N] CORRECT/INCORRECT 格式
-                m = re.match(r'\[?(\d+)\]?[:\.]?\s*(CORRECT|INCORRECT)\b', line, re.I)
-                if m:
-                    idx = int(m.group(1))
-                    is_correct = m.group(2).upper() == "CORRECT"
-                    if idx in [it[0] for it in batch_items]:
-                        # 找到原始文本
-                        orig_text = ""
-                        for batch_idx, batch_stripped in batch_items:
-                            if batch_idx == idx:
-                                orig_text = batch_stripped
-                                break
-                        results[idx] = (is_correct, orig_text)  # 分类模式保留原文
-            else:
-                # JSON 格式（用于 1.5B）
-                json_match = re.search(r'\{.*\}', line, re.DOTALL)
-                if json_match:
-                    try:
-                        result = json.loads(json_match.group())
-                        idx = result.get("idx")
-                        if idx is not None and idx in [it[0] for it in batch_items]:
-                            judgment = result.get("judgment", "INCORRECT").upper()
-                            output_str = result.get("output", "")
-                            is_correct = judgment == "CORRECT" and bool(output_str)
-                            results[idx] = (is_correct, output_str)  # JSON模式用提取文本
-                    except (json.JSONDecodeError, Exception):
-                        continue
+            m = re.match(r'\[?(\d+)\]?[:\.]?\s*(CORRECT|INCORRECT)\b', line, re.I)
+            if m:
+                idx = int(m.group(1))
+                is_correct = m.group(2).upper() == "CORRECT"
+                if idx in [it[0] for it in batch_items]:
+                    orig_text = ""
+                    for batch_idx, batch_stripped in batch_items:
+                        if batch_idx == idx:
+                            orig_text = batch_stripped
+                            break
+                    results[idx] = (is_correct, orig_text)
 
-        # 填结果（缺失项回退R2）
         final = []
         for orig_idx, stripped in batch_items:
             if orig_idx in results:
                 is_correct, output_text = results[orig_idx]
                 final.append(("CORRECT" if is_correct else "INCORRECT", output_text, is_correct))
             else:
-                score, _ = _crag_score(stripped)
-                final.append((_crag_level(score), stripped, score >= 0.3))
-
+                final.append(("AMBIGUOUS", stripped, True))
         return final
 
     except Exception:
-        return [(_crag_level(_crag_score(t)[0]), t, _crag_score(t)[0] >= 0.3)
-                for _, t in batch_items]
+        return [("AMBIGUOUS", t, True) for _, t in batch_items]
+
 
 # ===================================================================
 # 主清洗流程
@@ -449,17 +358,14 @@ def clean_text(
     model_id: Optional[str] = None,
 ) -> str:
     """
-    基于 CRAG 的文本清洗主流程
+    基于 LLM 驱动的文本清洗主流程（零硬编码关键词）
 
-    参数:
-      backend: "rule" | "qwen3" | "qwen2.5" | None (从 config 读取)
-      threshold: R2→R3 阈值（默认0.5，环境变量 CLEANER_THRESHOLD）
-      file_label: 当前文件名（用于实时进度显示）
-      batch_size: R3 批量大小（默认8，环境变量 CLEANER_BATCH_SIZE）
-      model_id: 模型 ID，默认从 CLEANER_MODEL_ID 或 QWEN3_MODEL_ID 读取
+    流程：
+      R1: 结构过滤（纯物理特征）
+      R2: LLM Prompt 驱动质量评分（by BUILD_MODE）
+      R3: LLM 批量评估模糊片段
     """
     import time as _time
-    # 确定后端
     if backend is None:
         try:
             backend = CLEANER_BACKEND
@@ -480,12 +386,11 @@ def clean_text(
         "total": 0, "title": 0,
         "r1_noise": 0, "r2_incorrect": 0,
         "r3_keep": 0, "r3_drop": 0,
-        "kept": 0,
-        "r3_batches": 0,
+        "kept": 0, "r3_batches": 0,
     }
 
     tokenizer, model = None, None
-    if backend == "qwen3" or backend == "qwen2.5":
+    if backend in ("qwen3", "qwen2.5"):
         if model_id is None:
             model_id = _RUNTIME_DEFAULTS["model_id"]
         tokenizer, model = load_model(model_id, "清洗器")
@@ -496,12 +401,11 @@ def clean_text(
     _prefix = f" [{file_label}]" if file_label else ""
 
     # R3 攒批缓存
-    r3_batch = []  # [(行号索引, stripped_text)]
+    r3_batch = []
     _last_r3_flush = _time.time()
-    _max_r3_wait = 60  # 最长等待 60 秒自动 flush
+    _max_r3_wait = 60
 
     def _flush_r3_batch():
-        """处理攒批的 R3 行（含时间触发）"""
         nonlocal r3_batch
         if not r3_batch:
             return
@@ -537,17 +441,17 @@ def clean_text(
             stats["kept"] += 1
             continue
 
-        # R1: 规则噪声
-        if _is_rule_noise(stripped):
+        # R1: 结构噪声（纯物理过滤，不涉及语义）
+        if _is_structural_noise(stripped):
             stats["r1_noise"] += 1
             continue
         if len(stripped) < 15:
             stats["r1_noise"] += 1
             continue
 
-        # R2: CRAG 三级评分
-        score, signals = _crag_score(stripped)
-        level = _crag_level(score)
+        # R2: LLM 评分
+        score = _llm_score(stripped, tokenizer, model) if backend in ("qwen3", "qwen2.5") else 0.5
+        level = _llm_level(score)
 
         if level == "CORRECT":
             cleaned.append(stripped)
@@ -558,20 +462,21 @@ def clean_text(
             continue
 
         # AMBIGUOUS → 攒入 R3 批
-        if (backend == "qwen3" or backend == "qwen2.5") and tokenizer is not None:
+        if backend in ("qwen3", "qwen2.5") and tokenizer is not None:
             r3_batch.append((idx, stripped))
             now = _time.time()
             if len(r3_batch) >= batch_size or (len(r3_batch) > 0 and now - _last_r3_flush >= _max_r3_wait):
                 _flush_r3_batch()
                 _last_r3_flush = _time.time()
         else:
+            # rule 后端：用 LLM 评分（或 fallback 0.5）直接决定
             if score >= threshold:
                 cleaned.append(stripped)
                 stats["kept"] += 1
             else:
-                stats["r3_drop"] += 1
+                stats["r2_incorrect"] += 1
 
-        # ⏱ 实时进度输出：每 10 行或每 5 秒刷新一次
+        # 实时进度
         now = _time.time()
         if (idx + 1) < total_lines and ((idx + 1) % 10 == 0 or (now - _last_report) >= 5.0):
             _last_report = now
@@ -582,7 +487,6 @@ def clean_text(
                   f"{speed:.1f}行/秒 | R3调{_qwen_call_count}次 | "
                   f"⏳R3待flush({len(r3_batch)})", flush=True)
 
-    # 处理剩余的 R3 批
     _flush_r3_batch()
 
     result = '\n'.join(cleaned)
@@ -590,8 +494,8 @@ def clean_text(
     if stats["total"] > 0:
         elapsed = _time.time() - _start_time
         kept_pct = stats["kept"] / stats["total"] * 100
-        print(f"  📊 CRAG 清洗{_prefix}: {stats['total']}行→{stats['kept']}行({kept_pct:.0f}%) "
-              f"R1噪声{stats['r1_noise']} R2低质{stats['r2_incorrect']} "
+        print(f"  📊 LLM清洗{_prefix}: {stats['total']}行→{stats['kept']}行({kept_pct:.0f}%) "
+              f"R1结构过滤{stats['r1_noise']} R2低质{stats['r2_incorrect']} "
               f"R3保留{stats['r3_keep']} R3丢弃{stats['r3_drop']}"
               + (f" R3批{stats['r3_batches']}" if stats['r3_batches'] else "")
               + f" | 耗时{elapsed:.0f}s")
@@ -605,7 +509,6 @@ def clean_file(
     backend: Optional[str] = None,
     threshold: Optional[float] = None,
 ) -> Optional[str]:
-    """清洗单个文件"""
     if output_dir is None:
         output_dir = CLEANED_DIR
     try:
@@ -620,7 +523,6 @@ def clean_file(
 
 
 def _batch_clean_worker(args):
-    """并行 worker：清洗单个文件"""
     input_dir_str, output_dir_str, backend, threshold, fname = args
     input_dir = Path(input_dir_str)
     output_dir = Path(output_dir_str)
@@ -644,17 +546,14 @@ def batch_clean(
     threshold: Optional[float] = None,
     parallel: int = 2,
 ) -> int:
-    """批量清洗所有 raw 文件（支持多文件并行）
-
-    参数:
-      with_summary: 保留兼容，已禁用
-      threshold: R2→R3 阈值
-      parallel: 并行文件数（默认2，环境变量 CLEANER_PARALLEL）
-    """
     if input_dir is None:
         input_dir = RAW_DIR
+    elif not isinstance(input_dir, Path):
+        input_dir = Path(input_dir)
     if output_dir is None:
         output_dir = CLEANED_DIR
+    elif not isinstance(output_dir, Path):
+        output_dir = Path(output_dir)
     if backend is None:
         try:
             backend = CLEANER_BACKEND
@@ -670,62 +569,29 @@ def batch_clean(
         print(f"  ⚠️ raw 目录为空: {input_dir}")
         return 0
 
-    print(f"\n🧹 CRAG 批量清洗: {len(files)} 个文件 "
-          f"(backend={backend}, threshold={threshold}, "
+    mode = os.environ.get("BUILD_MODE", "balanced")
+    print(f"\n🧹 LLM Prompt 驱动清洗: {len(files)} 个文件 "
+          f"(backend={backend}, BUILD_MODE={mode}, "
           f"batch_size={_RUNTIME_DEFAULTS['batch_size']}, parallel={parallel})")
-    print(f"  ℹ️  不做文档级总结，仅做行级 CRAG 筛选")
 
     import time as _ctime
     _cstart = _ctime.time()
 
-    if parallel > 1 and len(files) > 1 and backend not in ("qwen3", "qwen2.5"):
-        # 并行模式（仅 rule 后端，qwen 模型加载子进程会 OOM）
-        from concurrent.futures import ProcessPoolExecutor, as_completed
-
-        args_list = [
-            (str(input_dir), str(output_dir), backend, threshold, f.name)
-            for f in files
-        ]
-        count = 0
-        total_raw = 0
-        with ProcessPoolExecutor(max_workers=parallel) as executor:
-            futures = {executor.submit(_batch_clean_worker, args): args for args in args_list}
-            for i, future in enumerate(as_completed(futures)):
-                try:
-                    result = future.result()
-                    fname, status, raw_len = result
-                    if status == "OK":
-                        count += 1
-                        total_raw += raw_len
-                    else:
-                        print(f"  ❌ {fname}: {status}")
-                except Exception as e:
-                    print(f"  ❌ 并行任务异常: {e}")
-                if (i + 1) % 5 == 0 or i == len(files) - 1:
-                    elapsed = _ctime.time() - _cstart
-                    fps = (i + 1) / elapsed if elapsed > 0 else 0
-                    print(f"  📁 文件进度: {i+1}/{len(files)} | {fps:.2f}文件/秒")
-    else:
-        # 串行模式（qwen3 或 parallel=1）
-        if parallel > 1 and (backend == "qwen3" or backend == "qwen2.5"):
-            print(f"  ℹ️  后端=qwen3/qwen2.5，禁用并行（单进程加载模型）")
-        count = 0
-        for fi, f in enumerate(files):
-            try:
-                raw = f.read_text(encoding="utf-8")
-            except Exception:
-                print(f"  ❌ {f.name}: 读取失败")
-                continue
-
-            cleaned = clean_text(raw, backend=backend, threshold=threshold, file_label=f.name[:40])
-            out = output_dir / f.name
-            out.write_text(cleaned, encoding="utf-8")
-            count += 1
-
-            if count % 10 == 0 or fi == len(files) - 1:
-                elapsed = _ctime.time() - _cstart
-                fps = (fi + 1) / elapsed if elapsed > 0 else 0
-                print(f"  📁 文件 {fi+1}/{len(files)} | 已完成 {count} 个 | {fps:.2f}文件/秒")
+    count = 0
+    for fi, f in enumerate(files):
+        try:
+            raw = f.read_text(encoding="utf-8")
+        except Exception:
+            print(f"  ❌ {f.name}: 读取失败")
+            continue
+        cleaned = clean_text(raw, backend=backend, threshold=threshold, file_label=f.name[:40])
+        out = output_dir / f.name
+        out.write_text(cleaned, encoding="utf-8")
+        count += 1
+        if count % 10 == 0 or fi == len(files) - 1:
+            elapsed = _ctime.time() - _cstart
+            fps = (fi + 1) / elapsed if elapsed > 0 else 0
+            print(f"  📁 文件 {fi+1}/{len(files)} | 已完成 {count} 个 | {fps:.2f}文件/秒")
 
     raw_size = sum(f.stat().st_size for f in files)
     cleaned_files = sorted(output_dir.glob("*.txt"))
@@ -740,17 +606,12 @@ def batch_clean(
 
 if __name__ == "__main__":
     import argparse
-    p = argparse.ArgumentParser(description="CRAG 文本清洗器")
-    p.add_argument("--backend", choices=["rule", "qwen3"], default=None,
-                   help="清洗后端（默认从 config 读取）")
-    p.add_argument("--threshold", type=float, default=None,
-                   help=f"R2→R3 阈值（默认 {_RUNTIME_DEFAULTS['threshold']}，环境变量 CLEANER_THRESHOLD）")
-    p.add_argument("--batch-size", type=int, default=None,
-                   help=f"R3 批量大小（默认 {_RUNTIME_DEFAULTS['batch_size']}，环境变量 CLEANER_BATCH_SIZE）")
-    p.add_argument("--parallel", type=int, default=2,
-                   help="并行文件数（默认 2，环境变量 CLEANER_PARALLEL）")
-    p.add_argument("--file", type=str, default=None,
-                   help="清洗单个文件，不传则批量")
+    p = argparse.ArgumentParser(description="LLM Prompt 驱动文本清洗器")
+    p.add_argument("--backend", choices=["rule", "qwen3"], default=None)
+    p.add_argument("--threshold", type=float, default=None)
+    p.add_argument("--batch-size", type=int, default=None)
+    p.add_argument("--parallel", type=int, default=2)
+    p.add_argument("--file", type=str, default=None)
     args = p.parse_args()
 
     if args.file:
