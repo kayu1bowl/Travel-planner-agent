@@ -26,11 +26,13 @@ import {
   Crosshair,
   Wifi,
   Cpu,
-  Radio
+  Radio,
+  Play,
+  Pause
 } from 'lucide-react';
 import { TRANSLATIONS } from '../services/i18n';
 
-// 庞大且多维度的全球 4K 震撼风光大片库 (Unsplash 4K 旗舰画质，涵盖各大洲地标与自然秘境)
+// 庞大且多维度的全球 4K 震撼风光大片库 (Unsplash 4K 旗舰画质)
 const GLOBAL_SCENIC_CAROUSEL = [
   {
     url: "https://images.unsplash.com/photo-1507699622108-4be3abd695ad?w=1920&auto=format&fit=crop&q=85",
@@ -114,6 +116,114 @@ const GLOBAL_SCENIC_CAROUSEL = [
   }
 ];
 
+// 大师级全球专业摄影机位全量库 (含真实焦段、曝光参数、银河/蓝调窗口与机位构图建议)
+const GLOBAL_MASTER_PHOTO_SPOTS = [
+  {
+    image: "https://images.unsplash.com/photo-1507699622108-4be3abd695ad?w=1920&auto=format&fit=crop&q=85",
+    name: "特卡波湖好牧羊人教堂",
+    spotType: "ASTROPHOTOGRAPHY · 暗夜星空机位",
+    iso: "ISO 3200",
+    shutter: "20s",
+    aperture: "f/2.8",
+    focal: "14mm GM",
+    elevation: "710m",
+    bortle: "Class 1 极暗天空",
+    window: "银河拱桥升起 23:30 - 03:15",
+    tip: "超广角低机位仰拍，石砌教堂作为前景容纳整片银河拱桥，避开镇中心杂光。"
+  },
+  {
+    image: "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=1920&auto=format&fit=crop&q=85",
+    name: "瓦纳卡罗伊斯山峰",
+    spotType: "GOLDEN HOUR · 晨光云海脊线",
+    iso: "ISO 100",
+    shutter: "1/200s",
+    aperture: "f/8.0",
+    focal: "35mm F1.4",
+    elevation: "1578m",
+    bortle: "日出顺逆光",
+    window: "黄金时刻 06:15 - 07:00",
+    tip: "逆光拍摄山脊延伸至瓦纳卡湖，使用 CPL 偏振镜消除湖面反光与杂色。"
+  },
+  {
+    image: "https://images.unsplash.com/photo-1433086966358-54859d0ed716?w=1920&auto=format&fit=crop&q=85",
+    name: "米尔福德峡湾教皇冠峰",
+    spotType: "BLUE HOUR · 峡湾镜面倒影",
+    iso: "ISO 100",
+    shutter: "30s (ND64)",
+    aperture: "f/11",
+    focal: "16-35mm",
+    elevation: "海平面",
+    bortle: "晨雾蓝调",
+    window: "蓝调时刻 07:20 - 08:00",
+    tip: "利用退潮沙滩水面长曝光消除水波，捕捉倒映在深色海水中的教皇冠峰。"
+  },
+  {
+    image: "https://images.unsplash.com/photo-1516298773066-c48f8e9bd92b?w=1920&auto=format&fit=crop&q=85",
+    name: "富士山浅间公园五重塔",
+    spotType: "SUNSET ICONIC · 经典和风机位",
+    iso: "ISO 200",
+    shutter: "1/60s",
+    aperture: "f/5.6",
+    focal: "50mm F1.8",
+    elevation: "850m",
+    bortle: "夕阳暖调",
+    window: "日落晚霞 17:15 - 18:00",
+    tip: "使用中焦段将忠灵塔与远方雪白富士山同框压缩，日落前 30 分钟塔身亮灯最佳。"
+  },
+  {
+    image: "https://images.unsplash.com/photo-1530122037265-a5f1f91d3b99?w=1920&auto=format&fit=crop&q=85",
+    name: "采尔马特利菲尔湖倒影",
+    spotType: "ALPINE REFLECTION · 黄金日照金山",
+    iso: "ISO 100",
+    shutter: "1/125s",
+    aperture: "f/8.0",
+    focal: "24mm F1.4",
+    elevation: "2757m",
+    bortle: "晨曦金光",
+    window: "日出金顶 05:45 - 06:20",
+    tip: "清晨无风时湖面如镜，低机位蹲守马特洪峰第一缕金色朝霞倒映在利菲尔湖。"
+  },
+  {
+    image: "https://images.unsplash.com/photo-1534447677768-be436bb09401?w=1920&auto=format&fit=crop&q=85",
+    name: "挪威罗弗敦雷纳村极光",
+    spotType: "AURORA CHASER · 极光红木屋",
+    iso: "ISO 1600",
+    shutter: "8s",
+    aperture: "f/1.8",
+    focal: "14mm GM",
+    elevation: "15m",
+    bortle: "Kp 4-6 极光带",
+    window: "绿光爆发 21:00 - 01:30",
+    tip: "红色高脚渔屋作为暖色前景，大光圈长曝捕捉峡湾雪山上方舞动的绿色极光弧。"
+  },
+  {
+    image: "https://images.unsplash.com/photo-1513581166391-887a96ddeafd?w=1920&auto=format&fit=crop&q=85",
+    name: "意大利多洛米蒂休斯高原",
+    spotType: "DRAMATIC ALPS · 巨峰光影漫游",
+    iso: "ISO 100",
+    shutter: "1/160s",
+    aperture: "f/8.0",
+    focal: "70mm F2.8",
+    elevation: "2000m",
+    bortle: "暮色金辉",
+    window: "夕阳金辉 18:30 - 19:15",
+    tip: "使用中长焦压缩高山草甸木屋与垂直耸立的萨索伦戈白云石巨峰之间的空间层次。"
+  },
+  {
+    image: "https://images.unsplash.com/photo-1508873696983-2df5293cb32b?w=1920&auto=format&fit=crop&q=85",
+    name: "冰岛杰古沙龙钻石冰沙滩",
+    spotType: "GLACIER SEASCAPE · 远古冰晶慢门",
+    iso: "ISO 100",
+    shutter: "2s (ND8)",
+    aperture: "f/11",
+    focal: "24mm GM",
+    elevation: "海平面",
+    bortle: "冷冽晨光",
+    window: "日出微光 07:00 - 08:30",
+    tip: "贴近黑色火山沙滩上剔透的蓝色冰块，慢门雾化海浪退去时的白色拉丝水花。"
+  }
+];
+
 export default function WelcomeLandingView({
   language,
   onToggleLanguage,
@@ -124,56 +234,16 @@ export default function WelcomeLandingView({
 }) {
   const [inputText, setInputText] = useState('');
   const [selectedTags, setSelectedTags] = useState([]);
-  const [activePhotoSpotIndex, setActivePhotoSpotIndex] = useState(0);
   
+  // 影像机位当前索引与自动播放状态
+  const [activePhotoSpotIndex, setActivePhotoSpotIndex] = useState(0);
+  const [isVisionAutoPlaying, setIsVisionAutoPlaying] = useState(true);
+
   // 随机起始大片索引，每次进入页面都是新风景
   const [heroSlideIndex, setHeroSlideIndex] = useState(() => Math.floor(Math.random() * GLOBAL_SCENIC_CAROUSEL.length));
   const inputRef = useRef(null);
 
   const t = TRANSLATIONS[language]?.welcome || TRANSLATIONS.zh.welcome;
-
-  // 摄影机位图源与取景预设 (全屏覆盖)
-  const photoSpotsData = [
-    {
-      image: "https://images.unsplash.com/photo-1507699622108-4be3abd695ad?w=1920&auto=format&fit=crop&q=85",
-      name: "好牧羊人教堂 · 暗夜银河拱桥",
-      spotType: "ASTROPHOTOGRAPHY HUD 01",
-      iso: "ISO 3200",
-      shutter: "20s",
-      aperture: "f/2.8",
-      focal: "14mm GM",
-      elevation: "710m",
-      bortle: "Class 1 (极黑)",
-      window: "银河升起 23:30 - 03:15",
-      tip: "超广角低机位仰拍，石砌教堂作为前景纳整片银河拱桥，避开小镇杂光。"
-    },
-    {
-      image: "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=1920&auto=format&fit=crop&q=85",
-      name: "罗伊斯山峰 · 晨光云海脊线",
-      spotType: "GOLDEN HOUR HUD 02",
-      iso: "ISO 100",
-      shutter: "1/200s",
-      aperture: "f/8.0",
-      focal: "35mm F1.4",
-      elevation: "1578m",
-      bortle: "日出逆光",
-      window: "黄金时刻 06:15 - 07:00",
-      tip: "逆光拍摄山脊延伸至瓦纳卡湖，使用 CPL 偏振镜消除湖面反光与杂色。"
-    },
-    {
-      image: "https://images.unsplash.com/photo-1433086966358-54859d0ed716?w=1920&auto=format&fit=crop&q=85",
-      name: "米尔福德峡湾 · 冠峰镜面倒影",
-      spotType: "BLUE HOUR HUD 03",
-      iso: "ISO 100",
-      shutter: "30s (ND64)",
-      aperture: "f/11",
-      focal: "16-35mm + CPL",
-      elevation: "海平面",
-      bortle: "晨雾蓝调",
-      window: "蓝调时刻 07:20 - 08:00",
-      tip: "利用退潮沙滩水面长曝光消除水波，捕捉倒映在深色海水中的教皇冠峰。"
-    }
-  ];
 
   // 灵感画廊 8 大全球目的地高清大片
   const globalInspirationsList = [
@@ -227,7 +297,7 @@ export default function WelcomeLandingView({
     }
   ];
 
-  // 自动无限轮播 Hero 背景大片 (每 5 秒平滑切换，永无止境)
+  // 1. 自动无限轮播 Hero 背景大片 (每 5 秒平滑切换，永无止境)
   useEffect(() => {
     const timer = setInterval(() => {
       setHeroSlideIndex(prev => (prev + 1) % GLOBAL_SCENIC_CAROUSEL.length);
@@ -235,13 +305,31 @@ export default function WelcomeLandingView({
     return () => clearInterval(timer);
   }, []);
 
-  // 手动切换上一张/下一张
-  const handlePrevSlide = () => {
+  // 2. 自动无限轮播影像机位大片 (每 5 秒平滑切换，支持暂停/播放)
+  useEffect(() => {
+    if (!isVisionAutoPlaying) return;
+    const visionTimer = setInterval(() => {
+      setActivePhotoSpotIndex(prev => (prev + 1) % GLOBAL_MASTER_PHOTO_SPOTS.length);
+    }, 5000);
+    return () => clearInterval(visionTimer);
+  }, [isVisionAutoPlaying]);
+
+  // 手动切换 Hero 上一张/下一张
+  const handlePrevHeroSlide = () => {
     setHeroSlideIndex(prev => (prev - 1 + GLOBAL_SCENIC_CAROUSEL.length) % GLOBAL_SCENIC_CAROUSEL.length);
   };
 
-  const handleNextSlide = () => {
+  const handleNextHeroSlide = () => {
     setHeroSlideIndex(prev => (prev + 1) % GLOBAL_SCENIC_CAROUSEL.length);
+  };
+
+  // 手动切换摄影机位 上一张/下一张
+  const handlePrevVisionSpot = () => {
+    setActivePhotoSpotIndex(prev => (prev - 1 + GLOBAL_MASTER_PHOTO_SPOTS.length) % GLOBAL_MASTER_PHOTO_SPOTS.length);
+  };
+
+  const handleNextVisionSpot = () => {
+    setActivePhotoSpotIndex(prev => (prev + 1) % GLOBAL_MASTER_PHOTO_SPOTS.length);
   };
 
   // 点击偏好标签追加到输入框
@@ -284,6 +372,8 @@ export default function WelcomeLandingView({
       el.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   };
+
+  const currentSpot = GLOBAL_MASTER_PHOTO_SPOTS[activePhotoSpotIndex] || GLOBAL_MASTER_PHOTO_SPOTS[0];
 
   return (
     <div className="fullbleed-welcome-root">
@@ -364,14 +454,14 @@ export default function WelcomeLandingView({
         {/* 左右手动切换大片微控钮 */}
         <button 
           className="hero-carousel-arrow arrow-left"
-          onClick={handlePrevSlide}
+          onClick={handlePrevHeroSlide}
           title="上一张大片"
         >
           <ChevronLeft size={24} />
         </button>
         <button 
           className="hero-carousel-arrow arrow-right"
-          onClick={handleNextSlide}
+          onClick={handleNextHeroSlide}
           title="下一张大片"
         >
           <ChevronRight size={24} />
@@ -553,7 +643,7 @@ export default function WelcomeLandingView({
               </div>
             </div>
 
-            {/* 右侧：3 大数字化指标 */}
+            {/* 右侧：3 大真实数字化指标 */}
             <div className="spatial-metrics-deck">
               {t.spatialEngine.metrics.map((m, idx) => (
                 <div key={idx} className="spatial-deck-card">
@@ -571,12 +661,13 @@ export default function WelcomeLandingView({
 
       {/* =========================================================================
           STAGE 3: 100vw × 100vh 大疆级 Pro 影像 HUD 全屏舞台 (Pro Vision Stage)
+          (大片自动轮播 + 靠侧HUD参数排版，中央视野全透)
           ========================================================================= */}
       <section id="stage-vision" className="fullbleed-stage vision-stage">
-        {/* 全屏摄影大片背景 (随机位点击无缝切换) */}
+        {/* 全屏摄影大片背景 (全量 8 大机位自动轮播或点击切换) */}
         <div 
           className="stage-fullscreen-bg"
-          style={{ backgroundImage: `url('${photoSpotsData[activePhotoSpotIndex]?.image}')` }}
+          style={{ backgroundImage: `url('${currentSpot.image}')` }}
         >
           <div className="stage-overlay-vignette"></div>
         </div>
@@ -601,8 +692,9 @@ export default function WelcomeLandingView({
           </div>
         </div>
 
-        <div className="stage-content-container z-relative">
-          <div className="stage-headline-block">
+        {/* 顶部标题与机位快速滑动条 */}
+        <div className="stage-content-container z-relative vision-top-container">
+          <div className="stage-headline-block vision-headline-block">
             <div className="stage-tag-badge">
               <Camera size={14} color="#3B82F6" />
               <span>{t.proVision.badge}</span>
@@ -611,62 +703,108 @@ export default function WelcomeLandingView({
             <p className="stage-giant-subtitle">{t.proVision.subtitle}</p>
           </div>
 
-          {/* 交互式机位切换选择器 */}
-          <div className="vision-spots-selector">
-            {t.proVision.spots.map((spot, idx) => (
+          {/* 交互式机位快速切换胶囊条 (支持横向滑动与播放状态) */}
+          <div className="vision-spots-scroll-bar">
+            {GLOBAL_MASTER_PHOTO_SPOTS.map((spot, idx) => (
               <button
                 key={idx}
                 className={`vision-spot-capsule ${activePhotoSpotIndex === idx ? 'active' : ''}`}
-                onClick={() => setActivePhotoSpotIndex(idx)}
+                onClick={() => {
+                  setActivePhotoSpotIndex(idx);
+                  setIsVisionAutoPlaying(false);
+                }}
               >
                 <span className="capsule-num">0{idx + 1}</span>
                 <span className="capsule-title">{spot.name}</span>
               </button>
             ))}
           </div>
+        </div>
 
-          {/* HUD 参数仪表板 */}
-          <div className="vision-hud-dashboard">
-            <div className="hud-top-telemetry">
-              <div className="hud-lens-badge">
-                <Camera size={14} color="#60A5FA" />
-                <span>{photoSpotsData[activePhotoSpotIndex]?.spotType}</span>
-              </div>
-
-              <div className="hud-optical-strip">
-                <div className="optical-item">
-                  <span className="opt-label">FOCAL</span>
-                  <span className="opt-val">{photoSpotsData[activePhotoSpotIndex]?.focal}</span>
-                </div>
-                <div className="optical-divider"></div>
-                <div className="optical-item">
-                  <span className="opt-label">APERTURE</span>
-                  <span className="opt-val">{photoSpotsData[activePhotoSpotIndex]?.aperture}</span>
-                </div>
-                <div className="optical-divider"></div>
-                <div className="optical-item">
-                  <span className="opt-label">SHUTTER</span>
-                  <span className="opt-val">{photoSpotsData[activePhotoSpotIndex]?.shutter}</span>
-                </div>
-                <div className="optical-divider"></div>
-                <div className="optical-item highlight">
-                  <span className="opt-label">ISO</span>
-                  <span className="opt-val">{photoSpotsData[activePhotoSpotIndex]?.iso}</span>
-                </div>
-              </div>
+        {/* 靠左侧停靠的精细相机 HUD 悬浮参数控制板 (中央画面全透空出) */}
+        <aside className="vision-sidebar-hud-panel">
+          <div className="sidebar-hud-header">
+            <div className="hud-lens-tag">
+              <Camera size={14} color="#60A5FA" />
+              <span>{currentSpot.spotType}</span>
             </div>
+            
+            {/* 自动播放/暂停开关 */}
+            <button 
+              className="hud-play-toggle-btn"
+              onClick={() => setIsVisionAutoPlaying(!isVisionAutoPlaying)}
+              title={isVisionAutoPlaying ? "暂停自动轮播" : "恢复自动轮播"}
+            >
+              {isVisionAutoPlaying ? (
+                <>
+                  <Pause size={12} color="#10B981" />
+                  <span className="play-state-text">AUTO</span>
+                </>
+              ) : (
+                <>
+                  <Play size={12} color="#94A3B8" />
+                  <span className="play-state-text">PAUSED</span>
+                </>
+              )}
+            </button>
+          </div>
 
-            <div className="hud-bottom-tip-card">
-              <div className="tip-window-tag">
-                <Clock size={13} color="#F59E0B" />
-                <span>{t.proVision.spots[activePhotoSpotIndex]?.window}</span>
-              </div>
-              <div className="tip-text-content">
-                {t.proVision.spots[activePhotoSpotIndex]?.tip}
-              </div>
+          <h3 className="hud-spot-title">{currentSpot.name}</h3>
+
+          {/* 镜头与曝光参数矩阵 */}
+          <div className="hud-optical-grid-box">
+            <div className="opt-grid-item">
+              <span className="opt-label">FOCAL LENS</span>
+              <span className="opt-val">{currentSpot.focal}</span>
+            </div>
+            <div className="opt-grid-item">
+              <span className="opt-label">APERTURE</span>
+              <span className="opt-val">{currentSpot.aperture}</span>
+            </div>
+            <div className="opt-grid-item">
+              <span className="opt-label">SHUTTER</span>
+              <span className="opt-val">{currentSpot.shutter}</span>
+            </div>
+            <div className="opt-grid-item highlight">
+              <span className="opt-label">ISO SPEED</span>
+              <span className="opt-val">{currentSpot.iso}</span>
+            </div>
+            <div className="opt-grid-item">
+              <span className="opt-label">ELEVATION</span>
+              <span className="opt-val">{currentSpot.elevation}</span>
+            </div>
+            <div className="opt-grid-item highlight">
+              <span className="opt-label">SKY / LIGHT</span>
+              <span className="opt-val">{currentSpot.bortle}</span>
             </div>
           </div>
-        </div>
+
+          {/* 采光/银河时间窗与构图建议 */}
+          <div className="hud-tip-card-inner">
+            <div className="tip-window-tag">
+              <Clock size={13} color="#F59E0B" />
+              <span>{currentSpot.window}</span>
+            </div>
+            <div className="tip-text-content">
+              {currentSpot.tip}
+            </div>
+          </div>
+
+          {/* 左右手动换机位微钮 */}
+          <div className="hud-manual-nav-row">
+            <button className="hud-nav-btn" onClick={handlePrevVisionSpot}>
+              <ChevronLeft size={16} />
+              <span>PREV SPOT</span>
+            </button>
+            <div className="hud-spot-counter">
+              {String(activePhotoSpotIndex + 1).padStart(2, '0')} / {String(GLOBAL_MASTER_PHOTO_SPOTS.length).padStart(2, '0')}
+            </div>
+            <button className="hud-nav-btn" onClick={handleNextVisionSpot}>
+              <span>NEXT SPOT</span>
+              <ChevronRight size={16} />
+            </button>
+          </div>
+        </aside>
       </section>
 
       {/* =========================================================================

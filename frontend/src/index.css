@@ -3704,7 +3704,21 @@ body {
 
 /* =========================================================================
    STAGE 3: 大疆级 Pro 影像 HUD 全屏舞台 (Pro Vision Stage)
+   (靠左侧 HUD 参数悬浮舱，中央取景视界 100% 畅通通透)
    ========================================================================= */
+
+.vision-stage {
+  position: relative;
+  width: 100vw;
+  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 100px 48px 48px;
+}
 
 .viewport-camera-hud {
   position: absolute;
@@ -3741,134 +3755,224 @@ body {
   left: 50%;
   transform: translate(-50%, -50%);
   animation: pulse 2s infinite ease-in-out;
+  opacity: 0.6;
 }
 
-.vision-spots-selector {
+.vision-top-container {
+  width: 100%;
+  max-width: 1400px;
   display: flex;
-  justify-content: center;
-  gap: 16px;
+  flex-direction: column;
+  align-items: center;
+  z-index: 15;
+}
+
+.vision-headline-block {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.vision-spots-scroll-bar {
+  display: flex;
+  gap: 10px;
   flex-wrap: wrap;
-  margin-bottom: 36px;
+  justify-content: center;
+  max-width: 1200px;
 }
 
 .vision-spot-capsule {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 10px;
-  padding: 12px 28px;
+  gap: 8px;
+  padding: 8px 18px;
   border-radius: 20px;
   border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(11, 17, 32, 0.8);
+  background: rgba(11, 17, 32, 0.75);
   backdrop-filter: blur(16px);
   color: #94A3B8;
-  font-size: 0.95rem;
-  font-weight: 800;
+  font-size: 0.84rem;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.25s ease;
 }
 
+.vision-spot-capsule:hover {
+  background: rgba(59, 130, 246, 0.18);
+  border-color: rgba(59, 130, 246, 0.4);
+  color: #FFFFFF;
+}
+
 .vision-spot-capsule.active {
-  background: rgba(59, 130, 246, 0.2);
+  background: rgba(59, 130, 246, 0.25);
   border-color: #3B82F6;
-  color: #60A5FA;
-  box-shadow: 0 0 24px rgba(59, 130, 246, 0.3);
-  transform: translateY(-2px);
+  color: #93C5FD;
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.35);
 }
 
 .capsule-num {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   opacity: 0.7;
-}
-
-.vision-hud-dashboard {
-  width: 100%;
-  max-width: 1080px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.hud-top-telemetry {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: rgba(3, 7, 18, 0.8);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 20px;
-  padding: 16px 28px;
-}
-
-.hud-lens-badge {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.88rem;
-  font-weight: 800;
-  color: #FFFFFF;
-  letter-spacing: 0.04em;
-}
-
-.hud-optical-strip {
-  display: flex;
-  align-items: center;
-  gap: 20px;
   font-family: monospace;
 }
 
-.optical-item {
+/* 靠左侧停靠的精细相机 HUD 悬浮参数控制板 */
+.vision-sidebar-hud-panel {
+  position: absolute;
+  bottom: 48px;
+  left: 48px;
+  width: 440px;
+  max-width: calc(100vw - 96px);
+  z-index: 20;
+  background: rgba(3, 7, 18, 0.82);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 24px;
+  padding: 22px 26px;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.06);
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
+  gap: 14px;
+  text-align: left;
+  animation: fadeIn 0.4s ease-out;
 }
 
-.opt-label {
-  font-size: 0.65rem;
+.sidebar-hud-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.hud-lens-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: #60A5FA;
+  text-transform: uppercase;
+}
+
+.hud-play-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 4px 10px;
+  border-radius: 12px;
+  color: #E2E8F0;
+  font-size: 0.7rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.hud-play-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.play-state-text {
+  letter-spacing: 0.05em;
+}
+
+.hud-spot-title {
+  font-size: 1.35rem;
+  font-weight: 900;
+  color: #FFFFFF;
+  line-height: 1.25;
+}
+
+.hud-optical-grid-box {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  background: rgba(15, 23, 42, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 12px 14px;
+}
+
+.opt-grid-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-family: monospace;
+}
+
+.opt-grid-item .opt-label {
+  font-size: 0.62rem;
   color: #64748B;
   font-weight: 800;
+  letter-spacing: 0.04em;
 }
 
-.opt-val {
-  font-size: 1rem;
+.opt-grid-item .opt-val {
+  font-size: 0.86rem;
   font-weight: 800;
   color: #FFFFFF;
+  white-space: nowrap;
 }
 
-.optical-item.highlight .opt-val {
+.opt-grid-item.highlight .opt-val {
   color: #F59E0B;
 }
 
-.optical-divider {
-  width: 1px;
-  height: 20px;
-  background: rgba(255, 255, 255, 0.15);
-}
-
-.hud-bottom-tip-card {
-  background: rgba(3, 7, 18, 0.85);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 20px;
-  padding: 20px 28px;
+.hud-tip-card-inner {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  text-align: left;
+  gap: 6px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 10px;
 }
 
 .tip-window-tag {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  font-size: 0.84rem;
+  gap: 6px;
+  font-size: 0.78rem;
   font-weight: 800;
   color: #F59E0B;
 }
 
 .tip-text-content {
-  font-size: 0.95rem;
-  color: #E2E8F0;
-  line-height: 1.55;
+  font-size: 0.84rem;
+  color: #CBD5E1;
+  line-height: 1.5;
+}
+
+.hud-manual-nav-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 10px;
+}
+
+.hud-nav-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: transparent;
+  border: none;
+  color: #94A3B8;
+  font-size: 0.75rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.hud-nav-btn:hover {
+  color: #60A5FA;
+}
+
+.hud-spot-counter {
+  font-family: monospace;
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: #64748B;
 }
 
 /* =========================================================================
