@@ -2989,11 +2989,16 @@ body {
   width: 36px;
   height: 36px;
   border-radius: 10px;
-  background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
+  background: #0F172A;
   display: flex;
   align-items: center;
   justify-content: center;
   box-shadow: 0 2px 8px rgba(15, 23, 42, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.welcome-logo-icon svg {
+  display: block;
 }
 
 .welcome-brand {
@@ -3025,41 +3030,15 @@ body {
   gap: 12px;
 }
 
-.welcome-dest-pills {
-  display: flex;
-  background: #E2E8F0;
-  padding: 3px;
-  border-radius: 20px;
-  gap: 2px;
-}
-
-.welcome-dest-btn {
-  padding: 5px 12px;
-  border-radius: 16px;
-  border: none;
-  background: transparent;
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: #64748B;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.welcome-dest-btn.active {
-  background: #FFFFFF;
-  color: #0F172A;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
-}
-
 .welcome-lang-btn {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 12px;
+  padding: 6px 14px;
   border-radius: 20px;
   border: 1px solid #CBD5E1;
   background: #FFFFFF;
-  font-size: 0.8rem;
+  font-size: 0.82rem;
   font-weight: 600;
   color: #475569;
   cursor: pointer;
@@ -3069,27 +3048,6 @@ body {
 .welcome-lang-btn:hover {
   background: #F8FAFC;
   border-color: #94A3B8;
-}
-
-.welcome-explore-top-btn {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 7px 16px;
-  border-radius: 20px;
-  border: none;
-  background: #0F172A;
-  color: #FFFFFF;
-  font-size: 0.82rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.welcome-explore-top-btn:hover {
-  background: #1E293B;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
 }
 
 /* 主体容器 */

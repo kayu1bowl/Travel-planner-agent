@@ -166,11 +166,6 @@ export default function App() {
           onDirectExplore={handleDirectExplore}
           isGenerating={loading}
           generatingSteps={agentStatusSteps}
-          currentDestination={currentDatasetKey}
-          onSelectDestination={(dest) => {
-            setCurrentDatasetKey(dest);
-            setDynamicCustomPlan(null);
-          }}
         />
       </div>
     );

@@ -11,7 +11,7 @@ export const TRANSLATIONS = {
       newTrip: "新建行程"
     },
     welcome: {
-      badge: "OpenClaw Agent · Powered by Google Gemini 3.7 Flash",
+      badge: "OpenClaw Agent",
       heroTitle: "探索世界，从一句话开始",
       heroSubtitle: "AI 智能规划您的专属梦想旅程 · 融合官方权威指南、实时天气路况与专业摄影机位",
       inputPlaceholder: "想去哪里？比如：带父母新西兰南岛自驾7天，不想太累，想看暗夜星空与吃三文鱼...",
@@ -91,7 +91,7 @@ export const TRANSLATIONS = {
       newTrip: "New Trip"
     },
     welcome: {
-      badge: "OpenClaw Agent · Powered by Google Gemini 3.7 Flash",
+      badge: "OpenClaw Agent",
       heroTitle: "Explore the World, Starting with a Sentence",
       heroSubtitle: "AI-Powered Travel Planning · Integrated with Official DOC Guides, Real-Time Weather & Pro Photography Spots",
       inputPlaceholder: "Where do you want to go? e.g. 7-day self-drive in NZ South Island with parents, relax pace, stargazing & salmon...",

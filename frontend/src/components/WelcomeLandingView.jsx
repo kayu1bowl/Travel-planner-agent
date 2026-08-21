@@ -3,12 +3,7 @@ import {
   Sparkles, 
   Compass, 
   Send, 
-  MapPin, 
   Globe, 
-  ArrowRight, 
-  ShieldCheck, 
-  Camera, 
-  Layers, 
   CheckCircle2, 
   Loader2 
 } from 'lucide-react';
@@ -20,9 +15,7 @@ export default function WelcomeLandingView({
   onStartPlanning,
   onDirectExplore,
   isGenerating,
-  generatingSteps,
-  currentDestination,
-  onSelectDestination
+  generatingSteps
 }) {
   const [inputText, setInputText] = useState('');
   const [selectedTags, setSelectedTags] = useState([]);
@@ -60,11 +53,11 @@ export default function WelcomeLandingView({
 
   return (
     <div className="welcome-landing-wrapper">
-      {/* 顶部极简导航 */}
+      {/* 顶部极简导航：仅保留 Logo 品牌与语言切换 */}
       <header className="welcome-header">
         <div className="welcome-logo-group">
           <div className="welcome-logo-icon">
-            <Compass size={22} className="logo-spin-subtle text-emerald-400" />
+            <Compass size={20} color="#10B981" strokeWidth={2.4} />
           </div>
           <div className="welcome-brand">
             <span className="welcome-brand-name">Roam AI</span>
@@ -73,39 +66,14 @@ export default function WelcomeLandingView({
         </div>
 
         <div className="welcome-header-actions">
-          {/* 快捷目的地选择 */}
-          <div className="welcome-dest-pills">
-            <button 
-              className={`welcome-dest-btn ${currentDestination === 'newzealand' ? 'active' : ''}`}
-              onClick={() => onSelectDestination('newzealand')}
-            >
-              🇳🇿 {language === 'zh' ? '新西兰南岛' : 'New Zealand'}
-            </button>
-            <button 
-              className={`welcome-dest-btn ${currentDestination === 'tokyo' ? 'active' : ''}`}
-              onClick={() => onSelectDestination('tokyo')}
-            >
-              🗼 {language === 'zh' ? '日本东京' : 'Tokyo'}
-            </button>
-          </div>
-
           {/* 语言切换 */}
           <button 
             className="welcome-lang-btn"
             onClick={onToggleLanguage}
             title={language === 'zh' ? 'Switch to English' : '切换为中文'}
           >
-            <Globe size={16} />
+            <Globe size={15} color="#475569" />
             <span>{language === 'zh' ? 'EN' : '中文'}</span>
-          </button>
-
-          {/* 直接进入看板 */}
-          <button 
-            className="welcome-explore-top-btn"
-            onClick={onDirectExplore}
-          >
-            <span>{language === 'zh' ? '浏览精选看板' : 'Explore Dashboard'}</span>
-            <ArrowRight size={15} />
           </button>
         </div>
       </header>
@@ -114,7 +82,7 @@ export default function WelcomeLandingView({
       <main className="welcome-main-container">
         {/* AI 模型标识微标 */}
         <div className="welcome-ai-badge">
-          <Sparkles size={14} className="text-teal-300 animate-pulse" />
+          <Sparkles size={14} color="#059669" className="animate-pulse" />
           <span>{t.badge}</span>
         </div>
 
@@ -169,7 +137,7 @@ export default function WelcomeLandingView({
             {/* 卡片底栏操作区 */}
             <div className="welcome-card-footer">
               <div className="welcome-hint-text">
-                {language === 'zh' ? '💡 支持自由输入天数、随行人群、摄影喜好或自驾预算' : '💡 Feel free to include days, budget, companion or photography style'}
+                {language === 'zh' ? '💡 支持自由输入全球任意目的地、天数、随行人群、摄影喜好或自驾预算' : '💡 Feel free to include any global destination, days, budget or companion style'}
               </div>
 
               <button
@@ -184,7 +152,7 @@ export default function WelcomeLandingView({
                   </>
                 ) : (
                   <>
-                    <Sparkles size={18} className="text-white" />
+                    <Sparkles size={18} color="#FFFFFF" />
                     <span>{t.generateBtn}</span>
                   </>
                 )}
@@ -242,13 +210,13 @@ export default function WelcomeLandingView({
           <div className="welcome-generating-modal">
             <div className="generating-header">
               <div className="generating-icon-pulse">
-                <Sparkles size={28} className="text-teal-400 animate-spin" />
+                <Sparkles size={28} color="#10B981" className="animate-spin" />
               </div>
               <h3 className="generating-title">
                 {language === 'zh' ? 'AI 正在智能规划您的专属行程' : 'AI is Crafting Your Travel Plan'}
               </h3>
               <p className="generating-subtitle">
-                {language === 'zh' ? 'Google Gemini 3.7 Flash 拓展思考推理中...' : 'Powered by Gemini 3.7 Flash with Extended Thinking'}
+                {language === 'zh' ? 'OpenClaw Agent 拓展思考推理中...' : 'OpenClaw Agent Reasoning with Extended Thinking...'}
               </p>
             </div>
 
@@ -259,7 +227,7 @@ export default function WelcomeLandingView({
                 language === 'zh' ? '正在精选最佳出片机位与地道特色风物...' : 'Selecting photo spots & local cuisine...'
               ]).map((stepText, sIdx) => (
                 <div key={sIdx} className="generating-step-item">
-                  <CheckCircle2 size={16} className="text-emerald-400 flex-shrink-0 animate-pulse" />
+                  <CheckCircle2 size={16} color="#10B981" className="flex-shrink-0 animate-pulse" />
                   <span>{stepText}</span>
                 </div>
               ))}
