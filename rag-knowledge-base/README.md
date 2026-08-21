@@ -42,22 +42,37 @@ Travel_planner_agent/
 │   └── ...
 │
 ├── openclaw_agent/                # OpenClaw 智能体核心
-│   ├── config/                    # 智能体配置文件
-│   ├── tools/                     # 自定义工具定义（RAG 检索、联网搜索等）
-│   ├── prompts/                   # 系统提示词模板
-│   ├── workflows/                 # 工作流编排
-│   └── ...
+│   ├── __init__.py
+│   ├── main.py                    # 智能体入口（CLI / 模块调用）
+│   ├── config/
+│   │   ├── __init__.py
+│   │   └── agent_config.py        # 全局配置：LLM / RAG / Web Search
+│   ├── tools/
+│   │   ├── __init__.py
+│   │   ├── rag_search.py          # RAG 检索工具（对接本地 retriever）
+│   │   ├── web_search.py          # 联网搜索（Tavily / SerpAPI / Mock）
+│   │   └── format_output.py       # 行程格式化 + LLM 调用
+│   ├── prompts/
+│   │   ├── __init__.py
+│   │   └── system_prompt.md       # 旅行规划专家系统提示词
+│   ├── workflows/
+│   │   ├── __init__.py
+│   │   └── travel_planner.py      # 旅行规划主流程编排
+│   └── api/
+│       ├── __init__.py
+│       ├── server.py              # FastAPI 后端服务
+│       └── frontend_api.md        # 前后端接口规范
 │
 ├── rag_knowledge_base/            # 自研 RAG 向量知识库
 │   ├── __init__.py
 │   ├── config.py                  # 统一配置：模型ID、路径、BUILD_MODE、IPEX加速、CPU线程数
 │   ├── builder.py                 # 知识库构建入口（分片→清洗→分类→评分→嵌入→存储）
-│   ├── classifier.py              # 智能分类（纯规则 / Qwen2.5-1.5B / Qwen3-14B 三档）
-│   ├── precision.py               # 精密等级评分器（纯规则，零模型，零延迟）
+│   ├── classifier.py              # LLM Prompt 驱动智能分类（零硬编码关键词，三档 Prompt）
+│   ├── precision.py               # LLM Prompt 驱动精密等级评分器（零硬编码关键词）
 │   │
 │   ├── embedding/
 │   │   ├── __init__.py
-│   │   └── cleaner.py             # CRAG 三级清洗：R1规则→R2质量评分→R3攒批推理
+│   │   └── cleaner.py             # CRAG 三级清洗：LLM Prompt 驱动（零硬编码关键词，三档 Prompt）
 │   │
 │   ├── retriever/
 │   │   ├── __init__.py
@@ -65,15 +80,17 @@ Travel_planner_agent/
 │   │
 │   ├── crawler/
 │   │   ├── __init__.py
-│   │   ├── social_fetcher.py      # 中文社交平台游记采集
-│   │   └── crawl4ai_fetcher.py    # 英文官方/百科信息采集
+│   │   ├── social_fetcher.py      # 中文社交平台游记采集（马蜂窝/穷游/小红书）
+│   │   ├── crawl4ai_fetcher.py    # 英文官方/百科信息采集
+│   │   └── multi_country_fetcher.py # 28国多源爬虫（Wikivoyage+Wikipedia+OSM）
 │   │
 │   ├── data/
 │   │   ├── raw/                   # 原始私有资料（PDF/TXT 等）
 │   │   └── chunks/                # 文本分片后的片段
 │   │
 │   ├── chroma_db/                 # Chroma 向量数据库持久化目录
-│   └── faiss_index/               # FAISS 索引持久化目录
+│   ├── vector_db/                 # FAISS 索引 + 元数据持久化目录（默认）
+│   └── faiss_index/               # FAISS 索引持久化目录（可选自定义路径）
 │
 ├── scripts/                       # 辅助脚本
 │   ├── auto_build_kb.py           # 一键构建知识库（CLI入口，支持 --build-mode）
@@ -112,23 +129,27 @@ Travel_planner_agent/
 - 收集新西兰自驾攻略、季节指南、风光摄影机位、调色参数等 PDF/TXT
 - 支持两种数据来源：
   - **本地文件**：放入 `data/raw/` 后通过 `--mode local` 构建
-  - **网络爬虫**：`crawl4ai_fetcher.py`（英文）+ `social_fetcher.py`（中文社交），两套互补
+  - **网络爬虫**：`multi_country_fetcher.py`（28国百科）+ `crawl4ai_fetcher.py`（英文官网）+ `social_fetcher.py`（中文社交），三套互补
 - 分片后经过三级清洗（噪声过滤→质量评分→攒批推理）
 - 智能分类（12个旅行类目）和精密等级评分（high/medium/low）
 - 支持 FAISS 和 Chroma 两种向量数据库后端
 
 ### 三种构建模式
 
-| 模式 | 命令 | 清洗后端 | 向量维度 | 智能分类 | 精密评分 | 重排序 | 适用场景 |
-|------|------|---------|---------|---------|---------|-------|---------|
-| `fast` | `--build-mode fast` | rule（纯规则） | 768 | ❌ | ❌ | ❌ | 快速预览、开发调试 |
-| `balanced` | `--build-mode balanced` | Qwen2.5-1.5B | 512 | ✅ | ✅ | ✅ | 日常使用（推荐） |
-| `precise` | `--build-mode precise` | Qwen3-14B | 384 | ✅ | ✅ | ✅ | 高精度场景 |
+| 模式 | 命令 | 推理模型 | Prompt 强度 | 分片大小 | R3 批推理 | 分类 | 精密评分 | 重排 | 适用场景 |
+|------|------|---------|-----------|---------|---------|------|---------|------|---------|
+| `fast` | `--build-mode fast` | Qwen2.5-1.5B | 极简（单句判定） | 768 | ❌ | ✅ | ✅ | ❌ | 快速预览、开发调试 |
+| `balanced` | `--build-mode balanced` | Qwen2.5-1.5B | 中等（带评分标准） | 512 | ✅ | ✅ | ✅ | ✅ | 日常使用（推荐） |
+| `precise` | `--build-mode precise` | Qwen3-14B | 完整（含示例+细化） | 384 | ✅ | ✅ | ✅ | ✅ | 高精度场景 |
 
 也可通过单个参数微调：
-- `--no-qwen3`：跳过 Qwen3-14B，使用纯规则清洗
+- `--no-qwen3`：跳过所有模型调用，仅使用 R1 纯物理过滤
 - `--no-classify`：跳过智能分类，全部归为 general
 - `--no-summary`：跳过文档级智能总结
+
+**重要**：`--build-mode` 参数同时支持 `builder.py` 和 `scripts/auto_build_kb.py` 两个入口。
+- `python rag_knowledge_base\builder.py --mode local --build-mode balanced`
+- `python scripts/auto_build_kb.py --mode local --build-mode balanced`
 
 ### 2️⃣ 用户交互 → 智能体推理
 
@@ -183,41 +204,53 @@ python scripts/auto_build_kb.py --mode local --build-mode precise
 python scripts/test_pipeline.py
 ```
 
-测试涵盖 23 项：语法检查、配置注入、CLI 参数、CRAG 清洗、规则分类、智能分类、精密评分、检索后端、错误路径等。
+测试覆盖 85 项：语法检查（11个文件）、配置注入、CLI 参数矩阵、CRAG 清洗、规则分类、精密评分、检索后端、错误路径、全系统覆盖扫描、多国爬虫模块等。
 
 ---
 
+## OpenClaw 智能体（AI Agent）
+
+`openclaw_agent/` 是系统的智能调度核心，支持独立运行和 FastAPI 服务两种模式。
+
 ## RAG 知识库详解
 
-### 三层清洗架构（CRAG 论文实践）
+### 三层清洗架构 — LLM Prompt 驱动（零硬编码关键词）
 
-参考 arXiv:2401.15884 (CRAG)，采用三级体系而非逐行调大模型：
+参考 CRAG (arXiv:2401.15884)、FILCO (arXiv:2309.04772)、RAPTOR (arXiv:2401.18059)。
+**全部文本筛选/分类/评分均由 LLM Prompt 驱动，没有任何硬编码的关键词或正则规则。**
 
-| 层级 | 策略 | 模型 | 速度 |
-|------|------|------|------|
-| **R1** | 规则过滤（正则：纯URL、纯标点、噪声模板） | 无 | 纳秒级 |
-| **R2** | 质量评分（16个信号：长度、信息熵、结构特征等） | 无 | 微秒级 |
-| **R3** | 攒批推理（仅 R1+R2 仍不确定的文本） | Qwen2.5-1.5B / Qwen3-14B | 秒级 |
+| 层级 | 策略 | Prompt 特征 | 速度 |
+|------|------|-------------|------|
+| **R1** | 物理级过滤（纯结构：空行、纯符号，不涉及语义） | 无模型 | 纳秒级 |
+| **R2** | LLM Prompt 驱动单行质量评分（按 BUILD_MODE 分三档） | 由 model 自主判断 | 秒级 |
+| **R3** | LLM 攒批批量评估模糊片段（同样三档 Prompt） | 由 model 自主判断 | 秒级/批 |
 
-### 精密等级评分
+**三个强度等级的 Prompt 设计**：
+- **fast** → 极简 Prompt（单句判定，是/否快速过滤）
+- **balanced** → 中等 Prompt（带具体评分标准+维度说明）
+- **precise** → 完整 Prompt（含 Few-shot 示例+细化评估维度+边界案例指导）
 
-纯规则零模型评分系统（`precision.py`），每个分片标注内容精细度：
+### 精密等级评分 — LLM Prompt 驱动
 
-| 等级 | 含义 | 匹配方式 |
-|------|------|---------|
-| `high` | 含事实数据：价格、电话、地址、开放时间、路线 | 精准信号匹配 |
-| `medium` | 有细节的个人经验：店名、花费、具体建议、行程结构 | 组合信号评分 |
-| `low` | 泛泛而谈：纯情感词、模糊态度、极短文本 | 全量匹配 |
-| `uncertain` | 兜底 | 信号不足 |
+纯 LLM 驱动的零关键词评分系统（`precision.py`），每个分片标注内容精细度。
+由 BUILD_MODE 选择 Prompt 强度（三档），模型自主判断：
 
-7 阶段流水线：全量匹配 → HIGH 信号 → 短文本检测 → LOW 信号过滤 → 信息密度检查 → MEDIUM 信号检测 → 长篇无信号兜底。
+| 等级 | 含义 |
+|------|------|
+| `high` | 含事实数据：价格、电话、地址、开放时间、路线等 |
+| `medium` | 有细节的个人经验：店名、花费、具体建议、行程结构 |
+| `low` | 泛泛而谈：纯情感词、模糊态度、极短文本 |
+| `uncertain` | 兜底 |
 
-### 智能分类（12 类目）
+**零硬编码**：没有任何预设的关键词/正则规则。所有判断由 LLM 根据 Prompt 中的等级定义自主完成。
 
-维护旅行相关的 12 个分类，每个分类含 30-80 个规则关键词：
+### 智能分类 — LLM Prompt 驱动（零硬编码）
 
-`driving` `food` `accommodation` `nature` `transportation` `city`
-`visa` `weather` `itinerary` `photography` `safety` `general`
+维护由 LLM 自主发现并定义的分类体系（classifier.py），流程：
+
+1. **分类发现** — 采样 50~100 个片段，由 LLM 阅读后自主决定分类体系
+2. **逐条分类** — 对每个片段用 LLM 归入最合适的类别
+3. **零关键词** — 不预设任何关键词或正则规则
 
 ### 检索后端
 
@@ -286,6 +319,7 @@ def _find_project_root(path: Path) -> Path:
 | `retriever.py` | 动态搜索父目录 |
 | `social_fetcher.py` | `_find_project_root()` |
 | `crawl4ai_fetcher.py` | `_find_project_root()` |
+| `multi_country_fetcher.py` | `_find_project_root()` |
 | `auto_build_kb.py` | 遍历父目录找 `rag_knowledge_base/` |
 | `test_pipeline.py` | `Path(__file__).parent.parent` |
 
