@@ -31,95 +31,32 @@ import {
   Pause
 } from 'lucide-react';
 import { TRANSLATIONS } from '../services/i18n';
+import { VERIFIED_LANDSCAPE_LIBRARY, matchDestinationImage } from '../services/imageMatcher';
 
-// 庞大且多维度的全球 4K 震撼风光大片库 (Unsplash 4K 旗舰画质)
+// 全球 4K 震撼风光轮播大图源 (全部经由 imageMatcher 权威校验，绝无货不对板)
 const GLOBAL_SCENIC_CAROUSEL = [
-  {
-    url: "https://images.unsplash.com/photo-1507699622108-4be3abd695ad?w=1920&auto=format&fit=crop&q=85",
-    title: "Lake Tekapo Dark Sky Reserve",
-    location: "新西兰特卡波湖 · 国际暗夜星空保护区"
-  },
-  {
-    url: "https://images.unsplash.com/photo-1516298773066-c48f8e9bd92b?w=1920&auto=format&fit=crop&q=85",
-    title: "Mount Fuji & Lake Kawaguchi",
-    location: "日本富士山 · 河口湖落日与雪顶"
-  },
-  {
-    url: "https://images.unsplash.com/photo-1530122037265-a5f1f91d3b99?w=1920&auto=format&fit=crop&q=85",
-    title: "Matterhorn & Glacier Express",
-    location: "瑞士采尔马特 · 马特洪峰与冰川列车"
-  },
-  {
-    url: "https://images.unsplash.com/photo-1534447677768-be436bb09401?w=1920&auto=format&fit=crop&q=85",
-    title: "Lofoten Aurora Borealis",
-    location: "挪威罗弗敦群岛 · 极光与峡湾渔村"
-  },
-  {
-    url: "https://images.unsplash.com/photo-1513581166391-887a96ddeafd?w=1920&auto=format&fit=crop&q=85",
-    title: "Dolomites Alpine Peaks",
-    location: "意大利多洛米蒂 · 白云石巨峰与高山草甸"
-  },
-  {
-    url: "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=1920&auto=format&fit=crop&q=85",
-    title: "Lake Louise Banff National Park",
-    location: "加拿大班夫国家公园 · 冰川蓝路易斯湖"
-  },
-  {
-    url: "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=1920&auto=format&fit=crop&q=85",
-    title: "Southern Alps Scenic Highway",
-    location: "新西兰南岛 8 号国道 · 纵贯南阿尔卑斯山脉"
-  },
-  {
-    url: "https://images.unsplash.com/photo-1503899036084-c55cdd92da26?w=1920&auto=format&fit=crop&q=85",
-    title: "Tokyo Cyberpunk Nightscape",
-    location: "日本东京 · 新宿涩谷赛博霓虹夜色"
-  },
-  {
-    url: "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=1920&auto=format&fit=crop&q=85",
-    title: "Santorini Caldera Sunset",
-    location: "希腊圣托里尼 · 爱琴海蓝顶白屋夕阳"
-  },
-  {
-    url: "https://images.unsplash.com/photo-1508873696983-2df5293cb32b?w=1920&auto=format&fit=crop&q=85",
-    title: "Jokulsarlon Glacier Lagoon",
-    location: "冰岛杰古沙龙 · 钻石黑沙滩与远古冰川"
-  },
-  {
-    url: "https://images.unsplash.com/photo-1433086966358-54859d0ed716?w=1920&auto=format&fit=crop&q=85",
-    title: "Milford Sound Fiordland",
-    location: "米尔福德峡湾 · 世界自然遗产地瀑布"
-  },
-  {
-    url: "https://images.unsplash.com/photo-1528164344705-475426879c0d?w=1920&auto=format&fit=crop&q=85",
-    title: "Kyoto Yasaka Pagoda Cherry Blossom",
-    location: "日本京都 · 八坂之塔古街与春樱盛放"
-  },
-  {
-    url: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=1920&auto=format&fit=crop&q=85",
-    title: "Yosemite Valley Tunnel View",
-    location: "美国优胜美地 · 酋长岩晨雾与高山瀑布"
-  },
-  {
-    url: "https://images.unsplash.com/photo-1516483638261-f4dbaf036963?w=1920&auto=format&fit=crop&q=85",
-    title: "Cinque Terre Riomaggiore",
-    location: "意大利五渔村 · 悬崖彩色小镇与地中海"
-  },
-  {
-    url: "https://images.unsplash.com/photo-1518684079-3c830dcef090?w=1920&auto=format&fit=crop&q=85",
-    title: "Arabian Desert Golden Dunes",
-    location: "迪拜阿拉伯沙漠 · 金色落日沙丘巡航"
-  },
-  {
-    url: "https://images.unsplash.com/photo-1506929562872-bb421503ef21?w=1920&auto=format&fit=crop&q=85",
-    title: "Maldives Coral Atoll",
-    location: "马尔代夫群岛 · 玻璃果冻海与珊瑚礁"
-  }
+  VERIFIED_LANDSCAPE_LIBRARY.NZ_TEKAPO_NIGHT,
+  VERIFIED_LANDSCAPE_LIBRARY.JP_FUJI_PAGODA,
+  VERIFIED_LANDSCAPE_LIBRARY.CH_SWISS_LAUTERBRUNNEN,
+  VERIFIED_LANDSCAPE_LIBRARY.NO_LOFOTEN_AURORA,
+  VERIFIED_LANDSCAPE_LIBRARY.IT_DOLOMITES_PEAKS,
+  VERIFIED_LANDSCAPE_LIBRARY.CA_BANFF_MORAINE_LAKE,
+  VERIFIED_LANDSCAPE_LIBRARY.JP_KYOTO_PAGODA,
+  VERIFIED_LANDSCAPE_LIBRARY.GR_SANTORINI_OIA,
+  VERIFIED_LANDSCAPE_LIBRARY.NZ_SOUTHERN_ALPS_HIGHWAY,
+  VERIFIED_LANDSCAPE_LIBRARY.JP_TOKYO_SHIBUYA,
+  VERIFIED_LANDSCAPE_LIBRARY.IS_JOKULSARLON_ICE,
+  VERIFIED_LANDSCAPE_LIBRARY.CN_GUIZHOU_KARST,
+  VERIFIED_LANDSCAPE_LIBRARY.NZ_MILFORD_SOUND,
+  VERIFIED_LANDSCAPE_LIBRARY.JP_KYOTO_BAMBOO,
+  VERIFIED_LANDSCAPE_LIBRARY.CH_MATTERHORN_PEAK,
+  VERIFIED_LANDSCAPE_LIBRARY.NZ_WANAKA_ROYS_PEAK
 ];
 
-// 大师级全球专业摄影机位全量库 (含真实焦段、曝光参数、银河/蓝调窗口与机位构图建议)
+// 大师级全球专业摄影机位全量库 (100% 真实机位参数与绝景大片严格对应)
 const GLOBAL_MASTER_PHOTO_SPOTS = [
   {
-    image: "https://images.unsplash.com/photo-1507699622108-4be3abd695ad?w=1920&auto=format&fit=crop&q=85",
+    image: VERIFIED_LANDSCAPE_LIBRARY.NZ_TEKAPO_NIGHT.url,
     name: "特卡波湖好牧羊人教堂",
     spotType: "ASTROPHOTOGRAPHY · 暗夜星空机位",
     iso: "ISO 3200",
@@ -128,11 +65,11 @@ const GLOBAL_MASTER_PHOTO_SPOTS = [
     focal: "14mm GM",
     elevation: "710m",
     bortle: "Class 1 极暗天空",
-    window: "银河拱桥升起 23:30 - 03:15",
-    tip: "超广角低机位仰拍，石砌教堂作为前景容纳整片银河拱桥，避开镇中心杂光。"
+    window: "银河升起 23:30 - 03:15",
+    tip: "超广角低机位仰拍，石砌教堂作为前景容纳整片银河拱桥，避开小镇杂光。"
   },
   {
-    image: "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=1920&auto=format&fit=crop&q=85",
+    image: VERIFIED_LANDSCAPE_LIBRARY.NZ_WANAKA_ROYS_PEAK.url,
     name: "瓦纳卡罗伊斯山峰",
     spotType: "GOLDEN HOUR · 晨光云海脊线",
     iso: "ISO 100",
@@ -145,7 +82,7 @@ const GLOBAL_MASTER_PHOTO_SPOTS = [
     tip: "逆光拍摄山脊延伸至瓦纳卡湖，使用 CPL 偏振镜消除湖面反光与杂色。"
   },
   {
-    image: "https://images.unsplash.com/photo-1433086966358-54859d0ed716?w=1920&auto=format&fit=crop&q=85",
+    image: VERIFIED_LANDSCAPE_LIBRARY.NZ_MILFORD_SOUND.url,
     name: "米尔福德峡湾教皇冠峰",
     spotType: "BLUE HOUR · 峡湾镜面倒影",
     iso: "ISO 100",
@@ -155,23 +92,36 @@ const GLOBAL_MASTER_PHOTO_SPOTS = [
     elevation: "海平面",
     bortle: "晨雾蓝调",
     window: "蓝调时刻 07:20 - 08:00",
-    tip: "利用退潮沙滩水面长曝光消除水波，捕捉倒映在深色海水中的教皇冠峰。"
+    tip: "利用退潮沙滩水面长曝光消除水波，捕捉倒映在深色冰川海水中的教皇冠峰。"
   },
   {
-    image: "https://images.unsplash.com/photo-1516298773066-c48f8e9bd92b?w=1920&auto=format&fit=crop&q=85",
+    image: VERIFIED_LANDSCAPE_LIBRARY.JP_FUJI_PAGODA.url,
     name: "富士山浅间公园五重塔",
-    spotType: "SUNSET ICONIC · 经典和风机位",
+    spotType: "ICONIC VIEW · 经典雪顶和风",
     iso: "ISO 200",
     shutter: "1/60s",
     aperture: "f/5.6",
     focal: "50mm F1.8",
     elevation: "850m",
-    bortle: "夕阳暖调",
-    window: "日落晚霞 17:15 - 18:00",
-    tip: "使用中焦段将忠灵塔与远方雪白富士山同框压缩，日落前 30 分钟塔身亮灯最佳。"
+    bortle: "夕阳晚霞",
+    window: "日落前 17:15 - 18:00",
+    tip: "中焦段压缩忠灵塔与远方雪白富士山同框，日落前 30 分钟塔身朱红暖光最佳。"
   },
   {
-    image: "https://images.unsplash.com/photo-1530122037265-a5f1f91d3b99?w=1920&auto=format&fit=crop&q=85",
+    image: VERIFIED_LANDSCAPE_LIBRARY.JP_KYOTO_PAGODA.url,
+    name: "京都八坂之塔古街暮色",
+    spotType: "HERITAGE · 古都雅韵机位",
+    iso: "ISO 400",
+    shutter: "1/80s",
+    aperture: "f/2.8",
+    focal: "35mm F1.4",
+    elevation: "55m",
+    bortle: "石板路暖灯",
+    window: "蓝调傍晚 18:00 - 19:00",
+    tip: "清晨或傍晚沿二年坂石阶仰拍，避开拥挤游客，捕捉飞檐与石板路倒影。"
+  },
+  {
+    image: VERIFIED_LANDSCAPE_LIBRARY.CH_MATTERHORN_PEAK.url,
     name: "采尔马特利菲尔湖倒影",
     spotType: "ALPINE REFLECTION · 黄金日照金山",
     iso: "ISO 100",
@@ -179,12 +129,12 @@ const GLOBAL_MASTER_PHOTO_SPOTS = [
     aperture: "f/8.0",
     focal: "24mm F1.4",
     elevation: "2757m",
-    bortle: "晨曦金光",
+    bortle: "晨曦金顶",
     window: "日出金顶 05:45 - 06:20",
-    tip: "清晨无风时湖面如镜，低机位蹲守马特洪峰第一缕金色朝霞倒映在利菲尔湖。"
+    tip: "清晨无风时蹲守利菲尔湖边，捕捉马特洪峰第一缕金光倒映在澄澈冰川湖中。"
   },
   {
-    image: "https://images.unsplash.com/photo-1534447677768-be436bb09401?w=1920&auto=format&fit=crop&q=85",
+    image: VERIFIED_LANDSCAPE_LIBRARY.NO_LOFOTEN_AURORA.url,
     name: "挪威罗弗敦雷纳村极光",
     spotType: "AURORA CHASER · 极光红木屋",
     iso: "ISO 1600",
@@ -194,10 +144,10 @@ const GLOBAL_MASTER_PHOTO_SPOTS = [
     elevation: "15m",
     bortle: "Kp 4-6 极光带",
     window: "绿光爆发 21:00 - 01:30",
-    tip: "红色高脚渔屋作为暖色前景，大光圈长曝捕捉峡湾雪山上方舞动的绿色极光弧。"
+    tip: "经典红色高脚渔屋作为前景暖调，大光圈广角捕捉在峡湾雪山上空起舞的极光弧。"
   },
   {
-    image: "https://images.unsplash.com/photo-1513581166391-887a96ddeafd?w=1920&auto=format&fit=crop&q=85",
+    image: VERIFIED_LANDSCAPE_LIBRARY.IT_DOLOMITES_PEAKS.url,
     name: "意大利多洛米蒂休斯高原",
     spotType: "DRAMATIC ALPS · 巨峰光影漫游",
     iso: "ISO 100",
@@ -207,11 +157,11 @@ const GLOBAL_MASTER_PHOTO_SPOTS = [
     elevation: "2000m",
     bortle: "暮色金辉",
     window: "夕阳金辉 18:30 - 19:15",
-    tip: "使用中长焦压缩高山草甸木屋与垂直耸立的萨索伦戈白云石巨峰之间的空间层次。"
+    tip: "中长焦压缩休斯高原高山木屋与直插云霄的萨索伦戈白云石巨峰空间层次。"
   },
   {
-    image: "https://images.unsplash.com/photo-1508873696983-2df5293cb32b?w=1920&auto=format&fit=crop&q=85",
-    name: "冰岛杰古沙龙钻石冰沙滩",
+    image: VERIFIED_LANDSCAPE_LIBRARY.IS_JOKULSARLON_ICE.url,
+    name: "冰岛杰古沙龙钻石黑沙滩",
     spotType: "GLACIER SEASCAPE · 远古冰晶慢门",
     iso: "ISO 100",
     shutter: "2s (ND8)",
@@ -220,7 +170,98 @@ const GLOBAL_MASTER_PHOTO_SPOTS = [
     elevation: "海平面",
     bortle: "冷冽晨光",
     window: "日出微光 07:00 - 08:30",
-    tip: "贴近黑色火山沙滩上剔透的蓝色冰块，慢门雾化海浪退去时的白色拉丝水花。"
+    tip: "贴近黑色火山沙滩上剔透的蓝色冰块，慢门雾化大西洋海浪退去时的白色拉丝水花。"
+  },
+  {
+    image: VERIFIED_LANDSCAPE_LIBRARY.CA_BANFF_MORAINE_LAKE.url,
+    name: "加拿大班夫梦莲湖十峰山",
+    spotType: "GLACIAL OASIS · 绝美翡翠湖泊",
+    iso: "ISO 100",
+    shutter: "1/80s",
+    aperture: "f/9.0",
+    focal: "16-35mm",
+    elevation: "1884m",
+    bortle: "清晨无风",
+    window: "日出晨光 06:00 - 07:15",
+    tip: "攀上石堆观景台，清晨第一缕晨光洒在十峰山金顶，倒映在不可思议的绿松石色湖面。"
+  },
+  {
+    image: VERIFIED_LANDSCAPE_LIBRARY.GR_SANTORINI_OIA.url,
+    name: "希腊圣托里尼伊亚蓝顶教堂",
+    spotType: "AEGEAN ROMANCE · 爱琴海蓝顶夕阳",
+    iso: "ISO 100",
+    shutter: "1/250s",
+    aperture: "f/8.0",
+    focal: "28mm F2.0",
+    elevation: "120m",
+    bortle: "爱琴海夕照",
+    window: "日落时刻 19:30 - 20:30",
+    tip: "顺着伊亚悬崖小巷捕捉三重蓝顶教堂与远方火红夕阳沉入爱琴海的永恒瞬间。"
+  },
+  {
+    image: VERIFIED_LANDSCAPE_LIBRARY.CN_GUIZHOU_KARST.url,
+    name: "中国西南秘境喀斯特峰林",
+    spotType: "NATURAL KARST · 喀斯特奇观",
+    iso: "ISO 100",
+    shutter: "1/160s",
+    aperture: "f/8.0",
+    focal: "24-70mm",
+    elevation: "420m",
+    bortle: "晨雾绕山",
+    window: "晨间 07:00 - 09:00",
+    tip: "捕捉晨雾缭绕在孤峰翠竹之间的中国传统水墨意境，利用水面慢门倒影增添灵动。"
+  }
+];
+
+// 全球灵感画廊：经由语义匹配引擎绑定的 8 大真实目的地大片
+const GLOBAL_INSPIRATIONS_LIST = [
+  {
+    tag: "风光自驾",
+    title: "新西兰南岛 7 天自驾与暗夜星空",
+    query: "计划新西兰南岛7天自驾之旅，重点特卡波暗夜星空、库克山胡克谷冰川与皇后镇美食，包含专业摄影机位",
+    img: VERIFIED_LANDSCAPE_LIBRARY.NZ_TEKAPO_NIGHT.url
+  },
+  {
+    tag: "城市人文",
+    title: "东京 7 天动漫圣地与米其林漫游",
+    query: "计划东京7天深度游，涵盖浅草古刹、涩谷十字路口夜景、秋叶原动漫与筑地海鲜市场美食",
+    img: VERIFIED_LANDSCAPE_LIBRARY.JP_TOKYO_SHIBUYA.url
+  },
+  {
+    tag: "雪山列车",
+    title: "瑞士阿尔卑斯 10 天全景列车",
+    query: "瑞士10天黄金列车与冰川快车全景游，游览少女峰、马特洪峰与日内瓦湖",
+    img: VERIFIED_LANDSCAPE_LIBRARY.CH_SWISS_LAUTERBRUNNEN.url
+  },
+  {
+    tag: "极光秘境",
+    title: "挪威罗弗敦 6 天峡湾极光追猎",
+    query: "计划挪威罗弗敦群岛6天冬季追光之旅，包含雷纳小镇红色木屋摄影、峡湾雪山巡航与帝王蟹盛宴",
+    img: VERIFIED_LANDSCAPE_LIBRARY.NO_LOFOTEN_AURORA.url
+  },
+  {
+    tag: "高山徒步",
+    title: "意大利多洛米蒂 8 天徒步自驾",
+    query: "意大利多洛米蒂山脉8天自驾轻徒步，重点刀锋山Seceda、三峰山与休斯高原高山木屋",
+    img: VERIFIED_LANDSCAPE_LIBRARY.IT_DOLOMITES_PEAKS.url
+  },
+  {
+    tag: "古都雅韵",
+    title: "京都奈良 5 天风雅茶道之旅",
+    query: "京都奈良5天漫步，探访伏见稻荷大社、岚山竹林、清水寺与奈良公园小鹿互动",
+    img: VERIFIED_LANDSCAPE_LIBRARY.JP_KYOTO_PAGODA.url
+  },
+  {
+    tag: "落基国家公园",
+    title: "加拿大班夫贾斯珀 7 天自驾",
+    query: "加拿大阿尔伯塔省7天自驾，深度探索班夫国家公园、路易斯湖、冰原大道与梦莲湖日出机位",
+    img: VERIFIED_LANDSCAPE_LIBRARY.CA_BANFF_MORAINE_LAKE.url
+  },
+  {
+    tag: "海岛浪漫",
+    title: "希腊圣托里尼与米克诺斯 6 天",
+    query: "希腊爱琴海双岛6天度假，打卡伊亚小镇蓝顶教堂日落、白沙滩与悬崖无边泳池酒店",
+    img: VERIFIED_LANDSCAPE_LIBRARY.GR_SANTORINI_OIA.url
   }
 ];
 
@@ -244,58 +285,6 @@ export default function WelcomeLandingView({
   const inputRef = useRef(null);
 
   const t = TRANSLATIONS[language]?.welcome || TRANSLATIONS.zh.welcome;
-
-  // 灵感画廊 8 大全球目的地高清大片
-  const globalInspirationsList = [
-    {
-      tag: "风光自驾",
-      title: "新西兰南岛 7 天自驾与暗夜星空",
-      query: "计划新西兰南岛7天自驾之旅，重点特卡波暗夜星空、库克山胡克谷冰川与皇后镇美食，包含专业摄影机位",
-      img: "https://images.unsplash.com/photo-1507699622108-4be3abd695ad?w=1200&auto=format&fit=crop&q=85"
-    },
-    {
-      tag: "城市人文",
-      title: "东京 7 天动漫圣地与米其林漫游",
-      query: "计划东京7天深度游，涵盖浅草古刹、涩谷十字路口夜景、秋叶原动漫与筑地海鲜市场美食",
-      img: "https://images.unsplash.com/photo-1503899036084-c55cdd92da26?w=1200&auto=format&fit=crop&q=85"
-    },
-    {
-      tag: "雪山列车",
-      title: "瑞士阿尔卑斯 10 天全景列车",
-      query: "瑞士10天黄金列车与冰川快车全景游，游览少女峰、马特洪峰与日内瓦湖",
-      img: "https://images.unsplash.com/photo-1530122037265-a5f1f91d3b99?w=1200&auto=format&fit=crop&q=85"
-    },
-    {
-      tag: "极光秘境",
-      title: "挪威罗弗敦 6 天峡湾极光追猎",
-      query: "计划挪威罗弗敦群岛6天冬季追光之旅，包含雷纳小镇红色木屋摄影、峡湾雪山巡航与帝王蟹盛宴",
-      img: "https://images.unsplash.com/photo-1534447677768-be436bb09401?w=1200&auto=format&fit=crop&q=85"
-    },
-    {
-      tag: "高山徒步",
-      title: "意大利多洛米蒂 8 天徒步自驾",
-      query: "意大利多洛米蒂山脉8天自驾轻徒步，重点刀锋山Seceda、三峰山与休斯高原高山木屋",
-      img: "https://images.unsplash.com/photo-1513581166391-887a96ddeafd?w=1200&auto=format&fit=crop&q=85"
-    },
-    {
-      tag: "古都雅韵",
-      title: "京都奈良 5 天风雅茶道之旅",
-      query: "京都奈良5天漫步，探访伏见稻荷大社、岚山竹林、清水寺与奈良公园小鹿互动",
-      img: "https://images.unsplash.com/photo-1528164344705-475426879c0d?w=1200&auto=format&fit=crop&q=85"
-    },
-    {
-      tag: "落基国家公园",
-      title: "加拿大班夫贾斯珀 7 天自驾",
-      query: "加拿大阿尔伯塔省7天自驾，深度探索班夫国家公园、路易斯湖、冰原大道与梦莲湖日出机位",
-      img: "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=1200&auto=format&fit=crop&q=85"
-    },
-    {
-      tag: "海岛浪漫",
-      title: "希腊圣托里尼与米克诺斯 6 天",
-      query: "希腊爱琴海双岛6天度假，打卡伊亚小镇蓝顶教堂日落、白沙滩与悬崖无边泳池酒店",
-      img: "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=1200&auto=format&fit=crop&q=85"
-    }
-  ];
 
   // 1. 自动无限轮播 Hero 背景大片 (每 5 秒平滑切换，永无止境)
   useEffect(() => {
@@ -477,6 +466,7 @@ export default function WelcomeLandingView({
           <div className="hero-slide-desc">
             <MapPin size={13} color="#10B981" />
             <span>{GLOBAL_SCENIC_CAROUSEL[heroSlideIndex]?.location}</span>
+            <span className="photo-source-badge">📸 Unsplash</span>
           </div>
         </div>
 
@@ -587,7 +577,7 @@ export default function WelcomeLandingView({
         {/* 全屏拟真自驾公路背景大片 */}
         <div 
           className="stage-fullscreen-bg"
-          style={{ backgroundImage: `url('https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=1920&auto=format&fit=crop&q=85')` }}
+          style={{ backgroundImage: `url('${VERIFIED_LANDSCAPE_LIBRARY.NZ_SOUTHERN_ALPS_HIGHWAY.url}')` }}
         >
           <div className="stage-overlay-darken"></div>
         </div>
@@ -664,7 +654,7 @@ export default function WelcomeLandingView({
           (大片自动轮播 + 靠侧HUD参数排版，中央视野全透)
           ========================================================================= */}
       <section id="stage-vision" className="fullbleed-stage vision-stage">
-        {/* 全屏摄影大片背景 (全量 8 大机位自动轮播或点击切换) */}
+        {/* 全屏摄影大片背景 (全量机位自动轮播或点击切换，真实景观 100% 严丝合缝) */}
         <div 
           className="stage-fullscreen-bg"
           style={{ backgroundImage: `url('${currentSpot.image}')` }}
@@ -703,7 +693,7 @@ export default function WelcomeLandingView({
             <p className="stage-giant-subtitle">{t.proVision.subtitle}</p>
           </div>
 
-          {/* 交互式机位快速切换胶囊条 (支持横向滑动与播放状态) */}
+          {/* 交互式机位快速切换胶囊条 */}
           <div className="vision-spots-scroll-bar">
             {GLOBAL_MASTER_PHOTO_SPOTS.map((spot, idx) => (
               <button
@@ -729,24 +719,27 @@ export default function WelcomeLandingView({
               <span>{currentSpot.spotType}</span>
             </div>
             
-            {/* 自动播放/暂停开关 */}
-            <button 
-              className="hud-play-toggle-btn"
-              onClick={() => setIsVisionAutoPlaying(!isVisionAutoPlaying)}
-              title={isVisionAutoPlaying ? "暂停自动轮播" : "恢复自动轮播"}
-            >
-              {isVisionAutoPlaying ? (
-                <>
-                  <Pause size={12} color="#10B981" />
-                  <span className="play-state-text">AUTO</span>
-                </>
-              ) : (
-                <>
-                  <Play size={12} color="#94A3B8" />
-                  <span className="play-state-text">PAUSED</span>
-                </>
-              )}
-            </button>
+            <div className="hud-header-right-badges">
+              <span className="hud-source-badge">📸 Unsplash</span>
+              {/* 自动播放/暂停开关 */}
+              <button 
+                className="hud-play-toggle-btn"
+                onClick={() => setIsVisionAutoPlaying(!isVisionAutoPlaying)}
+                title={isVisionAutoPlaying ? "暂停自动轮播" : "恢复自动轮播"}
+              >
+                {isVisionAutoPlaying ? (
+                  <>
+                    <Pause size={12} color="#10B981" />
+                    <span className="play-state-text">AUTO</span>
+                  </>
+                ) : (
+                  <>
+                    <Play size={12} color="#94A3B8" />
+                    <span className="play-state-text">PAUSED</span>
+                  </>
+                )}
+              </button>
+            </div>
           </div>
 
           <h3 className="hud-spot-title">{currentSpot.name}</h3>
@@ -808,7 +801,7 @@ export default function WelcomeLandingView({
       </section>
 
       {/* =========================================================================
-          STAGE 4: 100vw × 100vh 澎湃OS 级知识架构全屏舞台 (Architecture Stage)
+          STAGE 4: 100vw × 100vh 知识架构全屏舞台 (Architecture Stage)
           ========================================================================= */}
       <section id="stage-knowledge" className="fullbleed-stage architecture-stage">
         {/* 全屏深空神经网络科技背景 */}
@@ -874,9 +867,9 @@ export default function WelcomeLandingView({
             <p className="stage-giant-subtitle">{t.inspirations.subtitle}</p>
           </div>
 
-          {/* 全屏展开式 8 大目的地大片网格 */}
+          {/* 全屏展开式 8 大目的地大片网格 (100% 景观一致与真地标对应) */}
           <div className="inspirations-full-grid">
-            {globalInspirationsList.map((item, idx) => (
+            {GLOBAL_INSPIRATIONS_LIST.map((item, idx) => (
               <div 
                 key={idx} 
                 className="inspiration-fullscreen-card"
@@ -888,7 +881,10 @@ export default function WelcomeLandingView({
                 />
                 <div className="card-gradient-layer"></div>
                 <div className="card-meta-box">
-                  <span className="card-tag">{item.tag}</span>
+                  <div className="card-top-tag-row">
+                    <span className="card-tag">{item.tag}</span>
+                    <span className="card-source-tag">📸 Unsplash</span>
+                  </div>
                   <h3 className="card-title">{item.title}</h3>
                   <p className="card-desc">{item.query}</p>
                   <div className="card-cta-row">
@@ -938,7 +934,7 @@ export default function WelcomeLandingView({
 
         <div className="fullbleed-bottom-credits">
           <span>© 2026 Roam AI Travel Planner · OpenClaw Agent Intelligence</span>
-          <span>DOC Official Knowledge Base Verified · Extended Thinking Enabled</span>
+          <span>Photos & Imagery via Unsplash Free License · DOC Official Knowledge Base Verified · Extended Thinking Enabled</span>
         </div>
       </footer>
 

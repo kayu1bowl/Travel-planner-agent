@@ -3325,6 +3325,19 @@ body {
   backdrop-filter: blur(10px);
 }
 
+.photo-source-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #94A3B8;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 2px 8px;
+  border-radius: 10px;
+  margin-left: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
 .hero-stage-content {
   position: relative;
   z-index: 10;
@@ -3843,6 +3856,25 @@ body {
   align-items: center;
 }
 
+.hud-header-right-badges {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hud-source-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.68rem;
+  font-weight: 800;
+  font-family: monospace;
+  color: #94A3B8;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 4px 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
 .hud-lens-tag {
   display: inline-flex;
   align-items: center;
@@ -4171,6 +4203,14 @@ body {
   text-align: left;
 }
 
+.card-top-tag-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 12px;
+}
+
 .card-tag {
   align-self: flex-start;
   font-size: 0.76rem;
@@ -4180,7 +4220,17 @@ body {
   border: 1px solid rgba(16, 185, 129, 0.4);
   padding: 4px 10px;
   border-radius: 8px;
-  margin-bottom: 12px;
+}
+
+.card-source-tag {
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: #CBD5E1;
+  background: rgba(3, 7, 18, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 3px 8px;
+  border-radius: 8px;
+  backdrop-filter: blur(8px);
 }
 
 .card-title {
