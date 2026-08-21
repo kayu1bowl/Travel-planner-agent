@@ -30,12 +30,17 @@ from llama_index.core.postprocessor import SentenceTransformerRerank
 from rag_knowledge_base.config import (
     VECTOR_DIR, CHROMA_DIR, EMBEDDING_MODEL, RERANKER_MODEL, EMBED_BACKEND,
     RERANK_TOP_K,
-    USE_HYDE, NUM_QUERY_VARIANTS, COLLECTION_NAME, VECTOR_BACKEND,
+    USE_HYDE, USE_BM25, NUM_QUERY_VARIANTS, COLLECTION_NAME, VECTOR_BACKEND,
     ENABLE_RERANK,
+    get_vector_dir,
 )
+
 
 META_FILE = VECTOR_DIR / "metadata.json"
 INDEX_FILE = VECTOR_DIR / "faiss.index"
+
+
+_COUNTRY_META_CACHE = {}  # {country: [chunks]}
 
 
 def _detect_backend() -> str:
@@ -169,22 +174,98 @@ class FAISSRetriever:
         else:
             self.reranker = None
 
+        # BM25 索引（初始化时构建一次）
+        self.bm25 = None
+        self.bm25_chunks = []
+        try:
+            texts = [c["text"] for c in chunks]
+            if texts:
+                from rank_bm25 import BM25Okapi
+                import jieba
+                tokenized_corpus = []
+                for t in texts:
+                    # 对中文文本分词
+                    words = list(jieba.cut(t))
+                    tokenized_corpus.append(words)
+                self.bm25 = BM25Okapi(tokenized_corpus)
+                self.bm25_chunks = chunks
+                print(f"  \U0001f4d6 BM25 索引已构建: {len(chunks)} 文档")
+        except ImportError:
+            print(f"  \u26a0\ufe0f rank_bm25 未安装，跳过 BM25")
+        except Exception as e:
+            print(f"  \u26a0\ufe0f BM25 初始化失败: {e}")
+
     def _encode_query(self, query: str) -> np.ndarray:
         emb = self.embed_model.get_query_embedding(query)
         return np.array([emb]).astype(np.float32)
 
-    def search(self, query: str, k: int) -> List[Dict]:
+    def _match_where(self, metadata: Dict, where: Optional[Dict]) -> bool:
+        """检查 metadata 是否匹配 where 条件（简单的等值匹配）"""
+        if not where:
+            return True
+        for key, val in where.items():
+            if metadata.get(key) != val:
+                return False
+        return True
+
+    def search(self, query: str, k: int, where: Optional[Dict] = None) -> List[Dict]:
+        # 如果有 where 条件，需要对 chunks 预过滤
+        active_chunks = self.chunks
+        query_multiplier = 1
+        
+        if where:
+            active_chunks = [c for c in self.chunks if self._match_where(c.get("metadata", {}), where)]
+            if not active_chunks:
+                return []
+            # 需要多拉一些候选（过滤后变少了）
+            query_multiplier = max(1, len(self.chunks) // max(len(active_chunks), 1))
+
+        # 标准 FAISS 搜索
         vec = self._encode_query(query)
-        distances, indices = self.index.search(vec, k)
+        effective_k = min(k * query_multiplier, len(self.chunks))
+        distances, indices = self.index.search(vec, effective_k)
+        
         results = []
+        seen = set()
         for dist, idx in zip(distances[0], indices[0]):
             if idx < 0 or idx >= len(self.chunks):
                 continue
             chunk = self.chunks[idx]
+            # 应用 where 过滤
+            if where and not self._match_where(chunk.get("metadata", {}), where):
+                continue
+            text_key = chunk["text"][:100]
+            if text_key in seen:
+                continue
+            seen.add(text_key)
             results.append({
                 "content": chunk["text"],
                 "metadata": chunk.get("metadata", {}),
                 "score": round(float(dist), 4),
+            })
+            if len(results) >= k:
+                break
+        return results
+
+    def bm25_search(self, query: str, k: int) -> List[Dict]:
+        """BM25 关键词检索（与 dense 形成互补）"""
+        if self.bm25 is None:
+            return []
+        import jieba
+        tokenized_query = list(jieba.cut(query))
+        scores = self.bm25.get_scores(tokenized_query)
+        # 获取 top-k 索引
+        top_indices = sorted(
+            range(len(scores)), key=lambda i: scores[i], reverse=True
+        )[:k]
+        results = []
+        for idx in top_indices:
+            if scores[idx] == 0:
+                continue
+            results.append({
+                "content": self.bm25_chunks[idx]["text"],
+                "metadata": self.bm25_chunks[idx].get("metadata", {}),
+                "score": round(float(scores[idx]), 4),
             })
         return results
 
@@ -281,12 +362,14 @@ class RAGRetriever:
         use_hyde: bool = USE_HYDE,
         use_multi_query: bool = True,
         use_reranker: bool = ENABLE_RERANK,
+        use_bm25: bool = USE_BM25,
         reranker_model: str = RERANKER_MODEL,
     ):
         self.top_k = top_k
         self.use_hyde = use_hyde
         self.use_multi_query = use_multi_query
         self.use_reranker = use_reranker
+        self.use_bm25 = use_bm25
 
         self.embed_model = create_embed_model()
 
@@ -312,31 +395,36 @@ class RAGRetriever:
             self.chroma = None
 
         strategies = []
+        if use_bm25: strategies.append("BM25")
         if use_hyde: strategies.append("HyDE")
         if use_multi_query: strategies.append("MultiQuery")
         if use_reranker: strategies.append("Reranker")
+        self._country = "nz"
+        self._country_name = "New Zealand"
         print(f"\u2705 RAG 就绪 | {backend.upper()} | TopK: {top_k} | 策略: {'+'.join(strategies)}")
 
+    def set_country(self, country: str):
+        """设置检索目标国家"""
+        # LLM 自主识别国家，系统层不预设白名单
+        self._country = country
+        self._country_name = country.upper()
+        print(f"  🌍 检索目标: {country.upper()}")
+
     def _generate_hyde_doc(self, query: str) -> str:
+        cn = self._country_name
         return (
-            f"As a travel guide for New Zealand, here is detailed information about '{query}': "
-            f"This covers key aspects of traveling to and experiencing New Zealand, "
+            f"As a travel guide for {cn}, here is detailed information about '{query}': "
+            f"This covers key aspects of traveling to and experiencing {cn}, "
             f"including practical tips, cultural insights, natural attractions, "
             f"and recommended activities related to {query}. "
             f"Visitors will find this useful for planning their trip."
         )
 
     def _generate_query_variants(self, query: str) -> List[str]:
+        cn = self._country_name
         variants = [query]
-        if all('\u4e00' <= c <= '\u9fff' or c in ' ，。？！' for c in query):
-            if "新西兰" in query:
-                variants.append(f"New Zealand {query.replace('新西兰', '').strip()}")
-            if "自驾" in query or "驾驶" in query:
-                variants.append(f"self-driving road trip New Zealand tips rules")
-            if "签证" in query:
-                variants.append(f"New Zealand visa application requirements")
-            if "皇后镇" in query:
-                variants.append(f"Queenstown New Zealand travel photography activities")
+        if all('\u4e00' <= c <= '\u9fff' or c in ' \uff0c\u3002\uff01\uff1f' for c in query):
+            variants.append(f"{cn} {query}")
         else:
             variants.append(query)
         seen = set()
@@ -352,7 +440,17 @@ class RAGRetriever:
         query: str,
         top_k: Optional[int] = None,
         where: Optional[Dict[str, Any]] = None,
+        country: Optional[str] = None,
     ) -> List[Dict[str, Any]]:
+        # 自动检测国家（如果未显式设置）
+        if country:
+            self.set_country(country)
+        # 如果 query 暗示了特定国家，自动加入 country where 条件
+        if self._country != "nz":
+            if where is None:
+                where = {}
+            if "country" not in where:
+                where["country"] = self._country
         k = top_k or self.top_k
 
         search_queries = [query]
@@ -382,13 +480,40 @@ class RAGRetriever:
             return all_results[:k]
         else:
             for q in search_queries:
-                results = self.faiss.search(q, mult)
+                results = self.faiss.search(q, mult, where=where)
                 for r in results:
                     text_key = r["content"][:100]
                     if text_key not in seen_texts:
                         seen_texts.add(text_key)
                         all_results.append(r)
             all_results.sort(key=lambda r: r["score"], reverse=True)
+
+            # BM25 混合检索（倒排融合）
+            if self.use_bm25:
+                bm25_results = self.faiss.bm25_search(query, mult)
+                for r in bm25_results:
+                    text_key = r["content"][:100]
+                    if text_key not in seen_texts:
+                        seen_texts.add(text_key)
+                        all_results.append(r)
+
+                # Reciprocal Rank Fusion (RRF) 融合
+                if bm25_results:
+                    dense_ids = {r["content"][:100]: i for i, r in enumerate(all_results)}
+                    fused = []
+                    for r in all_results:
+                        fused.append(r)
+                    # Sort by RRF score: sum(1/(k + rank)) for each result in each ranking
+                    dense_ranked = {r["content"][:100]: i+1 for i, r in enumerate(all_results)}
+                    bm25_ranked = {r["content"][:100]: i+1 for i, r in enumerate(bm25_results)}
+                    rrfs = {}
+                    for key in dense_ranked:
+                        dr = dense_ranked[key]
+                        br = bm25_ranked.get(key, 999)
+                        rrfs[key] = 1/(60 + dr) + 1/(60 + br)
+                    fused.sort(key=lambda r: rrfs.get(r["content"][:100], 0), reverse=True)
+                    all_results = fused
+
             if self.use_reranker:
                 return self.faiss.rerank(query, all_results, k)
             return all_results[:k]
@@ -418,6 +543,82 @@ def rag_search(query: str, top_k: int = 5, where: Optional[Dict[str, Any]] = Non
         return _format_results(results)
     except Exception as e:
         return f"【知识库检索】失败: {str(e)}"
+
+
+# ===================================================================
+# 检索质量评估（原 eval_retriever.py，合并至此）
+# ===================================================================
+
+
+def _load_chunks() -> list:
+    """加载 metadata.json"""
+    fp = VECTOR_DIR / "metadata.json"
+    if not fp.exists():
+        print("⚠️  metadata.json 不存在，请先构建知识库")
+        return []
+    with open(fp, "r", encoding="utf-8") as f:
+        return json.load(f)
+
+
+def _make_query_from_chunk(chunk: dict) -> str:
+    """从 chunk 生成一个自然语言查询"""
+    meta = chunk.get("metadata", {})
+    title = meta.get("section_title", "") or meta.get("title", "")
+    text = chunk.get("text", "")
+    first_sentence = text.split("。")[0] if "。" in text else text[:30]
+    if title:
+        return f"{title} {first_sentence}"
+    return first_sentence
+
+
+def evaluate_retrieval(
+    retriever: RAGRetriever,
+    n_samples: int = 50,
+    top_k: int = 5,
+) -> dict:
+    """
+    评估检索质量（MRR / Recall@k）。
+
+    Args:
+        retriever: 已初始化的 RAGRetriever
+        n_samples: 采样数量
+        top_k: 检索 top-k
+
+    Returns: {"mrr", "recall_at_1", "recall_at_3", "recall_at_5", "n_samples", "total_chunks"}
+    """
+    import random as _random
+    chunks = _load_chunks()
+    if not chunks:
+        return {"error": "知识库为空"}
+
+    n = min(n_samples, len(chunks))
+    samples = _random.sample(chunks, n)
+
+    rr_sum = 0.0
+    hit_at_1 = hit_at_3 = hit_at_5 = 0
+
+    for chunk in samples:
+        query = _make_query_from_chunk(chunk)
+        target_id = chunk["text"][:100]
+        results = retriever.search(query, top_k=top_k)
+        rr = 0.0
+        for rank, r in enumerate(results, 1):
+            if r["content"][:100] == target_id:
+                rr = 1.0 / rank
+                if rank == 1: hit_at_1 += 1
+                if rank <= 3: hit_at_3 += 1
+                if rank <= 5: hit_at_5 += 1
+                break
+        rr_sum += rr
+
+    return {
+        "mrr": round(rr_sum / n, 4),
+        "recall_at_1": round(hit_at_1 / n, 4),
+        "recall_at_3": round(hit_at_3 / n, 4),
+        "recall_at_5": round(hit_at_5 / n, 4),
+        "n_samples": n,
+        "total_chunks": len(chunks),
+    }
 
 
 if __name__ == "__main__":
