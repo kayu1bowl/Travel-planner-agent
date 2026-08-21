@@ -3976,8 +3976,12 @@ body {
 }
 
 /* =========================================================================
-   STAGE 4: 澎湃OS 级知识架构全屏舞台 (Architecture Stage)
+   STAGE 4: 知识架构全屏舞台 (Illustrated Hyper-Intellect Grid)
    ========================================================================= */
+
+.architecture-stage {
+  padding: 100px 48px 60px;
+}
 
 .architecture-grid-bg {
   position: absolute;
@@ -3988,77 +3992,128 @@ body {
   background-size: 100% 100%, 48px 48px, 48px 48px;
 }
 
-.architecture-layers-deck {
+.architecture-illustrated-grid {
   width: 100%;
-  max-width: 1180px;
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-}
-
-.architecture-layer-plaque {
-  display: flex;
-  align-items: center;
+  max-width: 1440px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
   gap: 28px;
-  background: rgba(11, 17, 32, 0.8);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.architecture-showcase-card {
+  display: flex;
+  background: rgba(11, 17, 32, 0.85);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 24px;
-  padding: 28px 36px;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  min-height: 220px;
 }
 
-.architecture-layer-plaque:hover {
-  transform: translateX(8px);
-  border-color: rgba(16, 185, 129, 0.5);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5), 0 0 20px rgba(16, 185, 129, 0.15);
+.architecture-showcase-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(16, 185, 129, 0.45);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6), 0 0 28px rgba(16, 185, 129, 0.2);
 }
 
-.layer-num-hex {
-  font-size: 1.8rem;
-  font-weight: 900;
-  color: #10B981;
-  font-family: monospace;
+.showcase-card-visual {
+  position: relative;
+  width: 220px;
+  min-width: 220px;
+  background-size: cover;
+  background-position: center;
+  overflow: hidden;
 }
 
-.layer-content-main {
-  flex: 1;
-  text-align: left;
+.visual-vignette-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 30%, rgba(11, 17, 32, 0.95) 100%),
+              linear-gradient(180deg, rgba(3, 7, 18, 0.4) 0%, transparent 60%);
 }
 
-.layer-main-title {
-  font-size: 1.3rem;
-  font-weight: 900;
-  color: #FFFFFF;
-  margin-bottom: 4px;
-}
-
-.layer-main-desc {
-  font-size: 0.92rem;
-  color: #94A3B8;
-  line-height: 1.45;
-}
-
-.layer-live-status {
+.visual-top-badge {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  z-index: 5;
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 0.76rem;
-  font-weight: 800;
-  color: #10B981;
-  background: rgba(16, 185, 129, 0.12);
-  border: 1px solid rgba(16, 185, 129, 0.3);
-  padding: 6px 14px;
-  border-radius: 20px;
-  letter-spacing: 0.06em;
+  gap: 6px;
+  background: rgba(3, 7, 18, 0.7);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 4px 10px;
+  border-radius: 12px;
 }
 
-.status-indicator-dot {
+.visual-layer-num {
+  font-family: monospace;
+  font-size: 0.75rem;
+  font-weight: 900;
+  color: #10B981;
+}
+
+.visual-live-dot {
   width: 6px;
   height: 6px;
   border-radius: 50%;
   background: #10B981;
   box-shadow: 0 0 8px #10B981;
+  animation: pulse 2s infinite ease-in-out;
+}
+
+.showcase-card-body {
+  flex: 1;
+  padding: 22px 26px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 10px;
+  text-align: left;
+}
+
+.card-sub-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #34D399;
+  letter-spacing: 0.02em;
+}
+
+.card-heading-title {
+  font-size: 1.22rem;
+  font-weight: 900;
+  color: #FFFFFF;
+  line-height: 1.3;
+}
+
+.card-detail-desc {
+  font-size: 0.85rem;
+  color: #94A3B8;
+  line-height: 1.55;
+  flex: 1;
+}
+
+.card-status-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.status-label {
+  font-family: monospace;
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: #64748B;
+  letter-spacing: 0.04em;
 }
 
 /* =========================================================================

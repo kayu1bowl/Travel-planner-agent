@@ -82,12 +82,36 @@ export const TRANSLATIONS = {
       knowledgeMesh: {
         badge: "HYPER-INTELLECT ARCHITECTURE",
         title: "双引擎驱动的知识底盘体系",
-        subtitle: "从权威私有 RAG 向量库到大模型拓展思考推理，构筑不可动摇的事实基石。",
+        subtitle: "从权威私有 RAG 向量数据库到多智能体深度时空推理，构筑不可动摇的事实基石。",
         layers: [
-          { num: "04", name: "Bento Grid 便士网格可视化层", desc: "日程安排、地标风物与机位指南秒级响应呈现" },
-          { num: "03", name: "Gemini 3.7 Flash 拓展深度思考", desc: "多步严密逻辑推演，权衡车程体能与游玩节奏" },
-          { num: "02", name: "全网实时气象与交通路况总线", desc: "即时核验公路畅通度与高精度小时级天气预报" },
-          { num: "01", name: "DOC 官方步道与暗夜保护区知识库", desc: "ChromaDB 严苛事实锚定，彻底消除幻觉" }
+          { 
+            num: "01", 
+            name: "DOC 官方步道与暗夜保护区权威底座", 
+            tag: "ChromaDB 向量检索 · 100% 事实锚定",
+            desc: "结构化录入新西兰环保署（DOC）官方步道安全评级、往返耗时、季节积雪与洪水警示及暗夜保护区规范，杜绝大模型无端幻觉与危险盲区。",
+            image: "https://images.unsplash.com/photo-1507699622108-4be3abd695ad?w=800&auto=format&fit=crop&q=80"
+          },
+          { 
+            num: "02", 
+            name: "全网气象雷达与实时交通路况遥测总线", 
+            tag: "小时级天气流态 · 公路通行警报",
+            desc: "即时核验南阿尔卑斯山脉高海拔路段通行状况，结合多普勒气象雷达与日出日落晨昏时刻，动态预警山口结冰与暴雨能见度。",
+            image: "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=800&auto=format&fit=crop&q=80"
+          },
+          { 
+            num: "03", 
+            name: "OpenClaw 多智能体时空推理与节奏推演中枢", 
+            tag: "Extended Thinking · 多步逻辑链推演",
+            desc: "启用拓展深度思考多智能体协同机制，权衡“每日驾驶时限 ≤ 250km”、“老人与儿童体能负荷”、“黄金采光窗口”与“餐厅营业周期”，输出严谨顺路的自驾时刻表。",
+            image: "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=800&auto=format&fit=crop&q=80"
+          },
+          { 
+            num: "04", 
+            name: "Bento Grid 便士网格多维动态交互呈现层", 
+            tag: "结构化信息矩阵 · 秒级响应呈现",
+            desc: "将繁杂的时空路线、官方步道指南、专业摄影机位经纬度与地道风物美食转化为直观的便士网格布局，支持一键沉浸式交互。",
+            image: "https://images.unsplash.com/photo-1433086966358-54859d0ed716?w=800&auto=format&fit=crop&q=80"
+          }
         ]
       },
       inspirations: {
@@ -138,12 +162,18 @@ export const TRANSLATIONS = {
       },
       mustVisitTitle: "必去地标与风味美食",
       recommendationsLabel: "推荐理由: ",
-      tipsLabel: "贴士",
-      photoGuideTitle: "摄影机位与出片指南",
-      tipsPrefix: "Tips:",
-      copySpotBtn: "复制机位建议",
-      shareSpotBtn: "分享机位",
-      paramsLabel: "参数建议"
+      openHoursLabel: "建议游玩时间: ",
+      pricingLabel: "门票/人均: ",
+      tipsLabel: "避坑指南: ",
+      spotsTitle: "专业摄影机位与绝景指南",
+      photoTipsLabel: "拍摄建议: ",
+      bestTimeLabel: "最佳机位时刻: ",
+      lensLabel: "推荐焦段: ",
+      weatherTitle: "当地实时天气与穿衣建议",
+      tempLabel: "气温: ",
+      conditionLabel: "天气状况: ",
+      clothingLabel: "穿衣穿搭: ",
+      packingLabel: "携带装备: "
     }
   },
   en: {
@@ -165,26 +195,26 @@ export const TRANSLATIONS = {
         knowledge: "Architecture",
         enterDashboard: "Dashboard →"
       },
-      badge: "OpenClaw Agent · Autonomous Travel Planner",
-      heroTitle: "Every Journey, A Masterpiece",
-      heroSubtitle: "Empowered by Official DOC Knowledge Base, Real-Time Telemetry & Pro Photospot Matrix for effortless adventures.",
-      inputPlaceholder: "Where do you want to go? e.g. 7-day self-drive in NZ South Island with parents, relax pace, stargazing & salmon...",
-      generateBtn: "Generate AI Itinerary",
-      generatingBtn: "AI is reasoning with RAG & Web Search...",
+      badge: "OpenClaw Agent · Supreme Travel Planner System",
+      heroTitle: "Your Ideal Journey, One Sentence Away",
+      heroSubtitle: "Uniting authoritative guides, millisecond weather telemetry and pro photography spots for effortless travels.",
+      inputPlaceholder: "Where would you like to go? e.g. 7-day South Island NZ road trip with parents, relaxed pace, stargazing and salmon dining...",
+      generateBtn: "Start AI Planning",
+      generatingBtn: "AI is Reasoning across Vector Stores...",
       preferencesTitle: "Preferences",
       preferences: [
-        { label: "🚗 Self-Drive", tag: "Self-drive" },
-        { label: "🌌 Dark Sky", tag: "Photography & Stargazing" },
-        { label: "📸 Pro Spots", tag: "Photography spots" },
-        { label: "🍜 Gourmet Food", tag: "Local Food & Dining" },
-        { label: "🏔️ Glacier Hike", tag: "Nature & Hiking" },
-        { label: "👨‍👩‍👧 Family Resort", tag: "Family Friendly & Relaxed" }
+        { label: "🚗 Road Trip", tag: "Road Trip" },
+        { label: "🌌 Dark Sky", tag: "Stargazing & Dark Sky" },
+        { label: "📸 Pro Spots", tag: "Pro Photography Spots" },
+        { label: "🍜 Gourmet", tag: "Authentic Local Cuisine" },
+        { label: "🏔️ Glaciers", tag: "Light Hiking & Glaciers" },
+        { label: "👨‍👩‍👧 Family", tag: "Family Friendly & Relaxed Pace" }
       ],
       telemetry: [
-        "100% DOC Official Guides",
-        "Live Weather & Highway Telemetry",
-        "Extended Thinking Deep Reasoner",
-        "Anti-Pitfall Radar"
+        "100% DOC Official Vector Base",
+        "Millisecond Weather & Highway Telemetry",
+        "Extended Thinking Multi-Step Reasoning",
+        "Scam Avoidance & Safety Guide"
       ],
       spatialEngine: {
         badge: "SPATIAL-TEMPORAL ROUTING ENGINE",
@@ -228,13 +258,37 @@ export const TRANSLATIONS = {
       },
       knowledgeMesh: {
         badge: "HYPER-INTELLECT ARCHITECTURE",
-        title: "Dual-Engine Grounded Intelligence",
-        subtitle: "From authoritative RAG vector store to Extended Thinking reasoning for unbreakable factual ground.",
+        title: "Dual-Engine Grounded Intelligence Architecture",
+        subtitle: "From authoritative RAG vector store to multi-agent temporal-spatial reasoning for unbreakable factual ground.",
         layers: [
-          { num: "04", name: "Bento Grid Visualization Matrix", desc: "Instantaneous rendering of schedules, sights & dining" },
-          { num: "03", name: "Gemini 3.7 Flash Extended Thinking", desc: "Multi-step rigorous deduction balancing drive fatigue & rhythm" },
-          { num: "02", name: "Live Weather & Highway Telemetry Bus", desc: "Real-time road viability checks & hourly meteorological forecast" },
-          { num: "01", name: "DOC Official Trail & Dark Sky Vector Base", desc: "ChromaDB precision grounding eliminating hallucinations" }
+          { 
+            num: "01", 
+            name: "DOC Official Trail & Dark Sky Vector Base", 
+            tag: "ChromaDB Vector Retrieval · 100% Fact Grounded",
+            desc: "Directly indexed New Zealand Department of Conservation (DOC) safety ratings, standard durations, season warnings, and Dark Sky IDA regulations, eliminating hallucinations.",
+            image: "https://images.unsplash.com/photo-1507699622108-4be3abd695ad?w=800&auto=format&fit=crop&q=80"
+          },
+          { 
+            num: "02", 
+            name: "Live Weather Radar & Highway Telemetry Bus", 
+            tag: "Hourly Meteorological Forecast · Road Viability",
+            desc: "Real-time road viability verification across alpine passes, combined with meteorological doppler radar and astronomical lighting calculations to avert icy hazards.",
+            image: "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=800&auto=format&fit=crop&q=80"
+          },
+          { 
+            num: "03", 
+            name: "OpenClaw Multi-Agent Temporal Reasoning Core", 
+            tag: "Extended Thinking · Multi-Step Logical Chain",
+            desc: "Leverages deep thinking multi-agent chains balancing 'daily drive limits ≤ 250km', 'family stamina pacing', 'golden lighting windows', and 'dining open hours' for realistic schedules.",
+            image: "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=800&auto=format&fit=crop&q=80"
+          },
+          { 
+            num: "04", 
+            name: "Bento Grid Multi-Dimensional Interactive Matrix", 
+            tag: "Structured Data Matrix · Instantaneous Rendering",
+            desc: "Translates complex itinerary itineraries, official trail guides, master photo coordinates, and local culinary discoveries into intuitive interactive Bento modules.",
+            image: "https://images.unsplash.com/photo-1433086966358-54859d0ed716?w=800&auto=format&fit=crop&q=80"
+          }
         ]
       },
       inspirations: {

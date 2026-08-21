@@ -824,18 +824,35 @@ export default function WelcomeLandingView({
             <p className="stage-giant-subtitle">{t.knowledgeMesh.subtitle}</p>
           </div>
 
-          {/* 4 层悬浮透光科技底座 */}
-          <div className="architecture-layers-deck">
+          {/* 4 大生动图文科技展示卡片 (2x2 全景矩阵，配有独立特色插图与真实技术解构) */}
+          <div className="architecture-illustrated-grid">
             {t.knowledgeMesh.layers.map((layer, idx) => (
-              <div key={idx} className="architecture-layer-plaque">
-                <div className="layer-num-hex">{layer.num}</div>
-                <div className="layer-content-main">
-                  <h3 className="layer-main-title">{layer.name}</h3>
-                  <p className="layer-main-desc">{layer.desc}</p>
+              <div key={idx} className="architecture-showcase-card">
+                {/* 独立科技视觉插图区 */}
+                <div 
+                  className="showcase-card-visual"
+                  style={{ backgroundImage: `url('${layer.image}')` }}
+                >
+                  <div className="visual-vignette-overlay"></div>
+                  <div className="visual-top-badge">
+                    <span className="visual-layer-num">LAYER {layer.num}</span>
+                    <div className="visual-live-dot"></div>
+                  </div>
                 </div>
-                <div className="layer-live-status">
-                  <div className="status-indicator-dot"></div>
-                  <span>ACTIVE KERNEL</span>
+
+                {/* 详细文字解构区 */}
+                <div className="showcase-card-body">
+                  <div className="card-sub-tag">
+                    <ShieldCheck size={13} color="#10B981" />
+                    <span>{layer.tag}</span>
+                  </div>
+                  <h3 className="card-heading-title">{layer.name}</h3>
+                  <p className="card-detail-desc">{layer.desc}</p>
+                  
+                  <div className="card-status-bar">
+                    <div className="status-indicator-dot"></div>
+                    <span className="status-label">ACTIVE KERNEL · 100% OPERATIONAL</span>
+                  </div>
                 </div>
               </div>
             ))}
