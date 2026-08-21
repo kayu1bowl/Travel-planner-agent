@@ -15,6 +15,7 @@ import {
   Maximize2,
   Sliders,
   ChevronRight,
+  ChevronLeft,
   ChevronDown,
   Sun,
   Moon,
@@ -29,6 +30,90 @@ import {
 } from 'lucide-react';
 import { TRANSLATIONS } from '../services/i18n';
 
+// 庞大且多维度的全球 4K 震撼风光大片库 (Unsplash 4K 旗舰画质，涵盖各大洲地标与自然秘境)
+const GLOBAL_SCENIC_CAROUSEL = [
+  {
+    url: "https://images.unsplash.com/photo-1507699622108-4be3abd695ad?w=1920&auto=format&fit=crop&q=85",
+    title: "Lake Tekapo Dark Sky Reserve",
+    location: "新西兰特卡波湖 · 国际暗夜星空保护区"
+  },
+  {
+    url: "https://images.unsplash.com/photo-1516298773066-c48f8e9bd92b?w=1920&auto=format&fit=crop&q=85",
+    title: "Mount Fuji & Lake Kawaguchi",
+    location: "日本富士山 · 河口湖落日与雪顶"
+  },
+  {
+    url: "https://images.unsplash.com/photo-1530122037265-a5f1f91d3b99?w=1920&auto=format&fit=crop&q=85",
+    title: "Matterhorn & Glacier Express",
+    location: "瑞士采尔马特 · 马特洪峰与冰川列车"
+  },
+  {
+    url: "https://images.unsplash.com/photo-1534447677768-be436bb09401?w=1920&auto=format&fit=crop&q=85",
+    title: "Lofoten Aurora Borealis",
+    location: "挪威罗弗敦群岛 · 极光与峡湾渔村"
+  },
+  {
+    url: "https://images.unsplash.com/photo-1513581166391-887a96ddeafd?w=1920&auto=format&fit=crop&q=85",
+    title: "Dolomites Alpine Peaks",
+    location: "意大利多洛米蒂 · 白云石巨峰与高山草甸"
+  },
+  {
+    url: "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=1920&auto=format&fit=crop&q=85",
+    title: "Lake Louise Banff National Park",
+    location: "加拿大班夫国家公园 · 冰川蓝路易斯湖"
+  },
+  {
+    url: "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=1920&auto=format&fit=crop&q=85",
+    title: "Southern Alps Scenic Highway",
+    location: "新西兰南岛 8 号国道 · 纵贯南阿尔卑斯山脉"
+  },
+  {
+    url: "https://images.unsplash.com/photo-1503899036084-c55cdd92da26?w=1920&auto=format&fit=crop&q=85",
+    title: "Tokyo Cyberpunk Nightscape",
+    location: "日本东京 · 新宿涩谷赛博霓虹夜色"
+  },
+  {
+    url: "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=1920&auto=format&fit=crop&q=85",
+    title: "Santorini Caldera Sunset",
+    location: "希腊圣托里尼 · 爱琴海蓝顶白屋夕阳"
+  },
+  {
+    url: "https://images.unsplash.com/photo-1508873696983-2df5293cb32b?w=1920&auto=format&fit=crop&q=85",
+    title: "Jokulsarlon Glacier Lagoon",
+    location: "冰岛杰古沙龙 · 钻石黑沙滩与远古冰川"
+  },
+  {
+    url: "https://images.unsplash.com/photo-1433086966358-54859d0ed716?w=1920&auto=format&fit=crop&q=85",
+    title: "Milford Sound Fiordland",
+    location: "米尔福德峡湾 · 世界自然遗产地瀑布"
+  },
+  {
+    url: "https://images.unsplash.com/photo-1528164344705-475426879c0d?w=1920&auto=format&fit=crop&q=85",
+    title: "Kyoto Yasaka Pagoda Cherry Blossom",
+    location: "日本京都 · 八坂之塔古街与春樱盛放"
+  },
+  {
+    url: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=1920&auto=format&fit=crop&q=85",
+    title: "Yosemite Valley Tunnel View",
+    location: "美国优胜美地 · 酋长岩晨雾与高山瀑布"
+  },
+  {
+    url: "https://images.unsplash.com/photo-1516483638261-f4dbaf036963?w=1920&auto=format&fit=crop&q=85",
+    title: "Cinque Terre Riomaggiore",
+    location: "意大利五渔村 · 悬崖彩色小镇与地中海"
+  },
+  {
+    url: "https://images.unsplash.com/photo-1518684079-3c830dcef090?w=1920&auto=format&fit=crop&q=85",
+    title: "Arabian Desert Golden Dunes",
+    location: "迪拜阿拉伯沙漠 · 金色落日沙丘巡航"
+  },
+  {
+    url: "https://images.unsplash.com/photo-1506929562872-bb421503ef21?w=1920&auto=format&fit=crop&q=85",
+    title: "Maldives Coral Atoll",
+    location: "马尔代夫群岛 · 玻璃果冻海与珊瑚礁"
+  }
+];
+
 export default function WelcomeLandingView({
   language,
   onToggleLanguage,
@@ -40,34 +125,12 @@ export default function WelcomeLandingView({
   const [inputText, setInputText] = useState('');
   const [selectedTags, setSelectedTags] = useState([]);
   const [activePhotoSpotIndex, setActivePhotoSpotIndex] = useState(0);
-  const [heroSlideIndex, setHeroSlideIndex] = useState(0);
+  
+  // 随机起始大片索引，每次进入页面都是新风景
+  const [heroSlideIndex, setHeroSlideIndex] = useState(() => Math.floor(Math.random() * GLOBAL_SCENIC_CAROUSEL.length));
   const inputRef = useRef(null);
 
   const t = TRANSLATIONS[language]?.welcome || TRANSLATIONS.zh.welcome;
-
-  // Hero 全屏 4K 背景多大片轮播图源 (无缝交叉淡入淡出)
-  const heroBackgrounds = [
-    {
-      url: "https://images.unsplash.com/photo-1507699622108-4be3abd695ad?w=1920&auto=format&fit=crop&q=85",
-      title: "Lake Tekapo Dark Sky Reserve",
-      location: "新西兰特卡波湖 · 国际暗夜星空保护区"
-    },
-    {
-      url: "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=1920&auto=format&fit=crop&q=85",
-      title: "Southern Alps Scenic Highway",
-      location: "新西兰南岛 8 号国道 · 纵贯南阿尔卑斯山脉"
-    },
-    {
-      url: "https://images.unsplash.com/photo-1433086966358-54859d0ed716?w=1920&auto=format&fit=crop&q=85",
-      title: "Milford Sound Fiordland",
-      location: "米尔福德峡湾 · 世界自然遗产地"
-    },
-    {
-      url: "https://images.unsplash.com/photo-1530122037265-a5f1f91d3b99?w=1920&auto=format&fit=crop&q=85",
-      title: "Swiss Alps Panoramic Railway",
-      location: "瑞士阿尔卑斯 · 冰川快车全景路线"
-    }
-  ];
 
   // 摄影机位图源与取景预设 (全屏覆盖)
   const photoSpotsData = [
@@ -112,21 +175,74 @@ export default function WelcomeLandingView({
     }
   ];
 
-  // 灵感卡片全屏高清背景
-  const inspirationImages = [
-    "https://images.unsplash.com/photo-1507699622108-4be3abd695ad?w=1200&auto=format&fit=crop&q=85",
-    "https://images.unsplash.com/photo-1503899036084-c55cdd92da26?w=1200&auto=format&fit=crop&q=85",
-    "https://images.unsplash.com/photo-1530122037265-a5f1f91d3b99?w=1200&auto=format&fit=crop&q=85",
-    "https://images.unsplash.com/photo-1542051841857-5f90071e7989?w=1200&auto=format&fit=crop&q=85"
+  // 灵感画廊 8 大全球目的地高清大片
+  const globalInspirationsList = [
+    {
+      tag: "风光自驾",
+      title: "新西兰南岛 7 天自驾与暗夜星空",
+      query: "计划新西兰南岛7天自驾之旅，重点特卡波暗夜星空、库克山胡克谷冰川与皇后镇美食，包含专业摄影机位",
+      img: "https://images.unsplash.com/photo-1507699622108-4be3abd695ad?w=1200&auto=format&fit=crop&q=85"
+    },
+    {
+      tag: "城市人文",
+      title: "东京 7 天动漫圣地与米其林漫游",
+      query: "计划东京7天深度游，涵盖浅草古刹、涩谷十字路口夜景、秋叶原动漫与筑地海鲜市场美食",
+      img: "https://images.unsplash.com/photo-1503899036084-c55cdd92da26?w=1200&auto=format&fit=crop&q=85"
+    },
+    {
+      tag: "雪山列车",
+      title: "瑞士阿尔卑斯 10 天全景列车",
+      query: "瑞士10天黄金列车与冰川快车全景游，游览少女峰、马特洪峰与日内瓦湖",
+      img: "https://images.unsplash.com/photo-1530122037265-a5f1f91d3b99?w=1200&auto=format&fit=crop&q=85"
+    },
+    {
+      tag: "极光秘境",
+      title: "挪威罗弗敦 6 天峡湾极光追猎",
+      query: "计划挪威罗弗敦群岛6天冬季追光之旅，包含雷纳小镇红色木屋摄影、峡湾雪山巡航与帝王蟹盛宴",
+      img: "https://images.unsplash.com/photo-1534447677768-be436bb09401?w=1200&auto=format&fit=crop&q=85"
+    },
+    {
+      tag: "高山徒步",
+      title: "意大利多洛米蒂 8 天徒步自驾",
+      query: "意大利多洛米蒂山脉8天自驾轻徒步，重点刀锋山Seceda、三峰山与休斯高原高山木屋",
+      img: "https://images.unsplash.com/photo-1513581166391-887a96ddeafd?w=1200&auto=format&fit=crop&q=85"
+    },
+    {
+      tag: "古都雅韵",
+      title: "京都奈良 5 天风雅茶道之旅",
+      query: "京都奈良5天漫步，探访伏见稻荷大社、岚山竹林、清水寺与奈良公园小鹿互动",
+      img: "https://images.unsplash.com/photo-1528164344705-475426879c0d?w=1200&auto=format&fit=crop&q=85"
+    },
+    {
+      tag: "落基国家公园",
+      title: "加拿大班夫贾斯珀 7 天自驾",
+      query: "加拿大阿尔伯塔省7天自驾，深度探索班夫国家公园、路易斯湖、冰原大道与梦莲湖日出机位",
+      img: "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=1200&auto=format&fit=crop&q=85"
+    },
+    {
+      tag: "海岛浪漫",
+      title: "希腊圣托里尼与米克诺斯 6 天",
+      query: "希腊爱琴海双岛6天度假，打卡伊亚小镇蓝顶教堂日落、白沙滩与悬崖无边泳池酒店",
+      img: "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=1200&auto=format&fit=crop&q=85"
+    }
   ];
 
-  // 自动轮播 Hero 背景大片 (每 6 秒平滑切换)
+  // 自动无限轮播 Hero 背景大片 (每 5 秒平滑切换，永无止境)
   useEffect(() => {
     const timer = setInterval(() => {
-      setHeroSlideIndex(prev => (prev + 1) % heroBackgrounds.length);
-    }, 6000);
+      setHeroSlideIndex(prev => (prev + 1) % GLOBAL_SCENIC_CAROUSEL.length);
+    }, 5000);
     return () => clearInterval(timer);
-  }, [heroBackgrounds.length]);
+  }, []);
+
+  // 手动切换上一张/下一张
+  const handlePrevSlide = () => {
+    setHeroSlideIndex(prev => (prev - 1 + GLOBAL_SCENIC_CAROUSEL.length) % GLOBAL_SCENIC_CAROUSEL.length);
+  };
+
+  const handleNextSlide = () => {
+    setHeroSlideIndex(prev => (prev + 1) % GLOBAL_SCENIC_CAROUSEL.length);
+  };
 
   // 点击偏好标签追加到输入框
   const handleToggleTag = (tagObj) => {
@@ -226,12 +342,12 @@ export default function WelcomeLandingView({
       </header>
 
       {/* =========================================================================
-          STAGE 1: 100vw × 100vh 全屏流媒体 Hero 主屏 (Cinematic Carousel Stage)
+          STAGE 1: 100vw × 100vh 全屏流媒体 Hero 主屏 (海量 Unsplash 4K 大片无限轮播)
           ========================================================================= */}
       <section id="stage-hero" className="fullbleed-stage hero-stage">
-        {/* 多张 4K 风光大片平滑交叉淡入淡出轮播背景 */}
+        {/* 全球大片无限平滑交叉淡入淡出轮播背景 */}
         <div className="hero-carousel-container">
-          {heroBackgrounds.map((bg, idx) => (
+          {GLOBAL_SCENIC_CAROUSEL.map((bg, idx) => (
             <div 
               key={idx} 
               className={`hero-carousel-slide ${heroSlideIndex === idx ? 'active' : ''}`}
@@ -245,20 +361,32 @@ export default function WelcomeLandingView({
         {/* 动态暗角与流光光效 */}
         <div className="hero-vignette"></div>
 
-        {/* 轮播图指示器与机位信息 */}
+        {/* 左右手动切换大片微控钮 */}
+        <button 
+          className="hero-carousel-arrow arrow-left"
+          onClick={handlePrevSlide}
+          title="上一张大片"
+        >
+          <ChevronLeft size={24} />
+        </button>
+        <button 
+          className="hero-carousel-arrow arrow-right"
+          onClick={handleNextSlide}
+          title="下一张大片"
+        >
+          <ChevronRight size={24} />
+        </button>
+
+        {/* 轮播图指示器与机位信息 (展示当前地标与流转进度) */}
         <div className="hero-slide-meta">
-          <div className="hero-slide-pills">
-            {heroBackgrounds.map((_, idx) => (
-              <button 
-                key={idx}
-                className={`slide-indicator-pill ${heroSlideIndex === idx ? 'active' : ''}`}
-                onClick={() => setHeroSlideIndex(idx)}
-              />
-            ))}
+          <div className="hero-slide-counter">
+            <span className="counter-curr">{String(heroSlideIndex + 1).padStart(2, '0')}</span>
+            <span className="counter-divider">/</span>
+            <span className="counter-total">{String(GLOBAL_SCENIC_CAROUSEL.length).padStart(2, '0')}</span>
           </div>
           <div className="hero-slide-desc">
             <MapPin size={13} color="#10B981" />
-            <span>{heroBackgrounds[heroSlideIndex]?.location}</span>
+            <span>{GLOBAL_SCENIC_CAROUSEL[heroSlideIndex]?.location}</span>
           </div>
         </div>
 
@@ -279,6 +407,7 @@ export default function WelcomeLandingView({
           {/* 悬浮磨砂智能指令舱 */}
           <div className="hero-floating-capsule">
             <form onSubmit={handleSubmit} className="capsule-form">
+              {/* 输入框在上 */}
               <div className="capsule-textarea-wrap">
                 <textarea
                   ref={inputRef}
@@ -297,25 +426,22 @@ export default function WelcomeLandingView({
                 />
               </div>
 
-              {/* 快捷偏好标签 */}
-              <div className="capsule-tags-row">
-                <span className="capsule-tags-label">{t.preferencesTitle}:</span>
-                <div className="capsule-tags-group">
-                  {t.preferences.map((tagObj, idx) => {
-                    const active = selectedTags.includes(tagObj.tag);
-                    return (
-                      <button
-                        key={idx}
-                        type="button"
-                        className={`capsule-tag-chip ${active ? 'active' : ''}`}
-                        onClick={() => handleToggleTag(tagObj)}
-                        disabled={isGenerating}
-                      >
-                        {tagObj.label}
-                      </button>
-                    );
-                  })}
-                </div>
+              {/* 快捷偏好小框紧随输入框下方，完全居中排列，不显示“标签”二字 */}
+              <div className="capsule-chips-centered">
+                {t.preferences.map((tagObj, idx) => {
+                  const active = selectedTags.includes(tagObj.tag);
+                  return (
+                    <button
+                      key={idx}
+                      type="button"
+                      className={`capsule-tag-chip ${active ? 'active' : ''}`}
+                      onClick={() => handleToggleTag(tagObj)}
+                      disabled={isGenerating}
+                    >
+                      {tagObj.label}
+                    </button>
+                  );
+                })}
               </div>
 
               {/* 卡片底栏操作区 */}
@@ -580,7 +706,7 @@ export default function WelcomeLandingView({
       </section>
 
       {/* =========================================================================
-          STAGE 5: 100vw × 100vh 全球灵感全景画廊 (Inspiration Matrix Stage)
+          STAGE 5: 100vw × 100vh 全球灵感全景画廊 (海量 8 大全球目的地大片矩阵)
           ========================================================================= */}
       <section id="stage-inspirations" className="fullbleed-stage inspirations-stage">
         <div className="stage-content-container z-relative">
@@ -593,9 +719,9 @@ export default function WelcomeLandingView({
             <p className="stage-giant-subtitle">{t.inspirations.subtitle}</p>
           </div>
 
-          {/* 全屏展开式 4 大目的地大片卡片 */}
+          {/* 全屏展开式 8 大目的地大片网格 */}
           <div className="inspirations-full-grid">
-            {t.inspirations.items.map((item, idx) => (
+            {globalInspirationsList.map((item, idx) => (
               <div 
                 key={idx} 
                 className="inspiration-fullscreen-card"
@@ -603,7 +729,7 @@ export default function WelcomeLandingView({
               >
                 <div 
                   className="card-bg-layer"
-                  style={{ backgroundImage: `url('${inspirationImages[idx % inspirationImages.length]}')` }}
+                  style={{ backgroundImage: `url('${item.img}')` }}
                 />
                 <div className="card-gradient-layer"></div>
                 <div className="card-meta-box">

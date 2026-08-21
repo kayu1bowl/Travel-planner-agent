@@ -3235,9 +3235,44 @@ body {
   pointer-events: none;
 }
 
+.hero-carousel-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: rgba(3, 7, 18, 0.5);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 25;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hero-carousel-arrow:hover {
+  background: rgba(16, 185, 129, 0.25);
+  border-color: #10B981;
+  color: #34D399;
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.hero-carousel-arrow.arrow-left {
+  left: 36px;
+}
+
+.hero-carousel-arrow.arrow-right {
+  right: 36px;
+}
+
 .hero-slide-meta {
   position: absolute;
-  top: 92px;
+  top: 96px;
   right: 48px;
   z-index: 20;
   display: flex;
@@ -3246,39 +3281,48 @@ body {
   gap: 10px;
 }
 
-.hero-slide-pills {
+.hero-slide-counter {
   display: flex;
-  gap: 8px;
+  align-items: baseline;
+  gap: 4px;
+  font-family: monospace;
+  font-weight: 900;
+  font-size: 1.1rem;
+  color: #FFFFFF;
+  background: rgba(3, 7, 18, 0.65);
+  padding: 4px 14px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(10px);
 }
 
-.slide-indicator-pill {
-  width: 28px;
-  height: 4px;
-  border-radius: 4px;
-  background: rgba(255, 255, 255, 0.25);
-  border: none;
-  cursor: pointer;
-  transition: all 0.3s ease;
+.counter-curr {
+  color: #10B981;
+  font-size: 1.25rem;
 }
 
-.slide-indicator-pill.active {
-  width: 48px;
-  background: #10B981;
-  box-shadow: 0 0 12px #10B981;
+.counter-divider {
+  color: #64748B;
+  font-size: 0.9rem;
+}
+
+.counter-total {
+  color: #94A3B8;
+  font-size: 0.85rem;
 }
 
 .hero-slide-desc {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 0.78rem;
+  font-size: 0.8rem;
   font-weight: 700;
   color: #E2E8F0;
-  background: rgba(3, 7, 18, 0.6);
-  padding: 4px 12px;
+  background: rgba(3, 7, 18, 0.65);
+  padding: 6px 14px;
   border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(10px);
 }
 
 .hero-stage-content {
@@ -3373,45 +3417,35 @@ body {
   color: #64748B;
 }
 
-.capsule-tags-row {
+/* 居中放置偏好小框，不显示“标签”文本 */
+.capsule-chips-centered {
   display: flex;
+  justify-content: center;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   flex-wrap: wrap;
   padding-top: 14px;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.capsule-tags-label {
-  font-size: 0.78rem;
-  font-weight: 800;
-  color: #94A3B8;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-.capsule-tags-group {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
+  width: 100%;
 }
 
 .capsule-tag-chip {
-  padding: 6px 14px;
-  border-radius: 16px;
+  padding: 7px 16px;
+  border-radius: 18px;
   border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(30, 41, 59, 0.7);
+  background: rgba(30, 41, 59, 0.75);
   color: #E2E8F0;
-  font-size: 0.82rem;
+  font-size: 0.84rem;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .capsule-tag-chip:hover {
-  background: rgba(51, 65, 85, 0.9);
+  background: rgba(51, 65, 85, 0.95);
   border-color: rgba(255, 255, 255, 0.3);
   color: #FFFFFF;
+  transform: translateY(-1px);
 }
 
 .capsule-tag-chip.active {
