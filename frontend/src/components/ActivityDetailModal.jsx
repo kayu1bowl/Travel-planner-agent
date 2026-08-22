@@ -35,42 +35,50 @@ export default function ActivityDetailModal({
   if (!isOpen || !item) return null;
 
   const handleCopyLocation = () => {
-    navigator.clipboard.writeText(item.location || item.activity);
+    const textToCopy = item.location || item.activity || (language === 'zh' ? '特色景点' : 'Scenic Spot');
+    navigator.clipboard.writeText(textToCopy);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
   const handleOpenMaps = () => {
-    const query = encodeURIComponent(`${item.location} New Zealand`);
+    const loc = item.location || item.activity || '';
+    if (!loc) return;
+    const query = encodeURIComponent(loc);
     window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, '_blank');
   };
 
-  // 生成智能贴士
+  // 生成智能贴士（多目的地通用自适应）
   const getContextualTips = (activity = '', location = '') => {
-    const act = (activity + ' ' + location).toLowerCase();
+    const act = (String(activity || '') + ' ' + String(location || '')).toLowerCase();
     if (act.includes('星空') || act.includes('观星') || act.includes('教堂') || act.includes('tekapo')) {
       return language === 'zh'
         ? '国际暗夜保护区核心区，夜间观星请关闭大灯使用红光手电；湖畔夜间风大温差大，建议穿戴羽绒保暖防风衣物。'
         : 'Dark Sky Reserve core area: Use red flashlights to preserve night vision. Night breeze can be very chilly, bring warm windproof gear.';
     }
-    if (act.includes('徒步') || act.includes('库克山') || act.includes('步道') || act.includes('hooker')) {
+    if (act.includes('徒步') || act.includes('山') || act.includes('步道') || act.includes('trail') || act.includes('peak') || act.includes('hike')) {
       return language === 'zh'
-        ? '高山步道多为碎石木栈道，建议穿着防滑徒步鞋；沿途无补给点，请随身自备 1L+ 饮用水与高热量能量棒。'
-        : 'Alpine gravel tracks and boardwalks. Sturdy hiking shoes recommended. Bring at least 1L water and energy snacks.';
+        ? '户外高山步道建议穿着防滑徒步鞋；沿途无补给点，请随身自备 1L+ 饮用水、防晒与高热量能量补给。'
+        : 'Alpine hiking trails require sturdy footwear. Bring at least 1L water, sun protection, and energy snacks.';
     }
-    if (act.includes('三文鱼') || act.includes('美食') || act.includes('肉派') || act.includes('汉堡')) {
+    if (act.includes('拉面') || act.includes('寿司') || act.includes('海鲜') || act.includes('美食') || act.includes('肉派') || act.includes('汉堡') || act.includes('sushi') || act.includes('dining')) {
       return language === 'zh'
-        ? '当地特色高人气打卡点，高峰就餐时段可能需排队 15-20 分钟；支持主流信用卡与移动支付。'
-        : 'High-popularity gourmet spot. Expect 15-20 min queues during peak hours. Cards accepted.';
+        ? '当地特色高人气打卡点，高峰就餐时段可能需排队 15-30 分钟；支持主流信用卡与移动支付。'
+        : 'High-popularity local culinary spot. Expect 15-30 min queues during peak hours. Cards and digital pay accepted.';
     }
-    if (act.includes('自驾') || act.includes('公路') || act.includes('sh8') || act.includes('取车')) {
+    if (act.includes('寺') || act.includes('神宫') || act.includes('shrine') || act.includes('temple')) {
       return language === 'zh'
-        ? '新西兰为左侧通行，交规严格；南岛高山路段弯道多且偶有黑冰，全线开启车灯并保持安全车距。'
-        : 'Drive on the left in NZ. Mountain passes have winding corners and occasional black ice. Keep safe distance.';
+        ? '传统文化与信仰圣地，参拜时请保持肃静并遵守手水舍净手礼仪；部分殿堂内部禁止拍照摄影。'
+        : 'Sacred cultural site. Please respect purification etiquette and observe photo-taking restrictions.';
+    }
+    if (act.includes('自驾') || act.includes('公路') || act.includes('租车') || act.includes('取车') || act.includes('drive')) {
+      return language === 'zh'
+        ? '请严格遵守当地交规与限速；山区路段多弯道与天气突变，全线开启车灯并保持安全跟车距离。'
+        : 'Strictly observe local driving rules and speed limits. Maintain safe distance especially on mountain roads.';
     }
     return language === 'zh'
-      ? '建议根据天气情况灵活调整停留时间，遵守新西兰无痕山林（Leave No Trace）环保准则。'
-      : 'Adjust stay duration based on weather conditions. Follow Leave No Trace principles throughout the journey.';
+      ? '建议根据天气情况灵活调整游览节奏，尊重当地文化与自然环境保护准则（Leave No Trace）。'
+      : 'Adjust sightseeing pace based on weather conditions. Follow Leave No Trace and local cultural guidelines.';
   };
 
   return (
@@ -94,7 +102,7 @@ export default function ActivityDetailModal({
         <div className="activity-modal-meta-bar">
           <div className="modal-meta-pill time">
             <Clock size={13} />
-            <span>{item.time || '全天'}</span>
+            <span>{item.time || (language === 'zh' ? '全天' : 'All Day')}</span>
           </div>
           <div className="modal-meta-pill location" onClick={handleCopyLocation} title={language === 'zh' ? '点击复制地点' : 'Click to copy'}>
             <MapPin size={13} />

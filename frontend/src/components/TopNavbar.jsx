@@ -65,17 +65,19 @@ export default function TopNavbar({
         {/* 新建行程按钮 */}
         {onNewTrip && (
           <button
+            type="button"
             className="navbar-new-trip-btn"
             onClick={onNewTrip}
             title={language === 'zh' ? '开启新的旅行规划' : 'Start a new trip plan'}
           >
-            <Sparkles size={14} className="text-emerald-400" />
+            <Sparkles size={14} color="#4F46E5" />
             <span>{labels.newTrip || (language === 'zh' ? '新建行程' : 'New Trip')}</span>
           </button>
         )}
 
         {/* 中英文切换按钮 */}
         <button 
+          type="button"
           className="navbar-lang-btn"
           onClick={onToggleLanguage}
           title={language === 'zh' ? 'Switch to English' : '切换为中文'}

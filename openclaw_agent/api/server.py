@@ -112,6 +112,8 @@ async def get_status():
   )
 
 
+import asyncio
+
 @app.post("/api/plan", response_model=PlanResponse, tags=["旅行规划"])
 async def create_plan(request: PlanRequest):
   """ 核心端点：根据用户需求生成旅行计划
@@ -130,36 +132,48 @@ async def create_plan(request: PlanRequest):
   if not request.query or not request.query.strip():
     raise HTTPException(status_code=400, detail="query 不能为空")
 
-  result = plan_trip(
+  result = await asyncio.to_thread(
+    plan_trip,
     user_input=request.query.strip(),
     conversation_history=request.conversation_history,
   )
   return PlanResponse(**result)
 
 
+
 @app.post("/api/plan/mock", response_model=PlanResponse, tags=["旅行规划"])
 async def create_mock_plan(request: PlanRequest):
-  """ Mock 模式：不调 LLM，直接返回模拟行程（供前端开发测试）
-
-  当前端在开发阶段不想依赖 LLM API 时使用。
+  """ Mock 模式：不调外部大模型，直接由智能规则引擎返回结构化行程（供前端开发测试）
   """
   return PlanResponse(
     success=True,
-    plan=_mock_plan(),
+    plan=_mock_plan(request.query),
     error=None,
     needs_more_info=False,
     follow_up_question=None,
   )
 
 
-def _mock_plan() -> dict:
-  """生成模拟行程数据"""
+def _mock_plan(query: str = "") -> dict:
+  """生成智能模拟行程数据（支持全球任意目的地）"""
+  try:
+    from backend.services.agent_router import AgentRouter
+    from openclaw_agent.tools.format_output import format_trip_plan
+    import json
+
+    router = AgentRouter()
+    fallback_res = router._generate_smart_fallback(query or "旅行规划", ["智能旅行规则推演引擎"])
+    data_dict = fallback_res.dict() if hasattr(fallback_res, "dict") else fallback_res.model_dump()
+    return format_trip_plan(json.dumps(data_dict, ensure_ascii=False))
+  except Exception as ex:
+    print(f"⚠️ [Mock Plan Error] {ex}")
+
   return {
     "summary": {
-      "title": "新西兰南岛14天秋季自驾摄影之旅",
-      "days": "14",
-      "route": "基督城 > 特卡波 > 瓦纳卡 > 皇后镇 > 但尼丁 > 基督城",
-      "budget": "约 25,000 - 35,000 人民币/人（不含国际机票）",
+      "title": f"{query[:12] or '精选'} 深度定制旅行规划",
+      "days": "5",
+      "route": "经典地标 > 深度风光 > 特色风味 > 黄金机位 > 返程",
+      "budget": "适中舒适",
     },
     "daily_plan": [
       {

@@ -38,24 +38,32 @@ from backend.models.travel_schema import TravelPlanResponse
 class GeminiNativeService:
     _instance = None
     _pool = None
-    _lock = asyncio.Lock()
 
     def __init__(self):
         self.cookies_path = GEMINI_API_DIR / "cookies.json"
         self.is_initialized = False
+        self.enable_native = os.getenv("ENABLE_GEMINI_NATIVE", "false").lower() in ("true", "1", "yes")
         # 遵循 API_SPECIFICATION.md §2.1 规范，默认使用 3.7 Flash 旗舰推理模型
         self.default_model = os.getenv("LLM_MODEL", "gemini-3.7-flash")
+        self._lock = None
 
     async def ensure_init(self):
         """确保 AccountPool 懒加载单例初始化 (符合 API_SPECIFICATION.md §4.1 规范)"""
+        if not self.enable_native:
+            return
+
         if self.is_initialized and self._pool:
             return
+
+        if self._lock is None:
+            self._lock = asyncio.Lock()
 
         async with self._lock:
             if not self.is_initialized:
                 if not HAS_GEMINI_NATIVE or not self.cookies_path.exists():
                     print("⚠️ 未找到 gemini-webapi 依赖或 cookies.json")
                     return
+
 
                 try:
                     data = json.loads(self.cookies_path.read_text(encoding="utf-8"))
@@ -117,8 +125,9 @@ class GeminiNativeService:
     {
       "location": "拍摄机位或景点名称",
       "best_time": "最佳出片时间 (如：黄金时刻 17:30 / 深夜 22:00 银河季)",
-      "composition_tips": "专业构图手法与镜头建议",
-      "outfit_color": "推荐镜头参数或穿搭建议 (如：14-24mm f/2.8 · 20s · ISO 3200)"
+      "composition_tips": "专业构图手法与拍摄视角建议",
+      "camera_params": "推荐镜头焦段与曝光参数 (如：14-24mm f/2.8 · 20s · ISO 3200)",
+      "outfit_color": "推荐穿搭或调色建议 (如：亮红色户外冲锋衣，形成强烈视觉反差)"
     }
   ]
 }
@@ -138,22 +147,31 @@ class GeminiNativeService:
             if not raw_text and hasattr(res, "candidates") and res.candidates:
                 raw_text = res.candidates[0].text or ""
 
-            clean_json = raw_text.strip()
-            if "```json" in clean_json:
-                clean_json = clean_json.split("```json")[1].split("```")[0].strip()
-            elif "```" in clean_json:
-                clean_json = clean_json.split("```")[1].split("```")[0].strip()
+            import re
+            clean_text = re.sub(r'<think>[\s\S]*?</think>', '', raw_text).strip()
+            clean_json = clean_text
+            if "```json" in clean_text:
+                clean_json = clean_text.split("```json")[1].split("```")[0].strip()
+            elif "```" in clean_text:
+                clean_json = clean_text.split("```")[1].split("```")[0].strip()
+            elif "{" in clean_text:
+                json_match = re.search(r'(\{[\s\S]*\})', clean_text)
+                if json_match:
+                    clean_json = json_match.group(1).strip()
 
             parsed = None
             try:
                 parsed = json.loads(clean_json)
             except Exception:
-                import re
-                json_match = re.search(r'(\{[\s\S]*\})', raw_text)
-                if json_match:
-                    parsed = json.loads(json_match.group(1).strip())
-                else:
-                    raise ValueError("未在模型输出中找到合法的 JSON 结构")
+                for suffix in ['"}', '"]}', '}]}', '"}]}', '"}\n}', '"]}\n}', '}]']:
+                    try:
+                        parsed = json.loads(clean_json + suffix)
+                        break
+                    except Exception:
+                        pass
+
+            if not parsed or not isinstance(parsed, dict):
+                raise ValueError("未在模型输出中找到合法的 JSON 结构")
 
             parsed["data_sources"] = data_sources
             return TravelPlanResponse(**parsed)
@@ -174,18 +192,28 @@ class GeminiNativeService:
             return None
 
     def generate_plan(self, query: str, context: str, data_sources: List[str]) -> Optional[TravelPlanResponse]:
-        """同步包装入口"""
+        """同步包装入口，兼容独立线程与异步上下文，具备 3.5s 严格熔断防阻塞"""
+        import concurrent.futures
+
+        async def _safe_call():
+            return await asyncio.wait_for(
+                self.generate_plan_async(query, context, data_sources),
+                timeout=3.5
+            )
+
         try:
             try:
-                loop = asyncio.get_event_loop()
-                if loop.is_running():
-                    import nest_asyncio
-                    nest_asyncio.apply()
-                    return loop.run_until_complete(self.generate_plan_async(query, context, data_sources))
-                else:
-                    return loop.run_until_complete(self.generate_plan_async(query, context, data_sources))
+                loop = asyncio.get_running_loop()
             except RuntimeError:
-                return asyncio.run(self.generate_plan_async(query, context, data_sources))
+                loop = None
+
+            if loop and loop.is_running():
+                with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
+                    future = executor.submit(lambda: asyncio.run(_safe_call()))
+                    return future.result(timeout=4.0)
+            else:
+                return asyncio.run(_safe_call())
         except Exception as e:
-            print(f"⚠️ [GeminiNative] 同步执行异常: {e}")
+            print(f"ℹ️ [GeminiNative] 熔断或超时提示: {e}")
             return None
+

@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Database, Globe, CheckCircle2, Loader2, Bot } from 'lucide-react';
+import { Send, Database, Globe, CheckCircle2, Loader2, Bot, RotateCcw } from 'lucide-react';
+import MarkdownRenderer from './MarkdownRenderer';
 
 export default function ConversationalSidebar({ 
   messages = [], 
@@ -19,18 +20,13 @@ export default function ConversationalSidebar({
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages, loading, agentStatusSteps]);
+  }, [messages, loading]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!inputText.trim() || loading) return;
-    onSendMessage(inputText.trim());
+    onSendMessage(inputText);
     setInputText('');
-  };
-
-  const handleQuickPrompt = (prompt) => {
-    if (loading) return;
-    onSendMessage(prompt);
   };
 
   return (
@@ -42,29 +38,26 @@ export default function ConversationalSidebar({
             <div className="bot-avatar-icon-box">
               <Bot size={22} className="bot-icon-svg" />
             </div>
-            <span className="online-status-dot"></span>
+            <span className="online-status-dot" />
           </div>
           <div className="user-meta">
-            <h3 className="user-name">{labels.title || 'Roam Copilot'}</h3>
-            <p className="user-role">{labels.subtitle || (language === 'zh' ? '智能旅行向导' : 'Conversational AI')}</p>
+            <h3 className="user-name">{labels.title || (language === 'zh' ? 'Roam 智能向导' : 'Roam AI Guide')}</h3>
+            <p className="user-role">{labels.subtitle || (language === 'zh' ? 'AI 旅行规划师' : 'AI Travel Planner')}</p>
           </div>
         </div>
-      </div>
 
-      {/* 快捷灵感推荐 Chips */}
-      <div className="quick-prompts-bar">
-        <button 
-          className="quick-chip"
-          onClick={() => handleQuickPrompt(language === 'zh' ? "计划新西兰南岛 7 天自驾与风光摄影，推荐暗夜星空与特色美食" : "Planning a 7-day trip to New Zealand South Island with photography & food.")}
-        >
-          {labels.quickNZ || "🇳🇿 新西兰南岛7天"}
-        </button>
-        <button 
-          className="quick-chip"
-          onClick={() => handleQuickPrompt(language === 'zh' ? "规划东京 7 天秋季漫游，包含地道美食、神社古迹与街头摄影" : "Planning a 7-day trip to Tokyo in October with food, shrines and street photography.")}
-        >
-          {labels.quickTokyo || "🗼 东京7天秋季之旅"}
-        </button>
+        {/* 重置会话按钮 */}
+        {messages.length > 1 && onResetChat && (
+          <button 
+            type="button"
+            className="sidebar-reset-btn" 
+            onClick={onResetChat}
+            title={language === 'zh' ? "开启新对话 / 重置会话" : "Reset Conversation"}
+            aria-label={language === 'zh' ? "开启新对话 / 重置会话" : "Reset Conversation"}
+          >
+            <RotateCcw size={15} />
+          </button>
+        )}
       </div>
 
       {/* 对话流 Feed */}
@@ -72,7 +65,11 @@ export default function ConversationalSidebar({
         {messages.map((msg) => (
           <div key={msg.id} className={`message-bubble-wrapper ${msg.sender}`}>
             <div className="message-bubble">
-              <div className="message-content-text">{msg.text}</div>
+              {msg.sender === 'assistant' ? (
+                <MarkdownRenderer content={msg.text} />
+              ) : (
+                <div className="message-content-text">{msg.text}</div>
+              )}
 
               {/* 信源展示 */}
               {msg.dataSources && msg.dataSources.length > 0 && (
@@ -126,7 +123,7 @@ export default function ConversationalSidebar({
           <input
             type="text"
             className="chat-text-input"
-            placeholder={labels.inputPlaceholder || "输入你的旅行想法或修改要求..."}
+            placeholder={labels.inputPlaceholder || (language === 'zh' ? "输入你的旅行想法或修改要求..." : "Ask anything or customize your itinerary...")}
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
             disabled={loading}

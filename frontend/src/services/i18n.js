@@ -16,45 +16,53 @@ export const TRANSLATIONS = {
         spatial: "时空引擎",
         vision: "影像机位",
         knowledge: "知识底座",
+        gallery: "全球画廊",
         enterDashboard: "进入看板 →"
       },
-      badge: "OpenClaw Agent · 极智旅行规划系统",
+      badge: "OpenClaw Agent · 智能旅行规划系统",
       heroTitle: "理想之旅，一语成行",
-      heroSubtitle: "融合官方权威指南、毫秒级路况气象与专业摄影机位，让每一次出发都从容不迫。",
+      heroSubtitle: "融合权威旅游指南、实时路况气象核验与专业摄影机位，让每一次出发都从容不迫。",
       inputPlaceholder: "想去哪里？比如：带父母新西兰南岛自驾7天，不想太累，想看暗夜星空与吃三文鱼...",
       generateBtn: "开始智能规划",
-      generatingBtn: "AI 正在全网与知识库推演中...",
+      generatingBtn: "AI 正在结合知识库与全网信息规划中...",
       preferencesTitle: "偏好标签",
       preferences: [
         { label: "🚗 深度自驾", tag: "自驾" },
         { label: "🌌 暗夜星空", tag: "摄影与暗夜星空" },
-        { label: "📸 大师机位", tag: "专业风光机位" },
+        { label: "📸 精选机位", tag: "专业风光机位" },
         { label: "🍜 地道风物", tag: "地道风味与美食" },
         { label: "🏔️ 冰川徒步", tag: "轻度徒步与自然" },
         { label: "👨‍👩‍👧 亲子度假", tag: "亲子家庭与轻松节奏" }
       ],
       telemetry: [
-        "100% DOC 官方知识库",
-        "毫秒级实时气象路况",
-        "Extended Thinking 深度推演",
-        "避坑防雷指南"
+        "权威指南与私有知识底座",
+        "联网路况与气象辅助核验",
+        "智能时空动线规划推演",
+        "避坑防雷实用出行建议"
       ],
       spatialEngine: {
         badge: "SPATIAL-TEMPORAL ROUTING ENGINE",
-        title: "4D 时空推演，让每一公里都充满确定性",
-        subtitle: "深度解构地形高差、行车节奏与自然采光窗口，为每一次转弯提供最优解。",
+        title: "时空动线规划，让每一段探索清晰可循",
+        subtitle: "合理拆解地理动线、行车节奏与自然采光时段，为每日行程提供清晰参考。",
         metrics: [
-          { value: "0", label: "危险盲区规避", desc: "自动避开季节性积雪与险峻陡坡" },
-          { value: "1:1", label: "官方步道核验", desc: "直连 DOC 官方安全分级与耗时" },
-          { value: "100%", label: "黄金采光窗口", desc: "日出日落晨昏光线精准计算" }
+          { value: "安全", label: "避坑防雷提示", desc: "提示高危路段、季节风险与行车注意事项" },
+          { value: "权威", label: "步道与景区指南", desc: "结合官方安全分级与建议游玩耗时" },
+          { value: "推荐", label: "最佳光影时段", desc: "参考晨昏日出日落光线推荐摄影窗口" }
         ],
-        cardTitle: "自驾行车流态与高差剖面推演",
-        cardDesc: "基督城 ➔ 特卡波湖 (SH80) ➔ 库克山冰川 ➔ 瓦纳卡 ➔ 皇后镇"
+        cardTitle: "示范路线：南岛高山湖泊动线推演",
+        cardDesc: "基督城 ➔ 特卡波湖 (SH80) ➔ 库克山冰川 ➔ 瓦纳卡 ➔ 皇后镇",
+        nodes: [
+          { label: "基督城 (起)", sub: "提车补给 0km" },
+          { label: "特卡波湖 (暗夜)", sub: "暗夜银河 225km" },
+          { label: "库克山 (冰川)", sub: "胡克谷步道 330km" },
+          { label: "瓦纳卡 (湖畔)", sub: "孤独之树 510km" },
+          { label: "皇后镇 (终)", sub: "峡湾与离境 650km" }
+        ]
       },
       proVision: {
         badge: "PRO OPTICS & ASTROPHOTOGRAPHY",
         title: "每一处风景，都是大场面",
-        subtitle: "内置专业摄影师机位数据库，精确到焦段、曝光参数与银河起落时刻。",
+        subtitle: "精选专业风光摄影机位，包含推荐焦段、曝光参数与拍摄时段建议。",
         spots: [
           {
             name: "好牧羊人教堂 · 暗夜银河",
@@ -71,7 +79,7 @@ export const TRANSLATIONS = {
             tip: "逆光拍摄山脊延伸至瓦纳卡湖，使用 CPL 偏振镜消除水面杂光。"
           },
           {
-            name: "米尔福德峡湾 · 冠峰倒影",
+            name: "米尔福德峡湾 · 主教冠峰倒影",
             lens: "16-35mm + CPL",
             params: "16mm · f/11 · 30s · ISO 100",
             window: "蓝调时刻 07:20 - 08:00",
@@ -80,36 +88,36 @@ export const TRANSLATIONS = {
         ]
       },
       knowledgeMesh: {
-        badge: "HYPER-INTELLECT ARCHITECTURE",
+        badge: "DUAL-ENGINE KNOWLEDGE BASE",
         title: "双引擎驱动的知识底盘体系",
-        subtitle: "从权威私有 RAG 向量数据库到多智能体深度时空推理，构筑不可动摇的事实基石。",
+        subtitle: "结合私有 RAG 向量知识库与智能体时空推理，为行程规划提供可靠的事实依据。",
         layers: [
           { 
             num: "01", 
-            name: "DOC 官方步道与暗夜保护区权威底座", 
-            tag: "ChromaDB 向量检索 · 100% 事实锚定",
-            desc: "结构化录入新西兰环保署（DOC）官方步道安全评级、往返耗时、季节积雪与洪水警示及暗夜保护区规范，杜绝大模型无端幻觉与危险盲区。",
+            name: "官方步道与暗夜保护区知识底座", 
+            tag: "ChromaDB 向量检索 · 事实检索",
+            desc: "结构化录入新西兰环保署（DOC）等官方步道安全评级、往返耗时、季节注意事项与暗夜保护区规范，有效减少大模型生成幻觉。",
             image: "https://images.unsplash.com/photo-1507699622108-4be3abd695ad?w=800&auto=format&fit=crop&q=80"
           },
           { 
             num: "02", 
-            name: "全网气象雷达与实时交通路况遥测总线", 
-            tag: "小时级天气流态 · 公路通行警报",
-            desc: "即时核验南阿尔卑斯山脉高海拔路段通行状况，结合多普勒气象雷达与日出日落晨昏时刻，动态预警山口结冰与暴雨能见度。",
+            name: "联网搜索与实时气象核验", 
+            tag: "天气检索 · 交通状况参考",
+            desc: "辅助核验目的地实时天气状况、日出日落时刻与道路交通指引，动态评估出行能见度与穿搭装备。",
             image: "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=800&auto=format&fit=crop&q=80"
           },
           { 
             num: "03", 
-            name: "OpenClaw 多智能体时空推理与节奏推演中枢", 
-            tag: "Extended Thinking · 多步逻辑链推演",
-            desc: "启用拓展深度思考多智能体协同机制，权衡“每日驾驶时限 ≤ 250km”、“老人与儿童体能负荷”、“黄金采光窗口”与“餐厅营业周期”，输出严谨顺路的自驾时刻表。",
+            name: "OpenClaw 智能体时空规划与节奏编排", 
+            tag: "结构化推理 · 行程逻辑编排",
+            desc: "智能权衡每日合理驾驶距离、同行人体能节奏、黄金采光窗口与餐厅营业时间，输出严谨顺路的自驾行程单。",
             image: "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=800&auto=format&fit=crop&q=80"
           },
           { 
             num: "04", 
             name: "Bento Grid 便士网格多维动态交互呈现层", 
-            tag: "结构化信息矩阵 · 秒级响应呈现",
-            desc: "将繁杂的时空路线、官方步道指南、专业摄影机位经纬度与地道风物美食转化为直观的便士网格布局，支持一键沉浸式交互。",
+            tag: "结构化信息矩阵 · 清晰直观呈现",
+            desc: "将繁杂的时空路线、官方步道指南、摄影机位建议与地道风物美食转化为直观的便士网格布局，支持一键沉浸式交互。",
             image: "https://images.unsplash.com/photo-1433086966358-54859d0ed716?w=800&auto=format&fit=crop&q=80"
           }
         ]
@@ -127,9 +135,19 @@ export const TRANSLATIONS = {
       },
       bottomCta: {
         title: "准备好开启您的梦想之旅了吗？",
-        subtitle: "告诉 OpenClaw Agent 您的想法，3 秒内为您呈现完整可落地的定制方案。",
+        subtitle: "告诉 OpenClaw Agent 您的想法，快速为您呈现结构化定制方案。",
         startBtn: "立即开启智能规划",
         demoBtn: "直接浏览精选标杆看板 →"
+      },
+      carousel: {
+        prevSlide: "上一张大片",
+        nextSlide: "下一张大片",
+        prevSpot: "上一机位",
+        nextSpot: "下一机位",
+        pauseAuto: "暂停自动轮播",
+        resumeAuto: "恢复自动轮播",
+        readyBadge: "知识底座就绪 · 智能编排中",
+        loadAndPlan: "一键载入并智能规划"
       }
     },
     sidebar: {
@@ -140,17 +158,18 @@ export const TRANSLATIONS = {
       inputPlaceholder: "输入你的旅行想法或修改要求...",
       welcomeMsg: "你好！请告诉我你的旅行想法，无论是目的地、游玩天数、偏好风格还是预算，我都能为你定制高品质行程～",
       userDefaultMsg: "想规划一次 7 天新西兰南岛自驾，重点想要风光摄影、暗夜星空和特色美食。",
-      aiDefaultReply: "太棒了！已深度检索新西兰 DOC 官方步道与暗夜保护区私有知识库，并联网核验即时路况与气象，以下是为您量身定制的完整行程！",
-      ragStatusPill1: "🔍 检索 ChromaDB 知识库命中 4 条高精事实 (DOC 官方指南)",
-      ragStatusPill2: "🌐 联网核验：特卡波湖天气晴朗，SH8/SH80 国道全线畅通",
-      ragTokyoPill1: "🔍 检索东京秋季红叶情报与米其林美食指南",
+      aiDefaultReply: "太棒了！已结合私有知识库指南并检索即时天气与路况，以下是为您量身定制的完整行程！",
+      ragStatusPill1: "🔍 检索知识库匹配相关官方步道与指南",
+      ragStatusPill2: "🌐 联网核验：已同步最新天气与自驾路线建议",
+      ragTokyoPill1: "🔍 检索东京秋季红叶情报与地道美食指南",
       ragTokyoPill2: "✨ 便士网格 (Bento Grid) 结构化日程排版完成",
-      thinkingText: "正在深度检索知识库与生成行程规划...",
+      thinkingText: "正在结合知识库与全网信息生成行程规划...",
       aiReplyTokyo: "东京 7 天金秋漫游方案已就绪！从浅草古刹祈福到涩谷街头霓虹光影，尽享极致视觉与味蕾盛宴。",
       aiReplyNZ: "新西兰南岛 7 天方案已更新！从特卡波暗夜银河到库克山冰川轻徒步，为您呈现大片级自驾路线。"
     },
     cards: {
       dailyScheduleTitle: "每日行程路线",
+      dailyTimelineEyebrow: "DAILY TIMELINE · 路线节点",
       dayPrefix: "第",
       daySuffix: "天",
       dayBtnPrefix: "Day ",
@@ -161,11 +180,22 @@ export const TRANSLATIONS = {
         details: "细节与体验"
       },
       mustVisitTitle: "必去地标与风味美食",
+      tasteSightsEyebrow: "TASTE & SIGHTS · 风物指南",
+      allCategories: "全部",
+      foodCategory: "🍲 美食",
+      landmarkCategory: "🏛️ 地标",
       recommendationsLabel: "推荐理由: ",
       openHoursLabel: "建议游玩时间: ",
       pricingLabel: "门票/人均: ",
       tipsLabel: "避坑指南: ",
-      spotsTitle: "专业摄影机位与绝景指南",
+      spotsTitle: "摄影机位与出片指南",
+      photoGuideTitle: "摄影机位与出片指南",
+      visualExpeditionEyebrow: "VISUAL EXPEDITION · 摄影出片指南",
+      expeditionEyebrow: "EXPEDITION · 专属定制路线档案",
+      tipsPrefix: "贴士:",
+      copySpotBtn: "复制机位建议",
+      shareSpotBtn: "分享机位文案",
+      paramsLabel: "推荐参数",
       photoTipsLabel: "拍摄建议: ",
       bestTimeLabel: "最佳机位时刻: ",
       lensLabel: "推荐焦段: ",
@@ -173,7 +203,11 @@ export const TRANSLATIONS = {
       tempLabel: "气温: ",
       conditionLabel: "天气状况: ",
       clothingLabel: "穿衣穿搭: ",
-      packingLabel: "携带装备: "
+      packingLabel: "携带装备: ",
+      allDay: "全天",
+      imageSourceTitle: "图片数据源: ",
+      copySuccess: "已复制到剪贴板！",
+      shareSuccess: "已复制分享文案"
     }
   },
   en: {
@@ -193,14 +227,15 @@ export const TRANSLATIONS = {
         spatial: "Spatial Engine",
         vision: "Pro Vision",
         knowledge: "Architecture",
+        gallery: "Gallery",
         enterDashboard: "Dashboard →"
       },
-      badge: "OpenClaw Agent · Supreme Travel Planner System",
+      badge: "OpenClaw Agent · Intelligent Travel Planner",
       heroTitle: "Your Ideal Journey, One Sentence Away",
-      heroSubtitle: "Uniting authoritative guides, millisecond weather telemetry and pro photography spots for effortless travels.",
+      heroSubtitle: "Uniting verified travel guides, live weather & route checks, and curated photography spots for effortless travels.",
       inputPlaceholder: "Where would you like to go? e.g. 7-day South Island NZ road trip with parents, relaxed pace, stargazing and salmon dining...",
       generateBtn: "Start AI Planning",
-      generatingBtn: "AI is Reasoning across Vector Stores...",
+      generatingBtn: "AI is Crafting Your Itinerary...",
       preferencesTitle: "Preferences",
       preferences: [
         { label: "🚗 Road Trip", tag: "Road Trip" },
@@ -211,27 +246,34 @@ export const TRANSLATIONS = {
         { label: "👨‍👩‍👧 Family", tag: "Family Friendly & Relaxed Pace" }
       ],
       telemetry: [
-        "100% DOC Official Vector Base",
-        "Millisecond Weather & Highway Telemetry",
-        "Extended Thinking Multi-Step Reasoning",
-        "Scam Avoidance & Safety Guide"
+        "Verified Guide Knowledge Base",
+        "Live Route & Weather Check",
+        "Spatial-Temporal Pacing Engine",
+        "Practical Travel & Safety Guide"
       ],
       spatialEngine: {
         badge: "SPATIAL-TEMPORAL ROUTING ENGINE",
-        title: "4D Spatial Engine for Absolute Certainty",
-        subtitle: "Deconstructing elevation profiles, drive pacing, and natural lighting windows for the optimal route.",
+        title: "Spatial-Temporal Routing for Confident Explorations",
+        subtitle: "Deconstruct terrain topology, driving stamina, and golden hour windows for seamless expeditions.",
         metrics: [
-          { value: "0", label: "Blindspot Avoidance", desc: "Auto-routes away from snow blocks & steep grades" },
-          { value: "1:1", label: "DOC Official Trail Sync", desc: "Directly verified safety grades & durations" },
-          { value: "100%", label: "Golden Hour Match", desc: "Precise dawn, dusk & blue hour alignment" }
+          { value: "Safety", label: "Risk Guidance", desc: "Highlights mountain passes & driving precautions" },
+          { value: "Official", label: "Trail & Park Sync", desc: "Aligned with verified safety grades & durations" },
+          { value: "Optimal", label: "Golden Hour Match", desc: "Curated dawn, dusk & blue hour photography windows" }
         ],
-        cardTitle: "Drive Pacing & Elevation Profile",
-        cardDesc: "Christchurch ➔ Lake Tekapo (SH80) ➔ Mount Cook ➔ Wanaka ➔ Queenstown"
+        cardTitle: "Benchmark Route: Alpine Lake Topology Profile",
+        cardDesc: "Christchurch ➔ Lake Tekapo (SH80) ➔ Mount Cook ➔ Wanaka ➔ Queenstown",
+        nodes: [
+          { label: "Christchurch (Start)", sub: "Car Pickup 0km" },
+          { label: "Lake Tekapo (Dark Sky)", sub: "Milky Way 225km" },
+          { label: "Mt Cook (Glacier)", sub: "Hooker Valley 330km" },
+          { label: "Wanaka (Lakeside)", sub: "Lone Tree 510km" },
+          { label: "Queenstown (End)", sub: "Fjord & Departure 650km" }
+        ]
       },
       proVision: {
         badge: "PRO OPTICS & ASTROPHOTOGRAPHY",
         title: "Every Landscape, A Grand Stage",
-        subtitle: "Curated pro photographer photo spots with focal lengths, exposure parameters, and celestial windows.",
+        subtitle: "Curated pro photographer photo spots with recommended focal lengths and lighting windows.",
         spots: [
           {
             name: "Good Shepherd Church · Milky Way",
@@ -257,36 +299,36 @@ export const TRANSLATIONS = {
         ]
       },
       knowledgeMesh: {
-        badge: "HYPER-INTELLECT ARCHITECTURE",
+        badge: "DUAL-ENGINE KNOWLEDGE BASE",
         title: "Dual-Engine Grounded Intelligence Architecture",
-        subtitle: "From authoritative RAG vector store to multi-agent temporal-spatial reasoning for unbreakable factual ground.",
+        subtitle: "From private RAG vector knowledge base to agentic temporal-spatial reasoning for solid factual grounding.",
         layers: [
           { 
             num: "01", 
-            name: "DOC Official Trail & Dark Sky Vector Base", 
-            tag: "ChromaDB Vector Retrieval · 100% Fact Grounded",
-            desc: "Directly indexed New Zealand Department of Conservation (DOC) safety ratings, standard durations, season warnings, and Dark Sky IDA regulations, eliminating hallucinations.",
+            name: "Official Trail & Dark Sky Knowledge Base", 
+            tag: "ChromaDB Vector Retrieval · Fact Grounded",
+            desc: "Indexes official safety ratings, standard durations, season warnings, and Dark Sky regulations to minimize hallucinations.",
             image: "https://images.unsplash.com/photo-1507699622108-4be3abd695ad?w=800&auto=format&fit=crop&q=80"
           },
           { 
             num: "02", 
-            name: "Live Weather Radar & Highway Telemetry Bus", 
-            tag: "Hourly Meteorological Forecast · Road Viability",
-            desc: "Real-time road viability verification across alpine passes, combined with meteorological doppler radar and astronomical lighting calculations to avert icy hazards.",
+            name: "Web Search & Live Weather Verification", 
+            tag: "Live Weather Check · Transit Guidance",
+            desc: "Verifies mountain pass conditions, sunset & sunrise windows, and assesses visibility for high-altitude scenic roads.",
             image: "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=800&auto=format&fit=crop&q=80"
           },
           { 
             num: "03", 
-            name: "OpenClaw Multi-Agent Temporal Reasoning Core", 
-            tag: "Extended Thinking · Multi-Step Logical Chain",
-            desc: "Leverages deep thinking multi-agent chains balancing 'daily drive limits ≤ 250km', 'family stamina pacing', 'golden lighting windows', and 'dining open hours' for realistic schedules.",
+            name: "OpenClaw Agent Spatial-Temporal Pacing", 
+            tag: "Structured Reasoning · Logical Routing",
+            desc: "Balances daily drive limits, family stamina pacing, golden lighting windows, and dining open hours for realistic schedules.",
             image: "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=800&auto=format&fit=crop&q=80"
           },
           { 
             num: "04", 
             name: "Bento Grid Multi-Dimensional Interactive Matrix", 
-            tag: "Structured Data Matrix · Instantaneous Rendering",
-            desc: "Translates complex itinerary itineraries, official trail guides, master photo coordinates, and local culinary discoveries into intuitive interactive Bento modules.",
+            tag: "Structured Data Matrix · Clear Visualization",
+            desc: "Translates complex itineraries, official trail guides, master photo coordinates, and local culinary discoveries into intuitive interactive Bento modules.",
             image: "https://images.unsplash.com/photo-1433086966358-54859d0ed716?w=800&auto=format&fit=crop&q=80"
           }
         ]
@@ -307,6 +349,16 @@ export const TRANSLATIONS = {
         subtitle: "Tell OpenClaw Agent your vision and get an actionable tailored master plan in seconds.",
         startBtn: "Launch AI Planner Now",
         demoBtn: "Explore Featured Demo Dashboard →"
+      },
+      carousel: {
+        prevSlide: "Previous slide",
+        nextSlide: "Next slide",
+        prevSpot: "PREV SPOT",
+        nextSpot: "NEXT SPOT",
+        pauseAuto: "Pause autoplay",
+        resumeAuto: "Resume autoplay",
+        readyBadge: "KNOWLEDGE BASE · READY",
+        loadAndPlan: "Load & Plan"
       }
     },
     sidebar: {
@@ -317,9 +369,9 @@ export const TRANSLATIONS = {
       inputPlaceholder: "Type a message...",
       welcomeMsg: "Tell me your travel ideas! Destinations, duration, travel style or budget—I'm here to customize your perfect trip.",
       userDefaultMsg: "Planning a 7-day road trip to New Zealand South Island with photography & food.",
-      aiDefaultReply: "Great! I have retrieved our DOC private knowledge base and verified live weather. Here is your tailored plan!",
-      ragStatusPill1: "🔍 ChromaDB retrieved 4 precision docs (DOC Official Guide)",
-      ragStatusPill2: "🌐 Live check: Clear skies in Tekapo, SH8/SH80 highways open",
+      aiDefaultReply: "Great! I have retrieved relevant knowledge base guides and verified live weather. Here is your tailored plan!",
+      ragStatusPill1: "🔍 Retrieved relevant guides & trail standards from knowledge base",
+      ragStatusPill2: "🌐 Live check: Synchronized weather and scenic highway recommendations",
       ragTokyoPill1: "🔍 Retrieved Tokyo autumn foliage & culinary guides",
       ragTokyoPill2: "✨ Bento Grid structured scheduling complete",
       thinkingText: "Retrieving knowledge base & generating itinerary...",
@@ -328,6 +380,7 @@ export const TRANSLATIONS = {
     },
     cards: {
       dailyScheduleTitle: "Daily Schedule",
+      dailyTimelineEyebrow: "DAILY TIMELINE · ROUTE STOPS",
       dayPrefix: "Day ",
       daySuffix: "",
       dayBtnPrefix: "Day ",
@@ -338,13 +391,34 @@ export const TRANSLATIONS = {
         details: "Details"
       },
       mustVisitTitle: "Must-Visit & Cuisine",
+      tasteSightsEyebrow: "TASTE & SIGHTS · LOCAL GUIDE",
+      allCategories: "All",
+      foodCategory: "🍲 Food",
+      landmarkCategory: "🏛️ Landmark",
       recommendationsLabel: "Recommendations: ",
+      openHoursLabel: "Suggested Duration: ",
+      pricingLabel: "Est. Price / Budget: ",
       tipsLabel: "Tips",
+      spotsTitle: "Photography Guide & Photo Spots",
       photoGuideTitle: "Photography Guide & Photo Spots",
+      visualExpeditionEyebrow: "VISUAL EXPEDITION · PHOTO GUIDE",
+      expeditionEyebrow: "EXPEDITION · CUSTOM ROUTE PROFILE",
       tipsPrefix: "Tips:",
       copySpotBtn: "Copy photo spot tips",
       shareSpotBtn: "Share photo spot",
-      paramsLabel: "Camera Settings"
+      paramsLabel: "Camera Settings",
+      photoTipsLabel: "Composition Tips: ",
+      bestTimeLabel: "Best Lighting Time: ",
+      lensLabel: "Recommended Lens: ",
+      weatherTitle: "Live Weather & Packing Guide",
+      tempLabel: "Temperature: ",
+      conditionLabel: "Condition: ",
+      clothingLabel: "Outfit Recommendation: ",
+      packingLabel: "Essential Gear: ",
+      allDay: "All Day",
+      imageSourceTitle: "Image Source: ",
+      copySuccess: "Copied to clipboard!",
+      shareSuccess: "Share text copied"
     }
   }
 };

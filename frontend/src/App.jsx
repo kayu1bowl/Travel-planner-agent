@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import WelcomeLandingView from './components/WelcomeLandingView';
 import ConversationalSidebar from './components/ConversationalSidebar';
 import TopNavbar from './components/TopNavbar';
@@ -25,8 +25,14 @@ export default function App() {
   const [activeDay, setActiveDay] = useState(1);
   const [loading, setLoading] = useState(false);
   const [agentStatusSteps, setAgentStatusSteps] = useState([]);
+  const activeRequestIdRef = useRef(0);
 
   const t = TRANSLATIONS[language] || TRANSLATIONS.zh;
+
+  // 同步 HTML 根节点的 lang 属性（提升 a11y、翻译与无障碍阅读器兼容性）
+  useEffect(() => {
+    document.documentElement.lang = language === 'zh' ? 'zh-CN' : 'en';
+  }, [language]);
 
   // 初始对话历史
   const [messages, setMessages] = useState([
@@ -41,25 +47,45 @@ export default function App() {
   const currentData = dynamicCustomPlan || (
     DESTINATION_DATASETS[currentDatasetKey] 
       ? (DESTINATION_DATASETS[currentDatasetKey][language] || DESTINATION_DATASETS[currentDatasetKey].zh)
-      : DESTINATION_DATASETS.newzealand.zh
+      : (DESTINATION_DATASETS.newzealand[language] || DESTINATION_DATASETS.newzealand.zh)
   );
 
   // 处理语言切换
   const handleToggleLanguage = () => {
-    setLanguage(prev => prev === 'zh' ? 'en' : 'zh');
+    setLanguage(prev => {
+      const nextLang = prev === 'zh' ? 'en' : 'zh';
+      setMessages(oldMsgs => {
+        if (oldMsgs.length === 1 && oldMsgs[0].sender === 'assistant') {
+          return [{
+            id: oldMsgs[0].id,
+            sender: 'assistant',
+            text: TRANSLATIONS[nextLang].sidebar.welcomeMsg
+          }];
+        }
+        return oldMsgs;
+      });
+      return nextLang;
+    });
   };
 
-  // 处理搜索与目的地切换
+  // 处理搜索与目的地切换（支持预设切换及任意目的地 AI 定制）
   const handleSearchSubmit = (keyword) => {
-    const kw = (keyword || '').toLowerCase();
+    if (!keyword || !keyword.trim()) return;
+    const kw = keyword.trim().toLowerCase();
     if (kw.includes('tokyo') || kw.includes('东京') || kw.includes('日本') || kw.includes('japan')) {
       setCurrentDatasetKey('tokyo');
       setDynamicCustomPlan(null);
       setActiveDay(1);
-    } else {
+      setActiveNavTab('home');
+    } else if (kw.includes('newzealand') || kw.includes('新西兰') || kw.includes('nz') || kw.includes('特卡波') || kw.includes('皇后镇')) {
       setCurrentDatasetKey('newzealand');
       setDynamicCustomPlan(null);
       setActiveDay(1);
+      setActiveNavTab('home');
+    } else {
+      // 任意其他全球目的地，自动触发 AI Agent 智能规划
+      setActiveNavTab('home');
+      handleSendMessage(language === 'zh' ? `我想规划去${keyword.trim()}的深度旅行，请提供详细定制行程、美食与摄影机位` : `Plan a comprehensive customized travel itinerary for ${keyword.trim()} with cuisine and photo spots`);
     }
   };
 
@@ -67,22 +93,82 @@ export default function App() {
   const handleSendMessage = async (queryText, fromWelcome = false) => {
     if (!queryText || !queryText.trim()) return;
 
+    const currentReqId = Date.now();
+    activeRequestIdRef.current = currentReqId;
+
     const userMsg = {
-      id: Date.now(),
+      id: currentReqId,
       sender: 'user',
       text: queryText.trim()
     };
-    setMessages(prev => [...prev, userMsg]);
+    const updatedMessages = [...messages, userMsg];
+    setMessages(updatedMessages);
     setLoading(true);
-    setAgentStatusSteps([
-      language === 'zh' ? '正在检索官方风景名胜与私有知识库...' : 'Searching official travel guides...',
-      language === 'zh' ? '正在智能规划行车路线与时间分配...' : 'Optimizing driving routes & schedule...',
-      language === 'zh' ? '正在精选最佳机位与地道特色风物...' : 'Selecting photo spots & local cuisine...'
-    ]);
+    
+    // 初始化 OpenClaw 4 阶段 Agent 动态进度
+    const multiSteps = language === 'zh' ? [
+      '🚀 [1/4] 路线架构 Agent：正在构思宏观骨架与城市跃迁动线...',
+      '⏱️ [2/4] 动线精算 Agent：正在深入细化每日时空节奏与交通耗时...',
+      '🍜 [3/4] 风物摄影 Agent：正在甄选当地口碑必吃与黄金机位参数...',
+      '📸 [4/4] 视觉解析 Agent：正在动态检索全球地标实拍与渲染看板...'
+    ] : [
+      '🚀 [1/4] Route Architect: Designing macro city route & theme...',
+      '⏱️ [2/4] Timeline Detailer: Crafting daily morning/afternoon schedules...',
+      '🍜 [3/4] Experience Curator: Scouting authentic delicacies & photo spots...',
+      '📸 [4/4] Visual Grounder: Matching global verified photography...'
+    ];
+
+    setAgentStatusSteps([multiSteps[0]]);
+
+    const stepTimers = [
+      setTimeout(() => {
+        if (activeRequestIdRef.current === currentReqId) {
+          setAgentStatusSteps([multiSteps[0], multiSteps[1]]);
+        }
+      }, 2500),
+      setTimeout(() => {
+        if (activeRequestIdRef.current === currentReqId) {
+          setAgentStatusSteps([multiSteps[0], multiSteps[1], multiSteps[2]]);
+        }
+      }, 5500),
+      setTimeout(() => {
+        if (activeRequestIdRef.current === currentReqId) {
+          setAgentStatusSteps(multiSteps);
+        }
+      }, 9500)
+    ];
+
+    let shouldSwitchToDashboard = fromWelcome;
 
     try {
-      const response = await fetchTravelPlan(queryText, messages);
-      const rawPlan = response?.plan || (response?.itineraries ? response : null);
+      const response = await fetchTravelPlan(queryText, updatedMessages);
+      stepTimers.forEach(t => clearTimeout(t));
+
+      if (response?.isCancelled || activeRequestIdRef.current !== currentReqId) {
+        return;
+      }
+
+      // 1. 优先处理日常对话、功能问询与向导问候 (needs_more_info)
+      if (response?.needs_more_info && response?.follow_up_question) {
+        const aiMsg = {
+          id: Date.now() + 1,
+          sender: 'assistant',
+          text: response.follow_up_question,
+          isGuide: true,
+          dataSources: [
+            language === 'zh' ? 'Roam AI 智能向导服务' : 'Roam AI Guide Service'
+          ]
+        };
+        setMessages(prev => [...prev, aiMsg]);
+        return;
+      }
+
+      // 2. 严格校验是否存在有效的结构化行程数据 (杜绝空数组误判)
+      const hasItineraries = Array.isArray(response?.itineraries) && response.itineraries.length > 0;
+      const hasPlanDaily = Array.isArray(response?.plan?.daily_plan) && response.plan.daily_plan.length > 0;
+      const hasPlanItineraries = Array.isArray(response?.plan?.itineraries) && response.plan.itineraries.length > 0;
+
+      const rawPlan = (hasItineraries || hasPlanDaily || hasPlanItineraries) ? (response?.plan || response) : null;
 
       if (rawPlan) {
         const transformed = transformBackendPlan(rawPlan, language);
@@ -91,25 +177,25 @@ export default function App() {
           setActiveDay(1);
         }
 
+        const summaryText = typeof transformed?.summary === 'string' && transformed.summary
+          ? transformed.summary
+          : (typeof response?.summary === 'string' && response.summary
+              ? response.summary
+              : (language === 'zh' ? '太棒了！已为您量身定制专属的旅行路线，右侧看板已同步更新。' : 'Great! A customized itinerary has been generated for you.'));
+
         const aiMsg = {
           id: Date.now() + 1,
           sender: 'assistant',
-          text: transformed?.summary || response?.summary || (language === 'zh' ? '太棒了！已为您量身定制专属的旅行路线，右侧看板已同步更新。' : 'Great! A customized itinerary has been generated for you.'),
+          text: summaryText,
           dataSources: response?.data_sources || transformed?.dataSources || [
-            language === 'zh' ? '官方权威步道与暗夜保护区指南' : 'Official DOC Hiking & Sky Reserve Guides',
-            language === 'zh' ? '智能路线优化与实时天气核验' : 'Route Optimization & Weather Verification'
+            language === 'zh' ? '权威旅游指南与私有知识库' : 'Travel Guides & Knowledge Base',
+            language === 'zh' ? '实时路况与气象辅助核验' : 'Route Optimization & Weather Verification'
           ]
         };
         setMessages(prev => [...prev, aiMsg]);
-      } else if (response?.needs_more_info && response?.follow_up_question) {
-        const aiMsg = {
-          id: Date.now() + 1,
-          sender: 'assistant',
-          text: response.follow_up_question
-        };
-        setMessages(prev => [...prev, aiMsg]);
+        shouldSwitchToDashboard = true;
       } else {
-        const replyText = response?.reply || response?.error || (language === 'zh' ? '已收到您的旅行需求，看板已完成更新。' : 'Request received, dashboard updated.');
+        const replyText = response?.error || response?.detail || response?.reply || (language === 'zh' ? '未能解析出结构化行程，请告诉我您想去的目的地或游玩天数，我们马上开始规划！' : 'Please provide your travel destination or preferred days to begin planning!');
         const aiMsg = {
           id: Date.now() + 1,
           sender: 'assistant',
@@ -118,18 +204,25 @@ export default function App() {
         setMessages(prev => [...prev, aiMsg]);
       }
     } catch (err) {
+      if (activeRequestIdRef.current !== currentReqId) return;
       console.error('Agent query error:', err);
+      const errorMsg = language === 'zh'
+        ? '⚠️ 未能连接到后端规划服务（端口 8080/8000 离线或响应超时）。请确保后端已启动（如运行 python -m openclaw_agent.api.server 或 python backend/main.py）后重试。'
+        : '⚠️ Unable to connect to travel planning backend. Please ensure the backend server is running and try again.';
       const fallbackAiMsg = {
         id: Date.now() + 1,
         sender: 'assistant',
-        text: language === 'zh' ? '已收到您的旅行需求，看板已完成更新。' : 'Request received, dashboard updated.'
+        text: errorMsg
       };
       setMessages(prev => [...prev, fallbackAiMsg]);
+      shouldSwitchToDashboard = true;
     } finally {
-      setLoading(false);
-      setAgentStatusSteps([]);
-      if (fromWelcome) {
-        setViewMode('dashboard');
+      if (activeRequestIdRef.current === currentReqId) {
+        setLoading(false);
+        setAgentStatusSteps([]);
+        if (shouldSwitchToDashboard) {
+          setViewMode('dashboard');
+        }
       }
     }
   };
@@ -139,13 +232,17 @@ export default function App() {
     setViewMode('dashboard');
   };
 
-  // 新建行程（返回欢迎页）
+  // 新建行程（清空自定义规划并返回欢迎页）
   const handleNewTrip = () => {
+    setDynamicCustomPlan(null);
+    setActiveDay(1);
     setViewMode('welcome');
   };
 
-  // 重置对话
+  // 重置对话（同步重置当前定制数据至精选基准）
   const handleResetChat = () => {
+    setDynamicCustomPlan(null);
+    setActiveDay(1);
     setMessages([
       {
         id: Date.now(),
@@ -218,7 +315,10 @@ export default function App() {
                 <TripBannerCard 
                   title={currentData.tripTitle}
                   subtitle={currentData.tripSubtitle}
+                  motto={currentData.motto}
                   onClick={() => setActiveNavTab('itineraries')}
+                  labels={t.cards}
+                  language={language}
                 />
 
                 <div className="bento-middle-row">
@@ -262,11 +362,12 @@ export default function App() {
         />
 
         {/* 移动端中间滚动内容区 */}
-        <div className="mobile-scrollable-content">
+        <div className={`mobile-scrollable-content ${mobileTab === 'chat' ? 'chat-mode' : ''}`}>
           {mobileTab === 'chat' ? (
             <MobileChatView 
               messages={messages}
               onSendMessage={handleSendMessage}
+              onResetChat={handleResetChat}
               loading={loading}
               agentStatusSteps={agentStatusSteps}
               labels={t.sidebar}
@@ -289,7 +390,10 @@ export default function App() {
               <TripBannerCard 
                 title={currentData.tripTitle}
                 subtitle={currentData.tripSubtitle}
+                motto={currentData.motto}
                 onClick={() => setMobileTab('itineraries')}
+                labels={t.cards}
+                language={language}
               />
 
               <DailyScheduleCard 

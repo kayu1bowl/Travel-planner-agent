@@ -8,8 +8,10 @@ import {
   Globe, 
   CheckCircle2, 
   Loader2,
-  Compass
+  Compass,
+  RotateCcw
 } from 'lucide-react';
+import MarkdownRenderer from './MarkdownRenderer';
 
 export default function MobileChatView({
   messages = [],
@@ -17,16 +19,41 @@ export default function MobileChatView({
   loading = false,
   agentStatusSteps = [],
   labels = {},
-  language = 'zh'
+  language = 'zh',
+  onResetChat
 }) {
   const [inputValue, setInputValue] = useState('');
   const messagesEndRef = useRef(null);
 
   const quickPrompts = [
-    { id: 'nz', label: language === 'zh' ? '🇳🇿 新西兰南岛 7 天' : '🇳🇿 New Zealand 7-Day', query: '我想规划一次 7 天新西兰南岛自驾，重点风光摄影、暗夜星空和特色美食。' },
-    { id: 'tokyo', label: language === 'zh' ? '🗼 东京 7 天秋季摄影' : '🗼 Tokyo 7-Day Photo', query: '帮我规划东京 7 天秋天深度自驾与街头胶片摄影之旅。' },
-    { id: 'lake', label: language === 'zh' ? '🌌 特卡波湖观星指南' : '🌌 Lake Tekapo Stargazing', query: '我想了解特卡波湖暗夜星空和好牧羊人教堂的最佳拍摄机位与参数。' },
-    { id: 'food', label: language === 'zh' ? '🍣 库克山高山三文鱼' : '🍣 Alpine Salmon Tasting', query: '推荐新西兰南岛沿途必吃特色美食与普卡基湖高山三文鱼。' }
+    { 
+      id: 'nz', 
+      label: language === 'zh' ? '🇳🇿 新西兰南岛 7 天' : '🇳🇿 New Zealand 7-Day', 
+      query: language === 'zh' 
+        ? '我想规划一次 7 天新西兰南岛自驾，重点风光摄影、暗夜星空和特色美食。' 
+        : 'Plan a 7-day road trip to New Zealand South Island with stargazing, photography and gourmet cuisine.' 
+    },
+    { 
+      id: 'tokyo', 
+      label: language === 'zh' ? '🗼 东京 7 天秋季摄影' : '🗼 Tokyo 7-Day Photo', 
+      query: language === 'zh' 
+        ? '帮我规划东京 7 天秋天深度漫游与街头胶片摄影之旅。' 
+        : 'Plan a 7-day autumn in-depth tour of Tokyo featuring local food, shrines and street photography.' 
+    },
+    { 
+      id: 'lake', 
+      label: language === 'zh' ? '🌌 特卡波湖观星指南' : '🌌 Lake Tekapo Stargazing', 
+      query: language === 'zh' 
+        ? '我想了解特卡波湖暗夜星空和好牧羊人教堂的最佳拍摄机位与参数。' 
+        : 'Guide me with the best photography spots and camera parameters for Lake Tekapo dark sky stargazing.' 
+    },
+    { 
+      id: 'food', 
+      label: language === 'zh' ? '🍣 库克山高山三文鱼' : '🍣 Alpine Salmon Tasting', 
+      query: language === 'zh' 
+        ? '推荐新西兰南岛沿途必吃特色美食与普卡基湖高山三文鱼。' 
+        : 'Recommend must-try local cuisine along South Island and Lake Pukaki alpine salmon.' 
+    }
   ];
 
   const handleSend = () => {
@@ -55,6 +82,18 @@ export default function MobileChatView({
     <div className="mobile-chat-view-container">
       {/* 快捷灵感 Tag 胶囊列表 */}
       <div className="mobile-chat-quick-tags">
+        {onResetChat && (
+          <button
+            className="mobile-quick-tag-btn reset-tag-btn"
+            onClick={onResetChat}
+            disabled={loading}
+            title={language === 'zh' ? "重置对话" : "Reset Chat"}
+            style={{ borderColor: 'rgba(239, 68, 68, 0.3)', color: '#EF4444' }}
+          >
+            <RotateCcw size={11} style={{ marginRight: '4px', verticalAlign: 'middle' }} />
+            {language === 'zh' ? '重置' : 'Reset'}
+          </button>
+        )}
         {quickPrompts.map((p) => (
           <button
             key={p.id}
@@ -84,7 +123,11 @@ export default function MobileChatView({
             </div>
 
             <div className="mobile-msg-bubble">
-              <p className="mobile-msg-text">{msg.text}</p>
+              {msg.sender === 'assistant' ? (
+                <MarkdownRenderer content={msg.text} />
+              ) : (
+                <p className="mobile-msg-text">{msg.text}</p>
+              )}
 
               {/* 如果是包含数据源与知识库的回答 */}
               {msg.dataSources && msg.dataSources.length > 0 && (

@@ -26,20 +26,25 @@ class MustVisitSpot(BaseModel):
 
 class PhotoGuide(BaseModel):
     location: str = Field(description="机位或拍摄地点")
-    best_time: str = Field(description="最佳拍摄时间（如：黄金时刻、蓝调时刻、深夜星空）")
-    composition_tips: str = Field(description="构图与拍摄镜头/角度技巧")
-    outfit_color: str = Field(description="穿搭建议与色彩调色灵感")
+    best_time: str = Field(default="", description="最佳拍摄时间（如：黄金时刻、蓝调时刻、深夜星空）")
+    composition_tips: str = Field(default="", description="构图与拍摄镜头/角度技巧")
+    camera_params: Optional[str] = Field(default="", description="推荐镜头与曝光参数（如：14-24mm f/2.8 · 20s · ISO 3200）")
+    outfit_color: Optional[str] = Field(default="", description="穿搭建议与色彩调色灵感")
+    image: Optional[str] = Field(default=None, description="机位实拍图或大片URL")
 
 
 class TravelPlanResponse(BaseModel):
-    title: str = Field(description="定制行程规划总标题")
-    summary: str = Field(description="行程整体特色与概要描述")
-    itineraries: List[DailyItinerary] = Field(description="每日行程表格数据明细")
-    must_visit_spots: List[MustVisitSpot] = Field(description="必去景点与特色小吃清单")
-    photo_guides: List[PhotoGuide] = Field(description="摄影机位与出片指南")
+    title: str = Field(default="", description="定制行程规划总标题")
+    summary: str = Field(default="", description="行程整体特色与概要描述")
+    itineraries: List[DailyItinerary] = Field(default_factory=list, description="每日行程表格数据明细")
+    must_visit_spots: List[MustVisitSpot] = Field(default_factory=list, description="必去景点与特色小吃清单")
+    photo_guides: List[PhotoGuide] = Field(default_factory=list, description="摄影机位与出片指南")
     data_sources: List[str] = Field(default_factory=list, description="数据来源标注（如：ChromaDB私有向量知识库、全网实时搜索）")
+    needs_more_info: bool = Field(default=False, description="是否需要用户补充关键信息")
+    follow_up_question: Optional[str] = Field(default=None, description="向用户展示的引导或追问文案")
 
 
 class TravelPlanRequest(BaseModel):
     query: str = Field(..., description="用户的自然语言旅游需求描述", example="想去新西兰南岛自驾7天，喜欢风光摄影与轻徒步")
+    conversation_history: Optional[List[dict]] = Field(default=None, description="可选历史对话上下文")
     preferences: Optional[dict] = Field(default_factory=dict, description="可选扩展偏好设置")
