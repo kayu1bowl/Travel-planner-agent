@@ -35,19 +35,46 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+from fastapi import Request
+from fastapi.responses import RedirectResponse
+
+@app.middleware("http")
+async def force_https_and_hsts(request: Request, call_next):
+    proto = request.headers.get("x-forwarded-proto", "").lower()
+    if proto == "http":
+        url = request.url.replace(scheme="https")
+        return RedirectResponse(url=str(url), status_code=301)
+    
+    response = await call_next(request)
+    response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains; preload"
+    return response
+
 # 挂载 API 路由
 app.include_router(plan_router, prefix="/api/v1")
 
+# 挂载静态前端构建产物（若存在 frontend/dist）
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 
-@app.get("/")
-def read_root():
-    return {
-        "status": "online",
-        "service": "Travel Planner AI Agent Backend",
-        "version": "1.0.0",
-        "docs_url": "/docs"
-    }
+dist_dir = PROJECT_ROOT / "frontend" / "dist"
+if dist_dir.exists():
+    app.mount("/assets", StaticFiles(directory=dist_dir / "assets"), name="assets")
 
+    @app.get("/{full_path:path}")
+    async def serve_spa(full_path: str):
+        file_path = dist_dir / full_path
+        if file_path.is_file():
+            return FileResponse(file_path)
+        return FileResponse(dist_dir / "index.html")
+else:
+    @app.get("/")
+    def read_root():
+        return {
+            "status": "online",
+            "service": "Travel Planner AI Agent Backend",
+            "version": "1.0.0",
+            "docs_url": "/docs"
+        }
 
 @app.get("/api/v1/health")
 def health_check():
