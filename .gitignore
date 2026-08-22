@@ -32,6 +32,8 @@ venv/
 # Build artifacts
 frontend/dist/
 frontend/build/
+frontend/.vite/
+.vite/
 
 # IDE
 .vscode/
