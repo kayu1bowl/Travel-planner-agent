@@ -183,18 +183,22 @@ class AgentRouter:
 
         user_prompt = f"用户需求：{query}\n\n参考上下文资料：\n{context}"
 
-        # 优先方式 1: 运行 OpenClaw 多阶段 Agent 协同流水线 (Multi-Stage Pipeline)
-        try:
-            from openclaw_agent.workflows.multi_stage_planner import run_multi_stage_pipeline
-            multi_dict = run_multi_stage_pipeline(query, context, data_sources)
-            if multi_dict and multi_dict.get("itineraries"):
-                print(f"🌟 [AgentRouter] 成功由 OpenClaw 多阶段 Agent 流水线生成规划！总天数: {len(multi_dict.get('itineraries', []))}天")
-                return TravelPlanResponse(**multi_dict)
-        except Exception as stage_e:
-            print(f"⚠️ [AgentRouter] 多阶段流水线降级 ({stage_e})，尝试单次 LLM 补全...")
+        # 判断是否有有效的 LLM API Key
+        has_llm_key = bool(self.openai_api_key and self.openai_api_key.strip())
 
-        # 方式 2: 用户自定义配置的 Gemini OpenAI 兼容 API 接口 (https://api.hisunalan.me/v1)
-        if self.openai_api_key and self.openai_api_base:
+        # 优先方式 1: 运行 OpenClaw 多阶段 Agent 协同流水线 (Multi-Stage Pipeline)
+        if has_llm_key:
+            try:
+                from openclaw_agent.workflows.multi_stage_planner import run_multi_stage_pipeline
+                multi_dict = run_multi_stage_pipeline(query, context, data_sources)
+                if multi_dict and multi_dict.get("itineraries"):
+                    print(f"🌟 [AgentRouter] 成功由 OpenClaw 多阶段 Agent 流水线生成规划！总天数: {len(multi_dict.get('itineraries', []))}天")
+                    return TravelPlanResponse(**multi_dict)
+            except Exception as stage_e:
+                print(f"⚠️ [AgentRouter] 多阶段流水线降级 ({stage_e})，尝试单次 LLM 补全...")
+
+        # 方式 2: 用户自定义配置的 Gemini OpenAI 兼容 API 接口
+        if has_llm_key and self.openai_api_base:
             try:
                 headers = {
                     "Authorization": f"Bearer {self.openai_api_key}",
