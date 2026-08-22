@@ -25,7 +25,13 @@ import time
 import xml.etree.ElementTree as ET
 from typing import Optional
 
-PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from pathlib import Path
+def _find_project_root(path: Path) -> Path:
+    for p in [path, *path.parents]:
+        if (p / "rag_knowledge_base").is_dir():
+            return p
+    return path.parent
+PROJECT_DIR = str(_find_project_root(Path(__file__).resolve()))
 RAW_DIR = os.path.join(PROJECT_DIR, "rag_knowledge_base", "data", "raw")
 os.makedirs(RAW_DIR, exist_ok=True)
 
@@ -50,12 +56,28 @@ def safe_fetch(url: str, timeout: int = 30) -> Optional[str]:
     }
     for attempt in range(1, MAX_RETRIES + 1):
         try:
-            resp = req_lib.get(url, headers=headers, timeout=timeout)
+            resp = req_lib.get(url, headers=headers, timeout=timeout, allow_redirects=True)
+            # Print debug for non-200 responses
             if resp.status_code == 429:
                 wait = BASE_BACKOFF ** attempt
                 print(f"  \u23f3 429, wait {wait:.0f}s ({attempt}/{MAX_RETRIES})")
                 time.sleep(wait); continue
+            if resp.status_code == 301 or resp.status_code == 302 or resp.status_code == 307 or resp.status_code == 308:
+                print(f"  \u21ba Redirect({resp.status_code}) to {resp.headers.get('Location','?')[:60]}")
+                # Follow redirect manually
+                redirect_url = resp.headers.get("Location", "")
+                if redirect_url.startswith("/"):
+                    from urllib.parse import urlparse
+                    parsed = urlparse(url)
+                    redirect_url = f"{parsed.scheme}://{parsed.netloc}{redirect_url}"
+                if redirect_url:
+                    resp = req_lib.get(redirect_url, headers=headers, timeout=timeout, allow_redirects=True)
+                    if resp.status_code != 200:
+                        return None
+                    return resp.text
+                return None
             if resp.status_code != 200:
+                print(f"  \u26a0\ufe0f HTTP {resp.status_code} ({len(resp.text)}b)")
                 return None
             return resp.text
         except req_lib.exceptions.ConnectionError as e:
@@ -65,18 +87,140 @@ def safe_fetch(url: str, timeout: int = 30) -> Optional[str]:
                     print(f"  \u26a0\ufe0f DNS fail, retry ({attempt}/{MAX_RETRIES})")
                     time.sleep(3); continue
                 return None
+            print(f"  \u274c ConnectionError: {err[:80]}")
             return None
         except req_lib.exceptions.Timeout:
             if attempt < MAX_RETRIES:
                 print(f"  \u23f3 timeout ({attempt}/{MAX_RETRIES})")
                 time.sleep(BASE_BACKOFF ** attempt); continue
             return None
-        except Exception:
+        except Exception as e:
+            print(f"  \u274c Exception: {str(e)[:80]}")
             if attempt < MAX_RETRIES:
                 time.sleep(BASE_BACKOFF ** attempt); continue
             return None
     return None
 
+
+
+def _resolve_via_doh(domain: str) -> Optional[str]:
+    """Resolve domain via Cloudflare DoH"""
+    import requests as rl
+    try:
+        resp = rl.get(f"https://cloudflare-dns.com/dns-query?name={domain}&type=A",
+                       headers={"Accept": "application/dns-json"}, timeout=8)
+        if resp.status_code == 200:
+            for ans in resp.json().get("Answer", []):
+                if ans.get("type") == 1:
+                    return ans["data"]
+    except: pass
+    return None
+
+def _resolve_via_google_doh(domain: str) -> Optional[str]:
+    """Resolve domain via Google DoH"""
+    import requests as rl
+    try:
+        resp = rl.get(f"https://dns.google/resolve?name={domain}&type=A",
+                       headers={"Accept": "application/dns-json"}, timeout=8)
+        if resp.status_code == 200:
+            for ans in resp.json().get("Answer", []):
+                if ans.get("type") == 1:
+                    return ans["data"]
+    except: pass
+    return None
+
+def _get_real_ip(domain: str) -> Optional[str]:
+    """Try multiple DoH providers to get real IP"""
+    ip = _resolve_via_doh(domain)
+    return ip if ip else _resolve_via_google_doh(domain)
+
+def safe_fetch_wikipedia(api_url: str, timeout: int = 30) -> Optional[str]:
+    """4-layer fallback for Wikipedia with full diagnostics
+
+    Strategy:
+      1. Try via proxy (HTTP_PROXY env) -- works when proxy itself can reach Wiki
+      2. DoH real IP without proxy -- for global VPN (TUN) users where DNS is polluted
+      3. DoH real IP WITH proxy -- for local proxy users where proxy can route IPs
+      4. curl_cffi direct -- last resort for WAF blocks
+    """
+    import requests as rl
+
+    # Layer 1: Via proxy (HTTP_PROXY/HTTPS_PROXY set by --proxy arg)
+    result = safe_fetch(api_url, timeout)
+    if result: return result
+
+    # Get real IP via DoH
+    print(f"  \u26a0\ufe0f DNS pollution suspected for en.wikipedia.org")
+    real_ip = _get_real_ip("en.wikipedia.org")
+
+    # Layer 2: Try DIRECT (no proxy) with real IP + Host header
+    # Works for: Global VPN (TUN mode) -- user connects to VPN globally
+    if real_ip:
+        direct_url = api_url.replace("https://en.wikipedia.org", f"https://{real_ip}")
+        headers = {"Host": "en.wikipedia.org", "User-Agent": USER_AGENT,
+                    "Accept": "application/json,*/*"}
+
+        # Save and temporarily remove proxy env vars
+        old_http = os.environ.pop("HTTP_PROXY", None)
+        old_https = os.environ.pop("HTTPS_PROXY", None)
+        old_h = os.environ.pop("http_proxy", None)
+        old_hs = os.environ.pop("https_proxy", None)
+
+        print(f"  Trying DoH IP {real_ip} direct (no proxy, global VPN mode)...")
+        try:
+            resp = rl.get(direct_url, headers=headers, timeout=timeout, allow_redirects=True)
+            if resp.status_code == 200:
+                text = resp.text
+                if text and text.startswith("{"):
+                    return text
+                print(f"  \u26a0\ufe0f Response {resp.status_code}, {len(text)}b, not JSON")
+            else:
+                print(f"  \u26a0\ufe0f HTTP {resp.status_code}")
+        except Exception as e:
+            print(f"  \u274c {str(e)[:70]}")
+
+        # Restore proxy
+        if old_http: os.environ["HTTP_PROXY"] = old_http
+        if old_https: os.environ["HTTPS_PROXY"] = old_https
+        if old_h: os.environ["http_proxy"] = old_h
+        if old_hs: os.environ["https_proxy"] = old_hs
+
+        # Layer 3: Try WITH proxy restored + real IP + Host header
+        # Works for: Local proxy (Clash/SS) -- proxy can route to any IP
+        print(f"  Trying DoH IP {real_ip} WITH proxy (local proxy mode)...")
+        try:
+            resp = rl.get(direct_url, headers=headers, timeout=timeout, allow_redirects=True)
+            if resp.status_code == 200:
+                text = resp.text
+                if text and text.startswith("{"):
+                    return text
+                print(f"  \u26a0\ufe0f Response {resp.status_code}, {len(text)}b, not JSON")
+            else:
+                print(f"  \u26a0\ufe0f HTTP {resp.status_code}")
+        except Exception as e:
+            print(f"  \u274c {str(e)[:70]}")
+
+    # Layer 4: curl_cffi as last resort
+    print(f"  Trying curl_cffi impersonate (WAF bypass)...")
+    try:
+        from curl_cffi import requests as curl_req
+        resp = curl_req.get(api_url, headers={"User-Agent": USER_AGENT,
+                            "Accept": "application/json,*/*"},
+                           impersonate="chrome120", timeout=min(timeout, 25))
+        if resp.status_code == 200:
+            text = resp.text
+            if text and text.startswith("{"):
+                return text
+            print(f"  \u26a0\ufe0f curl_cffi: {resp.status_code}, {len(text)}b")
+        else:
+            print(f"  \u26a0\ufe0f curl_cffi: HTTP {resp.status_code}")
+    except ImportError:
+        print(f"  \u274c curl_cffi not installed")
+    except Exception as e:
+        print(f"  \u274c curl_cffi: {str(e)[:70]}")
+
+    print(f"  \u274c ALL layers failed for Wikipedia")
+    return None
 
 # =========================== WIKIPEDIA ===========================
 
@@ -148,13 +292,20 @@ WIKIPEDIA_PAGES = [
     ("Rail_transport_in_New_Zealand", "72_nz_rail.txt", "travel-tips"),
     ("Education_in_New_Zealand", "73_nz_education.txt", "reference"),
     ("Health_care_in_New_Zealand", "74_nz_health.txt", "reference"),
+    # Driving-specific pages
+    ("Driving_in_New_Zealand", "75_driving_in_nz.txt", "driving"),
+    ("New_Zealand_State_Highway_network", "76_nz_state_highways.txt", "driving"),
+    ("Road_safety_in_New_Zealand", "77_road_safety_nz.txt", "driving"),
+    ("Speed_limits_in_New_Zealand", "78_speed_limits_nz.txt", "driving"),
+    ("Vehicle_emissions_in_New_Zealand", "79_vehicle_emissions_nz.txt", "driving"),
+
 ]
 
 
 def fetch_wikipedia_page(title: str) -> Optional[str]:
     import urllib.parse
     params = urllib.parse.urlencode({"action":"query","titles":title,"prop":"extracts","explaintext":True,"format":"json","exlimit":1})
-    raw = safe_fetch(f"https://en.wikipedia.org/w/api.php?{params}")
+    raw = safe_fetch_wikipedia(f"https://en.wikipedia.org/w/api.php?{params}")
     if not raw: return None
     try:
         data = json.loads(raw)
@@ -169,8 +320,16 @@ def fetch_wikipedia_page(title: str) -> Optional[str]:
 
 
 def fetch_wikipedia_docs() -> list:
-    print("\n[Wikipedia] ...")
-    print(f"  Target: {len(WIKIPEDIA_PAGES)} pages")
+    print("\n[Wikipedia] 快速连通性检查...")
+    import urllib.parse
+    # 只试1次5秒超时检查连通性
+    test_url = f"https://en.wikipedia.org/w/api.php?{urllib.parse.urlencode({'action':'query','titles':'New_Zealand','prop':'extracts','explaintext':True,'format':'json','exlimit':1})}"
+    test_result = safe_fetch_wikipedia(test_url, timeout=5)
+    if not test_result:
+        print(" ⚠️ Wikipedia 不可达(GFW阻断),跳过整个源")
+        print(" 💡 如需 Wikipedia 数据,开启代理: set HTTP_PROXY=http://127.0.0.1:7890")
+        return []
+    print(f" ✅ Wikipedia 可达! 开始爬取 {len(WIKIPEDIA_PAGES)} 页...")
     docs=[]
     for title,fname,cat in WIKIPEDIA_PAGES:
         print(f"  {title[:42].replace('_',' ')}...",end=" ",flush=True)
@@ -285,7 +444,7 @@ def fetch_opentripmap_docs() -> list:
     for label,lat,lon in OPENTRIPMAP_REGIONS:
         print(f"  {label}...")
         for kinds,fname in KINDS_MAP.items():
-            raw=safe_fetch(f"https://api.opentripmap.com/0.1/en/places/radius?radius=20000&lon={lon}&lat={lat}&kinds={kinds}&limit=30&format=json&apikey=***",15)
+            raw=safe_fetch(f"https://api.opentripmap.com/0.1/en/places/radius?radius=20000&lon={lon}&lat={lat}&kinds={kinds}&limit=30&format=json&apikey={ak}",15)
             time.sleep(REQUEST_DELAY)
             if not raw: continue
             try:
@@ -537,6 +696,395 @@ def fetch_nzcom_docs() -> list:
     return docs
 
 
+
+
+
+
+def safe_fetch_html(url: str, timeout: int = 25) -> Optional[str]:
+    """Generic HTML fetch with curl_cffi fallback for WAF-protected sites"""
+    result = safe_fetch(url, timeout)
+    if result and len(result) > 200:
+        return result
+    try:
+        from curl_cffi import requests as curl_req
+        resp = curl_req.get(url, impersonate="chrome120",
+            headers={"User-Agent": USER_AGENT, "Accept": "text/html,*/*",
+                      "Accept-Language": "en-US,en;q=0.9", "Upgrade-Insecure-Requests": "1"},
+            timeout=timeout)
+        if resp.status_code == 200:
+            return resp.text
+    except: pass
+    return None
+
+# =====================================================================
+# Source 6: AA New Zealand - Driving Guides
+# =====================================================================
+
+# AA driving sections for sitemap-style discovery
+_AA_BASE = "https://www.aa.co.nz"
+_AA_TRAVEL_SECTIONS = [
+    "travel/driving", "travel/overseas-drivers", "travel/road-code",
+    "travel/buying-a-car", "travel/car-safety", "travel/motoring",
+    "travel/vehicle-licensing",
+    "travel/breakdowns", "travel/fuel",
+    "travel/insurance", "travel/campervan-and-motorhomes",
+    "travel/trailers-and-towing",
+    "travel/vehicle-importing",
+    "travel/maps-and-directions", "travel/road-closures",
+    "travel/road-trips", "travel/touring-guides",
+    "travel/accommodation", "travel/travel-safety",
+]
+
+def _discover_aa_travel_pages(max_pages=50):
+    """Discover AA travel pages via crawling their site structure"""
+    from bs4 import BeautifulSoup
+    import requests as rl
+    found = set(_AA_TRAVEL_SECTIONS)
+    try:
+        resp = rl.get(f"{_AA_BASE}/travel/", headers={"User-Agent": USER_AGENT}, timeout=15)
+        if resp.status_code == 200:
+            soup = BeautifulSoup(resp.text, "html.parser")
+            for a in soup.find_all("a", href=True):
+                href = a["href"]
+                if "/travel/" in href and "#" not in href:
+                    if href.startswith("/"):
+                        path = href.lstrip("/")
+                    elif href.startswith(_AA_BASE):
+                        path = href.replace(_AA_BASE, "").lstrip("/")
+                    else: continue
+                    if path and len(path) < 60 and "/travel/" in path:
+                        found.add(path)
+    except: pass
+    found = sorted(found)[:max_pages]
+    return [(p, p.replace("/","_").replace("-","_")[:40], p.split("/")[-1].replace("-"," ").title())
+            for p in found]
+
+def _fetch_aa_page(path: str) -> Optional[str]:
+    """Fetch an AA page"""
+    from bs4 import BeautifulSoup
+    url = f"{_AA_BASE}/{path}/" if not path.endswith("/") else f"{_AA_BASE}/{path}"
+    html = safe_fetch_html(url, timeout=20)
+    if not html: return None
+    soup = BeautifulSoup(html, "html.parser")
+    for sel in ["script","style","noscript","nav","footer","header",
+                ".cookie",".newsletter",".advert",".share",".sidebar"]:
+        for e in soup.select(sel): e.decompose()
+    main = soup.find("main") or soup.find("article") or soup.find(attrs={"role":"main"}) or soup.find("body")
+    if not main: return None
+    text = main.get_text(separator="\n", strip=True)
+    lines = [l.strip() for l in text.split("\n") if l.strip() and len(l.strip()) > 4]
+    clean = "\n\n".join(lines)
+    if len(clean) < 100: return None
+    return f"# AA New Zealand - {path}\n\nURL: {url}\n\n{clean}"
+
+def fetch_aa_docs() -> list:
+    """AA网站已改版,/travel/全部404,跳过(NZTA已覆盖官方驾驶信息)"""
+    print("\n[AA New Zealand] ⚠️  已跳过(网站改版,travel路径404)")
+    return []
+
+
+# =====================================================================
+# Source 7: NZ Transport Agency (NZTA) - Official Road Rules
+# =====================================================================
+
+# 50 NZTA driving-related sections (discovered dynamically via sitemap + known sections)
+NZTA_SITEMAP_SECTIONS = [
+    "roads-and-rail", "safety", "driver-licences",
+    "driver-licences/visitors-and-new-residents",
+    "driver-licences/overseas-visitors", "driver-licences/new-residents",
+    "driver-licences/renewing", "driver-licences/applying",
+    "driver-licences/restricted-licence", "driver-licences/full-licence",
+    "driver-licences/learner-licence", "driver-licences/temporary-visa",
+    "driver-licences/international-driving-permit",
+    "roads-and-rail/toll-roads", "roads-and-rail/state-highways",
+    "roads-and-rail/road-closures", "roads-and-rail/roadworks",
+    "roads-and-rail/weight-and-dimensions", "roads-and-rail/rail-network",
+    "safety/driving-safely", "safety/driving-safely/speed",
+    "safety/driving-safely/alcohol-and-drugs",
+    "safety/driving-safely/driver-fatigue",
+    "safety/driving-safely/weather", "safety/driving-safely/rest-stops",
+    "safety/driving-safely/mobile-phones",
+    "safety/driving-safely/seatbelts-and-restraints",
+    "safety/driving-safely/child-restraints",
+    "safety/driving-safely/intersections",
+    "safety/driving-safely/roundabouts",
+    "safety/driving-safely/merging", "safety/driving-safely/passing",
+    "safety/driving-safely/overtaking",
+    "safety/driving-safely/head-on-crashes",
+    "safety/driving-safely/loss-of-control",
+    "safety/driving-safely/road-user-behaviour",
+    "safety/driving-safely/cycling-safety",
+    "safety/driving-safely/motorcycle-safety",
+    "safety/driving-safely/truck-and-heavy-vehicle",
+    "safety/driving-safely/pedestrian-safety",
+    "safety/young-drivers", "safety/older-drivers",
+    "safety/community-partnerships", "safety/campaigns",
+]
+
+def _discover_nzta_pages(max_pages=80):
+    """Discover NZTA driving-related pages via sitemap + known sections"""
+    from bs4 import BeautifulSoup
+    print("  Discovering NZTA sitemap...")
+    found = []
+    import requests as rl
+    try:
+        resp = rl.get("https://www.nzta.govt.nz/sitemap.xml",
+                       headers={"User-Agent": USER_AGENT}, timeout=15)
+        if resp.status_code == 200:
+            root = ET.fromstring(resp.text)
+            ns = "{http://www.sitemaps.org/schemas/sitemap/0.9}"
+            subs = [l.text for l in root.iter(f"{ns}loc") if l.text]
+            for su in subs[:20]:
+                try:
+                    sub = rl.get(su, headers={"User-Agent": USER_AGENT}, timeout=15)
+                    if sub.status_code != 200: continue
+                    sr = ET.fromstring(sub.text)
+                    for l in sr.iter(f"{ns}loc"):
+                        u = l.text or ""
+                        if any(kw in u.lower() for kw in ["driv", "road", "safety", "licen",
+                                                           "speed", "alcohol", "weather",
+                                                           "cycle", "crash", "tunnel"]):
+                            if u not in found:
+                                found.append(u)
+                            if len(found) >= max_pages: break
+                except: pass
+                if len(found) >= max_pages: break
+            print(f"  Sitemap found: {len(found)} NZTA pages")
+    except: pass
+    base_url = "https://www.nzta.govt.nz"
+    for section in NZTA_SITEMAP_SECTIONS:
+        if len(found) >= max_pages: break
+        url = f"{base_url}/{section}/"
+        if url not in found:
+            found.append(url)
+    return found[:max_pages]
+
+def _fetch_nzta_page(url: str) -> Optional[str]:
+    """Fetch an NZTA page using curl_cffi to bypass Incapsula WAF"""
+    from bs4 import BeautifulSoup
+    headers = {"User-Agent": USER_AGENT, "Accept": "text/html,application/xhtml+xml,*/*"}
+    try:
+        # NZTA uses Incapsula WAF — need curl_cffi like newzealand.com
+        from curl_cffi import requests as curl_req
+        try:
+            resp = curl_req.get(url, impersonate="chrome120", headers=headers, timeout=25)
+        except:
+            import requests as rl
+            resp = rl.get(url, headers=headers, timeout=20)
+        if resp.status_code != 200: return None
+        soup = BeautifulSoup(resp.text, "html.parser")
+        for sel in ["script","style","noscript","nav","footer","header",
+                    ".cookie",".share",".sidebar",".related"]:
+            for e in soup.select(sel): e.decompose()
+        main = soup.find("main") or soup.find("article") or soup.find(attrs={"role":"main"}) or soup.find("body")
+        if not main: return None
+        text = main.get_text(separator="\n", strip=True)
+        text_lines = [l.strip() for l in text.split("\n") if l.strip() and len(l.strip()) > 4]
+        clean = "\n\n".join(text_lines)
+        if len(clean) < 100: return None
+        return f"# NZTA - {url}\n\n{clean}"
+    except: return None
+
+def fetch_nzta_docs() -> list:
+    """Scrape NZ Transport Agency - official road rules (80+ pages)"""
+    print("\n[NZ Transport Agency] ...")
+    urls = _discover_nzta_pages(80)
+    print(f"  Target: {len(urls)} pages")
+    docs = []
+    for url in urls:
+        path = url.replace("https://www.nzta.govt.nz/", "").rstrip("/").replace("/", "_")
+        name = path[:45] if len(path) > 45 else path
+        print(f"  {name}...", end=" ", flush=True)
+        text = _fetch_nzta_page(url)
+        if text and len(text) > 200:
+            fname = f"nzta_{path[:40]}.txt"
+            with open(os.path.join(RAW_DIR, fname), "w", encoding="utf-8") as f: f.write(text)
+            title = f"NZTA - {path.replace('_',' ').title()}"
+            docs.append({"content":text, "url":url, "source_name":"nzta",
+                         "category":"driving", "title":title})
+            print(f"\u2705 {len(text)}c")
+        else: print("\u274c")
+        time.sleep(REQUEST_DELAY)
+    print(f"  NZTA: {len(docs)}/{len(urls)} OK")
+    return docs
+
+
+# =====================================================================
+# Source 8: newzealand.com - Driving/Transport pages (seed)
+# =====================================================================
+
+NZCOM_DRIVING_SEEDS = [
+    "feature/driving-in-new-zealand",
+    "feature/road-trips",
+    "feature/scenic-road-trips",
+    "feature/campervan-motorhome-travel",
+    "getting-around",
+    "getting-around/rental-cars",
+    "feature/summer-road-trips",
+    "feature/winter-driving",
+]
+
+
+# =====================================================================
+# Source 9: Te Ara - Transport section
+# =====================================================================
+
+def _fetch_teara_topic(topic_slug: str) -> Optional[str]:
+    """Fetch a Te Ara encyclopedia topic"""
+    from bs4 import BeautifulSoup
+    url = f"https://teara.govt.nz/en/{topic_slug}"
+    raw = safe_fetch_html(url, timeout=20)
+    if not raw: return None
+    soup = BeautifulSoup(raw, "html.parser")
+    for sel in ["script","style","noscript","nav","footer","header",
+                ".cookie",".share","#left-nav"]:
+        for e in soup.select(sel): e.decompose()
+    main = soup.find("main") or soup.find("article") or soup.find(attrs={"role":"main"}) or soup.find("body")
+    if not main: return None
+    text = main.get_text(separator="\n", strip=True)
+    lines = [l.strip() for l in text.split("\n") if l.strip() and len(l.strip()) > 4]
+    clean = "\n\n".join(lines)
+    if len(clean) < 100: return None
+    return f"# {topic_slug} - Te Ara Encyclopedia\n\nURL: {url}\n\n{clean}"
+
+def _discover_teara_topics(max_topics=200):
+    """Discover all Te Ara topics from the A-Z index"""
+    from bs4 import BeautifulSoup
+    import requests as rl
+    found = set()
+    print("  Discovering Te Ara topics...")
+    for url in ["https://teara.govt.nz/en/subjects", "https://teara.govt.nz/en"]:
+        try:
+            resp = rl.get(url, headers={"User-Agent": USER_AGENT}, timeout=20)
+            if resp.status_code == 200:
+                soup = BeautifulSoup(resp.text, "html.parser")
+                for a in soup.select("a[href*='/en/']"):
+                    parts = a["href"].lstrip("/").split("/")
+                    if len(parts) >= 2 and parts[0] == "en" and parts[1]:
+                        slug = parts[1]
+                        if slug not in ("subjects","about","contact","search","feedback"):
+                            found.add(slug)
+        except: pass
+    print(f"  Found {len(found)} Te Ara topics")
+    return sorted(found)[:max_topics]
+
+def fetch_teara_docs() -> list:
+    """Scrape Te Ara Encyclopedia - auto-discover (200+ topics)"""
+    print("\n[Te Ara Encyclopedia] ...")
+    # Te Ara uses Cloudflare — discovery may fail, fallback to known topics
+    KNOWN_TEARA_TOPICS = [
+        "new-zealand-brief-history", "economy", "peoples", "nz-people",
+        "maori", "maori-new-zealanders", "travel-and-tourism", "tourism",
+        "natural-environment", "climate", "plants-animals-fungi",
+        "south-island-regions", "north-island-regions",
+        "auckland", "wellington", "canterbury-region",
+        "transport", "roads-and-travel",
+    ]
+    try:
+        topics = _discover_teara_topics(200)
+        if not topics:
+            raise ValueError("discovery returned empty")
+    except Exception as e:
+        print(f"  ⚠️ Discovery failed ({str(e)[:30]}), using {len(KNOWN_TEARA_TOPICS)} known topics")
+        topics = list(KNOWN_TEARA_TOPICS)
+    print(f"  Target: {len(topics)} topics")
+    docs = []
+    for slug in topics:
+        title = slug.replace("-", " ").title()
+        print(f"  {title[:42]}...", end=" ", flush=True)
+        text = _fetch_teara_topic(slug)
+        if text and len(text) > 200:
+            fname = f"teara_{slug[:35]}.txt"
+            with open(os.path.join(RAW_DIR, fname), "w", encoding="utf-8") as f: f.write(text)
+            docs.append({"content":text,"url":f"https://teara.govt.nz/en/{slug}",
+                         "source_name":"teara","category":"reference","title":f"Te Ara - {title}"})
+            print(f"\u2705 {len(text)}c")
+        else: print("\u274c")
+        time.sleep(REQUEST_DELAY)
+    print(f"  Te Ara: {len(docs)}/{len(topics)} OK")
+    return docs
+
+
+# =====================================================================
+# Source 10: Safe driving tips (NZ Police / general)
+# =====================================================================
+
+
+
+# =====================================================================
+# Source 10: NZ Police — Driving and Road Safety
+# =====================================================================
+# NOTE: Police website restructured in 2025!
+# Old: /advice/driving/ (404)
+# New: /advice-services/driving-and-road-safety/
+
+_POLICE_DRIVING_TOPICS = [
+    "being-safe-road-rules-and-reasons",
+    "how-police-enforce-speed-limits",
+    "personal-safety-your-vehicle",
+    "fleeing-driver",
+    "commercial-vehicle-safety-team-cvst",
+]
+
+def _discover_police_driving_pages(max_pages=30):
+    from bs4 import BeautifulSoup
+    import requests as rl
+    base_url = "https://www.police.govt.nz/advice-services/driving-and-road-safety"
+    found = [f"{base_url}/{t}/" for t in _POLICE_DRIVING_TOPICS]
+    # Try to discover more from the listing page
+    try:
+        resp = rl.get(base_url, headers={"User-Agent": USER_AGENT}, timeout=15)
+        if resp.status_code == 200:
+            soup = BeautifulSoup(resp.text, "html.parser")
+            for a in soup.find_all("a", href=True):
+                href = a["href"]
+                if "/advice-services/driving-and-road-safety/" in href and "#" not in href:
+                    full = href if href.startswith("http") else f"https://www.police.govt.nz{href}"
+                    if full not in found: found.append(full)
+    except: pass
+    print(f"  Police driving: {len(found)} pages found")
+    return found[:max_pages]
+
+def _fetch_police_page(url: str) -> Optional[str]:
+    from bs4 import BeautifulSoup
+    import requests as rl
+    try:
+        resp = rl.get(url, headers={"User-Agent": USER_AGENT, "Accept": "text/html,*/*"}, timeout=20)
+        if resp.status_code != 200: return None
+        soup = BeautifulSoup(resp.text, "html.parser")
+        for sel in ["script","style","noscript","nav","footer","header",".cookie"]:
+            for e in soup.select(sel): e.decompose()
+        main = soup.find("main") or soup.find("article") or soup.find("body")
+        if not main: return None
+        text = main.get_text(separator="\n", strip=True)
+        text_lines = [l.strip() for l in text.split("\n") if l.strip() and len(l.strip()) > 4]
+        clean = "\n\n".join(text_lines)
+        if len(clean) < 100: return None
+        return f"# NZ Police - {url}\n\n{clean}"
+    except: return None
+
+def fetch_police_docs() -> list:
+    """Scrape NZ Police - driving safety pages (restructured URL)"""
+    print("\n[NZ Police] ...")
+    urls = _discover_police_driving_pages(30)
+    print(f"  Target: {len(urls)} pages")
+    docs = []
+    for url in urls:
+        safe_name = url.replace("https://www.police.govt.nz/advice-services/", "")\
+                      .rstrip("/").replace("/","_")[:35]
+        print(f"  {safe_name}...", end=" ", flush=True)
+        text = _fetch_police_page(url)
+        if text and len(text) > 200:
+            fname = f"police_driving_{safe_name}.txt"
+            with open(os.path.join(RAW_DIR, fname), "w", encoding="utf-8") as f: f.write(text)
+            docs.append({"content":text, "url":url, "source_name":"police",
+                         "category":"driving", "title":f"Police - {safe_name.replace('_',' ')}"})
+            print(f"\u2705 {len(text)}c")
+        else: print("\u274c")
+        time.sleep(REQUEST_DELAY)
+    print(f"  Police: {len(docs)}/{len(urls)} OK")
+    return docs
+
 # =====================================================================
 # fetch_all_sources — 异步统一入口
 # =====================================================================
@@ -552,11 +1100,15 @@ async def fetch_all_sources() -> list:
     loop = asyncio.get_event_loop()
 
     sources = [
-        ("Wikipedia",     fetch_wikipedia_docs),
-        ("Wikivoyage",    fetch_wikivoyage_docs),
-        ("OpenTripMap",   fetch_opentripmap_docs),
-        ("DOC",           fetch_doc_docs),
+        ("Wikipedia",      fetch_wikipedia_docs),
+        ("Wikivoyage",     fetch_wikivoyage_docs),
+        ("OpenTripMap",    fetch_opentripmap_docs),
+        ("DOC",            fetch_doc_docs),
         ("newzealand.com", fetch_nzcom_docs),
+        ("AA NZ",          fetch_aa_docs),
+        ("NZTA",           fetch_nzta_docs),
+        ("Te Ara",         fetch_teara_docs),
+        ("NZ Police",      fetch_police_docs),
     ]
 
     for label, func in sources:

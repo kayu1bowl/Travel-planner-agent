@@ -1,7 +1,14 @@
-# Environment & API Keys
+# Environment & API Keys & Credentials
 .env
+.env.*
+!.env.example
+*.env
 .env.local
 *.key
+*.pem
+cookies.json
+credentials*.json
+client_secrets*.json
 
 # Chroma Vector Database (large files)
 rag-knowledge-base/chroma_db/*
@@ -25,6 +32,8 @@ venv/
 # Build artifacts
 frontend/dist/
 frontend/build/
+frontend/.vite/
+.vite/
 
 # IDE
 .vscode/
