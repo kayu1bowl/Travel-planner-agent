@@ -420,5 +420,427 @@ export const TRANSLATIONS = {
       copySuccess: "Copied to clipboard!",
       shareSuccess: "Share text copied"
     }
+  },
+  ja: {
+    nav: {
+      home: "ホーム",
+      itineraries: "旅程",
+      bookings: "予約",
+      settings: "設定",
+      searchPlaceholder: "旅行先を検索...",
+      exportPlan: "エクスポート",
+      copied: "コピーしました",
+      newTrip: "新しい旅"
+    },
+    welcome: {
+      nav: {
+        planner: "プランナー",
+        spatial: "空間エンジン",
+        vision: "プロビジョン",
+        knowledge: "アーキテクチャ",
+        gallery: "ギャラリー",
+        enterDashboard: "ダッシュボード →"
+      },
+      badge: "OpenClaw Agent · スマート旅行プランナー",
+      heroTitle: "理想の旅、一言で実現",
+      heroSubtitle: "信頼できる旅行ガイド、リアルタイム気象・道路情報、厳選フォトスポットを統合。",
+      inputPlaceholder: "どこへ行きたいですか？例：ニュージーランド南島7日間ドライブ、星空とサーモン料理...",
+      generateBtn: "AIプランを作成",
+      generatingBtn: "AIが旅程を作成中...",
+      preferencesTitle: "嗜好タグ",
+      preferences: [
+        { label: "🚗 ドライブ", tag: "ドライブ" },
+        { label: "🌌 星空", tag: "星空撮影" },
+        { label: "📸 フォト", tag: "プロ撮影スポット" },
+        { label: "🍜 グルメ", tag: "現地グルメ" },
+        { label: "🏔️ ハイキング", tag: "軽登山と自然" },
+        { label: "👨‍👩‍👧 家族", tag: "ファミリー向け" }
+      ],
+      telemetry: [
+        "信頼できるガイド知識ベース",
+        "リアルタイム道路・気象情報",
+        "空間時間経路最適化エンジン",
+        "実用的な旅行安全ガイド"
+      ],
+      spatialEngine: {
+        badge: "SPATIAL-TEMPORAL ROUTING ENGINE",
+        title: "空間時間経路計画で、旅をスムーズに",
+        subtitle: "地理、運転リズム、ゴールデンアワーを最適に組み合わせた旅程。",
+        metrics: [
+          { value: "安全", label: "リスク案内", desc: "危険区間や季節リスクを事前警告" },
+          { value: "公式", label: "トレイルガイド", desc: "公式安全等級と推奨所要時間を反映" },
+          { value: "最適", label: "ゴールデンアワー", desc: "日の出・日没・ブルーアワーの撮影窓を提案" }
+        ],
+        cardTitle: "模範ルート：南島高山湖ルート",
+        cardDesc: "クライストチャーチ ➔ テカポ湖 (SH80) ➔ マウントクック ➔ ワナカ ➔ クイーンズタウン",
+        nodes: [
+          { label: "クライストチャーチ (出発)", sub: "レンタカー 0km" },
+          { label: "テカポ湖 (星空)", sub: "天の川 225km" },
+          { label: "マウントクック (氷河)", sub: "フッカーバレー 330km" },
+          { label: "ワナカ (湖畔)", sub: "孤独の木 510km" },
+          { label: "クイーンズタウン (終点)", sub: "フィヨルド 650km" }
+        ]
+      },
+      proVision: {
+        badge: "PRO OPTICS & ASTROPHOTOGRAPHY",
+        title: "すべての風景が絶景",
+        subtitle: "厳選フォトスポットと推奨レンズ・露出設定・撮影時間を提供。",
+        spots: [
+          {
+            name: "善き羊飼いの教会 · 天の川",
+            lens: "14-24mm f/2.8",
+            params: "14mm · f/2.8 · 20s · ISO 3200",
+            window: "天の川 23:30 - 03:15",
+            tip: "超広角ローアングルで石造教会を前景に天の川を捉える。"
+          },
+          {
+            name: "ロイズピーク · 黄金の朝日",
+            lens: "24-70mm f/4",
+            params: "35mm · f/8 · 1/200s · ISO 100",
+            window: "ゴールデンアワー 06:15 - 07:00",
+            tip: "逆光で山稜をワナカ湖へ伸ばす構図。CPLで水面の反射を除去。"
+          },
+          {
+            name: "ミルフォードサウンド · ミトレピーク",
+            lens: "16-35mm + CPL",
+            params: "16mm · f/11 · 30s · ISO 100",
+            window: "ブルーアワー 07:20 - 08:00",
+            tip: "干潮の砂浜で長時間露光、氷河の雪山を水面に映す。"
+          }
+        ]
+      },
+      knowledgeMesh: {
+        badge: "DUAL-ENGINE KNOWLEDGE BASE",
+        title: "デュアルエンジン知識基盤",
+        subtitle: "プライベートRAGベクトル知識ベースとエージェント推論を統合。",
+        layers: [
+          { 
+            num: "01", 
+            name: "公式トレイル＆星空保護区知識ベース", 
+            tag: "ChromaDB ベクトル検索",
+            desc: "ニュージーランドDOCの公式トレイル安全評価、所要時間、季節注意事項を構造化。",
+            image: "https://images.unsplash.com/photo-1507699622108-4be3abd695ad?w=800&auto=format&fit=crop&q=80"
+          },
+          { 
+            num: "02", 
+            name: "リアルタイム気象検索と道路情報", 
+            tag: "天気検索 · 交通情報",
+            desc: "目的地のリアルタイム天気、日の出・日没時刻、道路交通情報を補完。",
+            image: "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=800&auto=format&fit=crop&q=80"
+          },
+          { 
+            num: "03", 
+            name: "OpenClaw エージェント時空間計画", 
+            tag: "構造化推論",
+            desc: "運転距離、体力、撮影窓、営業時間をバランスよく考慮。",
+            image: "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=800&auto=format&fit=crop&q=80"
+          },
+          { 
+            num: "04", 
+            name: "Bento Grid 多次元動的表示層", 
+            tag: "構造化情報マトリクス",
+            desc: "複雑な旅程情報を直感的なBento Gridレイアウトで表示。",
+            image: "https://images.unsplash.com/photo-1433086966358-54859d0ed716?w=800&auto=format&fit=crop&q=80"
+          }
+        ]
+      },
+      inspirations: {
+        badge: "INSPIRATION MATRIX",
+        title: "世界のインスピレーションギャラリー",
+        subtitle: "厳選ルートをワンクリックでロード。",
+        items: [
+          { title: "🇳🇿 NZ南島 7日間ドライブ＆星空", query: "ニュージーランド南島7日間ドライブ、テカポ星空、クック山氷河、クイーンズタウン美食、フォトスポット", tag: "絶景ドライブ" },
+          { title: "🗼 東京 7日間アニメ聖地巡礼", query: "東京7日間、浅草寺、渋谷夜景、秋葉原アニメ、築地市場グルメ", tag: "街歩き" },
+          { title: "🇨🇭 スイスアルプス 10日間", query: "スイス10日間黄金ルート、ユングフラウ、マッターホルン、ジュネーブ湖", tag: "雪山鉄道" },
+          { title: "🇨🇳 貴州 5日間カルスト秘境", query: "貴州5日間ドライブ撮影旅行、黄果樹瀑布、荔波小七孔、西江千戸苗寨", tag: "秘境探検" }
+        ]
+      },
+      bottomCta: {
+        title: "夢の旅を始めましょうか？",
+        subtitle: "OpenClaw Agentにアイデアを伝えるだけで、カスタマイズされた旅程を即座にご提案。",
+        startBtn: "AIプランナーを起動",
+        demoBtn: "デモダッシュボードを見る →"
+      },
+      carousel: {
+        prevSlide: "前のスライド",
+        nextSlide: "次のスライド",
+        prevSpot: "前のスポット",
+        nextSpot: "次のスポット",
+        pauseAuto: "自動再生を停止",
+        resumeAuto: "自動再生を再開",
+        readyBadge: "知識ベース · 準備完了",
+        loadAndPlan: "ロードして計画"
+      }
+    },
+    sidebar: {
+      title: "Roam コパイロット",
+      subtitle: "会話型AI",
+      quickNZ: "🇳🇿 NZ南島 7日",
+      quickTokyo: "🗼 東京 7日秋",
+      inputPlaceholder: "メッセージを入力...",
+      welcomeMsg: "旅行のアイデアを教えてください！行き先、日数、スタイル、予算—完璧なプランをご提案します。",
+      userDefaultMsg: "ニュージーランド南島7日間ドライブ、写真撮影とグルメが中心。",
+      aiDefaultReply: "知識ベースとリアルタイム天気を確認しました。カスタマイズ旅程をご覧ください！",
+      ragStatusPill1: "🔍 知識ベースから該当ガイドを検索",
+      ragStatusPill2: "🌐 リアルタイム天気と道路情報を確認",
+      ragTokyoPill1: "🔍 東京紅葉とグルメガイドを検索",
+      ragTokyoPill2: "✨ Bento Grid構造化スケジュール完了",
+      thinkingText: "知識ベースとネット情報を統合して旅程を生成中...",
+      aiReplyTokyo: "東京秋の旅プラン準備完了！浅草から渋谷まで。",
+      aiReplyNZ: "NZ南島プラン更新！テカポ星空からクック山氷河ハイキングまで。"
+    },
+    cards: {
+      dailyScheduleTitle: "日別スケジュール",
+      dailyTimelineEyebrow: "DAILY TIMELINE · ルート",
+      dayPrefix: "",
+      daySuffix: "日目",
+      dayBtnPrefix: "Day ",
+      tableCols: {
+        time: "時間",
+        activity: "アクティビティ",
+        location: "場所",
+        details: "詳細"
+      },
+      mustVisitTitle: "必見スポット＆グルメ",
+      tasteSightsEyebrow: "TASTE & SIGHTS · 現地ガイド",
+      allCategories: "すべて",
+      foodCategory: "🍲 グルメ",
+      landmarkCategory: "🏛️ 名所",
+      recommendationsLabel: "おすすめ: ",
+      openHoursLabel: "所要時間目安: ",
+      pricingLabel: "料金/予算: ",
+      tipsLabel: "ヒント",
+      spotsTitle: "撮影ガイド＆フォトスポット",
+      photoGuideTitle: "撮影ガイド＆フォトスポット",
+      visualExpeditionEyebrow: "VISUAL EXPEDITION · 撮影ガイド",
+      expeditionEyebrow: "EXPEDITION · カスタムルート",
+      tipsPrefix: "ヒント:",
+      copySpotBtn: "撮影情報をコピー",
+      shareSpotBtn: "撮影案内を共有",
+      paramsLabel: "カメラ設定",
+      photoTipsLabel: "撮影のコツ: ",
+      bestTimeLabel: "最適撮影時間: ",
+      lensLabel: "推奨レンズ: ",
+      weatherTitle: "現地天気と服装アドバイス",
+      tempLabel: "気温: ",
+      conditionLabel: "天候: ",
+      clothingLabel: "服装: ",
+      packingLabel: "持参装備: ",
+      allDay: "終日",
+      imageSourceTitle: "画像ソース: ",
+      copySuccess: "クリップボードにコピーしました！",
+      shareSuccess: "共有テキストをコピー"
+    }
+  },
+  ko: {
+    nav: {
+      home: "홈",
+      itineraries: "여정",
+      bookings: "예약",
+      settings: "설정",
+      searchPlaceholder: "여행지 검색...",
+      exportPlan: "내보내기",
+      copied: "복사됨",
+      newTrip: "새 여행"
+    },
+    welcome: {
+      nav: {
+        planner: "플래너",
+        spatial: "공간 엔진",
+        vision: "프로 비전",
+        knowledge: "아키텍처",
+        gallery: "갤러리",
+        enterDashboard: "대시보드 →"
+      },
+      badge: "OpenClaw Agent · 스마트 여행 플래너",
+      heroTitle: "이상적인 여행, 한 마디로 실현",
+      heroSubtitle: "신뢰할 수 있는 여행 가이드, 실시간 날씨 및 도로 정보, 엄선된 포토 스팟을 통합합니다.",
+      inputPlaceholder: "어디로 가고 싶으신가요? 예: 뉴질랜드 남섬 7일 자동차 여행, 별빛과 연어 요리...",
+      generateBtn: "AI 플랜 시작",
+      generatingBtn: "AI가 여행 일정을 작성 중...",
+      preferencesTitle: "취향 태그",
+      preferences: [
+        { label: "🚗 드라이브", tag: "드라이브" },
+        { label: "🌌 별빛", tag: "별빛 촬영" },
+        { label: "📸 포토", tag: "프로 촬영 스팟" },
+        { label: "🍜 미식", tag: "현지 미식" },
+        { label: "🏔️ 하이킹", tag: "가벼운 하이킹" },
+        { label: "👨‍👩‍👧 가족", tag: "가족 여행" }
+      ],
+      telemetry: [
+        "신뢰할 수 있는 가이드 지식 베이스",
+        "실시간 도로 및 기상 정보",
+        "공간-시간 경로 최적화 엔진",
+        "실용적인 여행 안전 가이드"
+      ],
+      spatialEngine: {
+        badge: "SPATIAL-TEMPORAL ROUTING ENGINE",
+        title: "공간-시간 경로 계획으로 여행을 더욱 매끄럽게",
+        subtitle: "지리, 운전 리듬, 골든 아워를 최적으로 결합한 일정.",
+        metrics: [
+          { value: "안전", label: "위험 안내", desc: "위험 구간 및 계절 리스크 사전 경고" },
+          { value: "공식", label: "트레일 가이드", desc: "공식 안전 등급 및 권장 소요 시간 반영" },
+          { value: "최적", label: "골든 아워", desc: "일출·일몰·블루아워 촬영 시간 제안" }
+        ],
+        cardTitle: "표준 루트: 남섬 고산 호수 루트",
+        cardDesc: "크라이스트처치 ➔ 테카포 호수 (SH80) ➔ 마운트쿡 ➔ 와나카 ➔ 퀸스타운",
+        nodes: [
+          { label: "크라이스트처치 (출발)", sub: "렌터카 0km" },
+          { label: "테카포 호수 (별빛)", sub: "은하수 225km" },
+          { label: "마운트쿡 (빙하)", sub: "후커밸리 330km" },
+          { label: "와나카 (호숫가)", sub: "외로운 나무 510km" },
+          { label: "퀸스타운 (종점)", sub: "피오르드 650km" }
+        ]
+      },
+      proVision: {
+        badge: "PRO OPTICS & ASTROPHOTOGRAPHY",
+        title: "모든 풍경이 장관",
+        subtitle: "엄선된 포토 스팟과 권장 렌즈, 노출 설정, 촬영 시간을 제공합니다.",
+        spots: [
+          {
+            name: "선한 목자 교회 · 은하수",
+            lens: "14-24mm f/2.8",
+            params: "14mm · f/2.8 · 20s · ISO 3200",
+            window: "은하수 23:30 - 03:15",
+            tip: "초광각 로우앵글로 석조 교회를 전경에 은하수 촬영."
+          },
+          {
+            name: "로이스 피크 · 황금 일출",
+            lens: "24-70mm f/4",
+            params: "35mm · f/8 · 1/200s · ISO 100",
+            window: "골든 아워 06:15 - 07:00",
+            tip: "역광으로 산등성이를 와나카 호수로 연결. CPL로 수면 반사 제거."
+          },
+          {
+            name: "밀포드 사운드 · 미트레 피크",
+            lens: "16-35mm + CPL",
+            params: "16mm · f/11 · 30s · ISO 100",
+            window: "블루 아워 07:20 - 08:00",
+            tip: "썰물 때 모래사장에서 장노출, 빙하 설산을 수면에 반사."
+          }
+        ]
+      },
+      knowledgeMesh: {
+        badge: "DUAL-ENGINE KNOWLEDGE BASE",
+        title: "듀얼 엔진 지식 기반",
+        subtitle: "프라이빗 RAG 벡터 지식 베이스와 에이전트 추론을 통합.",
+        layers: [
+          { 
+            num: "01", 
+            name: "공식 트레일 & 별빛 보호구 지식 베이스", 
+            tag: "ChromaDB 벡터 검색",
+            desc: "뉴질랜드 DOC 공식 트레일 안전 평가, 소요 시간, 계절 주의사항을 구조화.",
+            image: "https://images.unsplash.com/photo-1507699622108-4be3abd695ad?w=800&auto=format&fit=crop&q=80"
+          },
+          { 
+            num: "02", 
+            name: "실시간 날씨 검색 및 도로 정보", 
+            tag: "날씨 검색 · 교통 정보",
+            desc: "목적지 실시간 날씨, 일출·일몰 시간, 도로 교통 정보 보완.",
+            image: "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=800&auto=format&fit=crop&q=80"
+          },
+          { 
+            num: "03", 
+            name: "OpenClaw 에이전트 시공간 계획", 
+            tag: "구조화 추론",
+            desc: "운전 거리, 체력, 촬영 시간, 영업 시간을 균형 있게 고려.",
+            image: "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=800&auto=format&fit=crop&q=80"
+          },
+          { 
+            num: "04", 
+            name: "Bento Grid 다차원 동적 표시", 
+            tag: "구조화 정보 매트릭스",
+            desc: "복잡한 여정 정보를 직관적인 Bento Grid 레이아웃으로 표시.",
+            image: "https://images.unsplash.com/photo-1433086966358-54859d0ed716?w=800&auto=format&fit=crop&q=80"
+          }
+        ]
+      },
+      inspirations: {
+        badge: "INSPIRATION MATRIX",
+        title: "세계의 영감 갤러리",
+        subtitle: "엄선된 루트를 원클릭으로 로드.",
+        items: [
+          { title: "🇳🇿 NZ 남섬 7일 드라이브＆별빛", query: "뉴질랜드 남섬 7일 드라이브, 테카포 별빛, 마운트쿡 빙하, 퀸스타운 미식, 포토 스팟", tag: "절경 드라이브" },
+          { title: "🗼 도쿄 7일 애니메이션 성지", query: "도쿄 7일, 아사쿠사 절, 시부야 야경, 아키하바라 애니메이션, 츠키지 시장", tag: "도시 산책" },
+          { title: "🇨🇭 스위스 알프스 10일", query: "스위스 10일 골든 루트, 융프라우, 마터호른, 제네바 호수", tag: "설산 기차" },
+          { title: "🇨🇳 구이저우 5일 카르스트秘境", query: "구이저우 5일 드라이브 촬영 여행, 황궈수 폭포, 리보 샤오치쿵, 시장 먀오족 마을", tag: "비경 탐험" }
+        ]
+      },
+      bottomCta: {
+        title: "꿈의 여행을 시작할 준비가 되셨나요?",
+        subtitle: "OpenClaw Agent에게 아이디어를 전하면 맞춤형 여정을 즉시 제안합니다.",
+        startBtn: "AI 플래너 시작",
+        demoBtn: "데모 대시보드 보기 →"
+      },
+      carousel: {
+        prevSlide: "이전 슬라이드",
+        nextSlide: "다음 슬라이드",
+        prevSpot: "이전 스팟",
+        nextSpot: "다음 스팟",
+        pauseAuto: "자동 재생 중지",
+        resumeAuto: "자동 재생 재개",
+        readyBadge: "지식 베이스 · 준비 완료",
+        loadAndPlan: "로드 & 계획"
+      }
+    },
+    sidebar: {
+      title: "Roam 코파일럿",
+      subtitle: "대화형 AI",
+      quickNZ: "🇳🇿 NZ 남섬 7일",
+      quickTokyo: "🗼 도쿄 7일 가을",
+      inputPlaceholder: "메시지 입력...",
+      welcomeMsg: "여행 아이디어를 알려주세요! 목적지, 기간, 스타일, 예산—완벽한 플랜을 제안합니다.",
+      userDefaultMsg: "뉴질랜드 남섬 7일 드라이브, 사진 촬영과 미식 중심.",
+      aiDefaultReply: "지식 베이스와 실시간 날씨를 확인했습니다. 맞춤형 여정을 확인하세요!",
+      ragStatusPill1: "🔍 지식 베이스에서 관련 가이드 검색",
+      ragStatusPill2: "🌐 실시간 날씨 및 도로 정보 확인",
+      ragTokyoPill1: "🔍 도쿄 단풍 및 미식 가이드 검색",
+      ragTokyoPill2: "✨ Bento Grid 구조화 스케줄 완료",
+      thinkingText: "지식 베이스와 네트워크 정보를 통합하여 여정 생성 중...",
+      aiReplyTokyo: "도쿄 가을 여행 플랜 준비 완료! 아사쿠사에서 시부야까지.",
+      aiReplyNZ: "NZ 남섬 플랜 업데이트! 테카포 별빛부터 마운트쿡 빙하 하이킹까지."
+    },
+    cards: {
+      dailyScheduleTitle: "일별 일정",
+      dailyTimelineEyebrow: "DAILY TIMELINE · 루트",
+      dayPrefix: "",
+      daySuffix: "일차",
+      dayBtnPrefix: "Day ",
+      tableCols: {
+        time: "시간",
+        activity: "활동",
+        location: "장소",
+        details: "세부사항"
+      },
+      mustVisitTitle: "필수 방문 & 미식",
+      tasteSightsEyebrow: "TASTE & SIGHTS · 현지 가이드",
+      allCategories: "전체",
+      foodCategory: "🍲 미식",
+      landmarkCategory: "🏛️ 명소",
+      recommendationsLabel: "추천: ",
+      openHoursLabel: "권장 시간: ",
+      pricingLabel: "요금/예산: ",
+      tipsLabel: "팁",
+      spotsTitle: "촬영 가이드 & 포토 스팟",
+      photoGuideTitle: "촬영 가이드 & 포토 스팟",
+      visualExpeditionEyebrow: "VISUAL EXPEDITION · 촬영 가이드",
+      expeditionEyebrow: "EXPEDITION · 맞춤 루트",
+      tipsPrefix: "팁:",
+      copySpotBtn: "촬영 정보 복사",
+      shareSpotBtn: "촬영 안내 공유",
+      paramsLabel: "카메라 설정",
+      photoTipsLabel: "촬영 팁: ",
+      bestTimeLabel: "최적 촬영 시간: ",
+      lensLabel: "권장 렌즈: ",
+      weatherTitle: "현지 날씨 및 복장 가이드",
+      tempLabel: "기온: ",
+      conditionLabel: "날씨: ",
+      clothingLabel: "복장: ",
+      packingLabel: "준비물: ",
+      allDay: "종일",
+      imageSourceTitle: "이미지 출처: ",
+      copySuccess: "클립보드에 복사되었습니다!",
+      shareSuccess: "공유 텍스트 복사됨"
+    }
   }
 };

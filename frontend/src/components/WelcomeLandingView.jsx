@@ -354,6 +354,7 @@ const GLOBAL_INSPIRATIONS_LIST = [
 
 export default function WelcomeLandingView({
   language,
+  nextLangLabel,
   onToggleLanguage,
   onStartPlanning,
   onDirectExplore,
@@ -545,10 +546,10 @@ export default function WelcomeLandingView({
             <button 
               className="fullbleed-lang-btn"
               onClick={onToggleLanguage}
-              title={language === 'zh' ? 'Switch to English' : '切换为中文'}
+              title={'切换语言 / Switch Language'}
             >
               <Globe size={15} color="#94A3B8" />
-              <span>{language === 'zh' ? 'EN' : '中文'}</span>
+              <span>{nextLangLabel}</span>
             </button>
 
             {/* 进入看板 */}

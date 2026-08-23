@@ -7,6 +7,7 @@ export default function TopNavbar({
   onSearch, 
   onSearchSubmit,
   language = 'zh',
+  nextLangLabel,
   onToggleLanguage,
   onNewTrip,
   labels = {}
@@ -80,11 +81,11 @@ export default function TopNavbar({
           type="button"
           className="navbar-lang-btn"
           onClick={onToggleLanguage}
-          title={language === 'zh' ? 'Switch to English' : '切换为中文'}
+          title={'切换语言 / Switch Language'}
         >
           <Languages size={15} color="#4F46E5" />
           <span className="lang-text">
-            {language === 'zh' ? 'EN' : '中文'}
+            {nextLangLabel}
           </span>
         </button>
       </div>

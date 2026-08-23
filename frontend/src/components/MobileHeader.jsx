@@ -4,6 +4,7 @@ import { Sparkles, Languages } from 'lucide-react';
 export default function MobileHeader({
   tripTitle,
   language = 'zh',
+  nextLangLabel,
   onToggleLanguage
 }) {
   return (
@@ -25,10 +26,10 @@ export default function MobileHeader({
         <button 
           className="mobile-action-pill" 
           onClick={onToggleLanguage}
-          title={language === 'zh' ? 'Switch to English' : '切换至中文'}
+          title={'切换语言 / Switch Language'}
         >
           <Languages size={13} />
-          <span>{language === 'zh' ? 'EN' : '中文'}</span>
+          <span>{nextLangLabel}</span>
         </button>
       </div>
     </header>

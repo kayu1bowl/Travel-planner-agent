@@ -27,11 +27,16 @@ export default function App() {
   const [agentStatusSteps, setAgentStatusSteps] = useState([]);
   const activeRequestIdRef = useRef(0);
 
+  const LANG_LIST = ['zh', 'en', 'ja', 'ko'];
+  const LANG_LABELS = { zh: '中文', en: 'EN', ja: '日本語', ko: '한국어' };
+  const LANG_HTML = { zh: 'zh-CN', en: 'en', ja: 'ja', ko: 'ko' };
+  const nextLangLabel = LANG_LABELS[LANG_LIST[(LANG_LIST.indexOf(language) + 1) % LANG_LIST.length]];
+
   const t = TRANSLATIONS[language] || TRANSLATIONS.zh;
 
   // 同步 HTML 根节点的 lang 属性（提升 a11y、翻译与无障碍阅读器兼容性）
   useEffect(() => {
-    document.documentElement.lang = language === 'zh' ? 'zh-CN' : 'en';
+    document.documentElement.lang = LANG_HTML[language] || 'zh-CN';
   }, [language]);
 
   // 初始对话历史
@@ -53,7 +58,8 @@ export default function App() {
   // 处理语言切换
   const handleToggleLanguage = () => {
     setLanguage(prev => {
-      const nextLang = prev === 'zh' ? 'en' : 'zh';
+      const idx = LANG_LIST.indexOf(prev);
+      const nextLang = LANG_LIST[(idx + 1) % LANG_LIST.length];
       setMessages(oldMsgs => {
         if (oldMsgs.length === 1 && oldMsgs[0].sender === 'assistant') {
           return [{
@@ -85,7 +91,7 @@ export default function App() {
     } else {
       // 任意其他全球目的地，自动触发 AI Agent 智能规划
       setActiveNavTab('home');
-      handleSendMessage(language === 'zh' ? `我想规划去${keyword.trim()}的深度旅行，请提供详细定制行程、美食与摄影机位` : `Plan a comprehensive customized travel itinerary for ${keyword.trim()} with cuisine and photo spots`);
+      handleSendMessage(isZhFallback ? `我想规划去${keyword.trim()}的深度旅行，请提供详细定制行程、美食与摄影机位` : `Plan a comprehensive customized travel itinerary for ${keyword.trim()} with cuisine and photo spots`);
     }
   };
 
@@ -156,7 +162,7 @@ export default function App() {
           text: response.follow_up_question,
           isGuide: true,
           dataSources: [
-            language === 'zh' ? 'Roam AI 智能向导服务' : 'Roam AI Guide Service'
+            isZhFallback ? 'Roam AI 智能向导服务' : 'Roam AI Guide Service'
           ]
         };
         setMessages(prev => [...prev, aiMsg]);
@@ -181,21 +187,21 @@ export default function App() {
           ? transformed.summary
           : (typeof response?.summary === 'string' && response.summary
               ? response.summary
-              : (language === 'zh' ? '太棒了！已为您量身定制专属的旅行路线，右侧看板已同步更新。' : 'Great! A customized itinerary has been generated for you.'));
+              : (isZhFallback ? '太棒了！已为您量身定制专属的旅行路线，右侧看板已同步更新。' : 'Great! A customized itinerary has been generated for you.'));
 
         const aiMsg = {
           id: Date.now() + 1,
           sender: 'assistant',
           text: summaryText,
           dataSources: response?.data_sources || transformed?.dataSources || [
-            language === 'zh' ? '权威旅游指南与私有知识库' : 'Travel Guides & Knowledge Base',
-            language === 'zh' ? '实时路况与气象辅助核验' : 'Route Optimization & Weather Verification'
+            isZhFallback ? '权威旅游指南与私有知识库' : 'Travel Guides & Knowledge Base',
+            isZhFallback ? '实时路况与气象辅助核验' : 'Route Optimization & Weather Verification'
           ]
         };
         setMessages(prev => [...prev, aiMsg]);
         shouldSwitchToDashboard = true;
       } else {
-        const replyText = response?.error || response?.detail || response?.reply || (language === 'zh' ? '未能解析出结构化行程，请告诉我您想去的目的地或游玩天数，我们马上开始规划！' : 'Please provide your travel destination or preferred days to begin planning!');
+        const replyText = response?.error || response?.detail || response?.reply || (isZhFallback ? '未能解析出结构化行程，请告诉我您想去的目的地或游玩天数，我们马上开始规划！' : 'Please provide your travel destination or preferred days to begin planning!');
         const aiMsg = {
           id: Date.now() + 1,
           sender: 'assistant',
@@ -257,6 +263,7 @@ export default function App() {
     return (
       <WelcomeLandingView 
         language={language}
+        nextLangLabel={nextLangLabel}
         onToggleLanguage={handleToggleLanguage}
         onStartPlanning={(q) => handleSendMessage(q, true)}
         onDirectExplore={handleDirectExplore}
@@ -292,6 +299,7 @@ export default function App() {
               onTabChange={(tab) => setActiveNavTab(tab)}
               onSearchSubmit={handleSearchSubmit}
               language={language}
+              nextLangLabel={nextLangLabel}
               onToggleLanguage={handleToggleLanguage}
               onNewTrip={handleNewTrip}
               labels={t.nav}
@@ -358,6 +366,7 @@ export default function App() {
         <MobileHeader 
           tripTitle={currentData.tripTitle}
           language={language}
+          nextLangLabel={nextLangLabel}
           onToggleLanguage={handleToggleLanguage}
         />
 
