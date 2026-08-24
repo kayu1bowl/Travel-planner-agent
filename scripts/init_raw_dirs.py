@@ -1,7 +1,7 @@
 import os
 
 # 项目根目录下的raw根路径
-RAW_ROOT = r"./rag-knowledge-base/data/raw"
+RAW_ROOT = r"./rag_knowledge_base/data/raw"
 # 每个地区固定3个子文件夹
 SUB_DIRS = ["selfdrive", "season_guide", "photography"]
 

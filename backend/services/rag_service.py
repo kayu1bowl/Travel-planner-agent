@@ -10,7 +10,7 @@ from pathlib import Path
 
 # 将项目根目录与 rag-knowledge-base 插入 sys.path
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
-RAG_KB_DIR = PROJECT_ROOT / "rag-knowledge-base"
+RAG_KB_DIR = PROJECT_ROOT / "rag_knowledge_base"
 
 for p in [str(PROJECT_ROOT), str(RAG_KB_DIR)]:
     if p not in sys.path:

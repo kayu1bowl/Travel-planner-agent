@@ -621,19 +621,20 @@ def clean_file(
 
 def _batch_clean_worker(args):
     """并行 worker：清洗单个文件"""
-    input_dir_str, output_dir_str, backend, threshold, fname = args
+    input_dir_str, output_dir_str, backend, threshold, rel_path = args
     input_dir = Path(input_dir_str)
     output_dir = Path(output_dir_str)
-    filepath = input_dir / fname
+    filepath = input_dir / rel_path
+    flat_name = rel_path.replace("/", "_").replace("\\", "_")
     try:
         raw = filepath.read_text(encoding="utf-8")
     except Exception:
-        return (fname, "读取失败", 0)
-    label = fname[:40]
+        return (rel_path, "读取失败", 0)
+    label = flat_name[:40]
     cleaned = clean_text(raw, backend=backend, threshold=threshold, file_label=label)
-    out = output_dir / fname
+    out = output_dir / flat_name
     out.write_text(cleaned, encoding="utf-8")
-    return (fname, "OK", len(raw))
+    return (flat_name, "OK", len(raw))
 
 
 def batch_clean(
@@ -665,7 +666,7 @@ def batch_clean(
     parallel = int(os.environ.get("CLEANER_PARALLEL", str(parallel)))
 
     output_dir.mkdir(parents=True, exist_ok=True)
-    files = sorted(input_dir.glob("*.txt"))
+    files = sorted(input_dir.rglob("*.txt"))
     if not files:
         print(f"  ⚠️ raw 目录为空: {input_dir}")
         return 0
@@ -683,7 +684,7 @@ def batch_clean(
         from concurrent.futures import ProcessPoolExecutor, as_completed
 
         args_list = [
-            (str(input_dir), str(output_dir), backend, threshold, f.name)
+            (str(input_dir), str(output_dir), backend, threshold, str(f.relative_to(input_dir)))
             for f in files
         ]
         count = 0
@@ -717,8 +718,9 @@ def batch_clean(
                 print(f"  ❌ {f.name}: 读取失败")
                 continue
 
-            cleaned = clean_text(raw, backend=backend, threshold=threshold, file_label=f.name[:40])
-            out = output_dir / f.name
+            flat_name = str(f.relative_to(input_dir)).replace("/", "_").replace("\\", "_")
+            cleaned = clean_text(raw, backend=backend, threshold=threshold, file_label=flat_name[:40])
+            out = output_dir / flat_name
             out.write_text(cleaned, encoding="utf-8")
             count += 1
 

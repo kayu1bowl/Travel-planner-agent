@@ -21,20 +21,21 @@ if str(_project_root) not in sys.path:
   sys.path.insert(0, str(_project_root))
 
 # 确保 rag-knowledge-base 能够被正确加载
-rag_hyphen_dir = _project_root / "rag-knowledge-base"
-if rag_hyphen_dir.exists():
+# 确保 rag_knowledge_base 能够被正确加载
+rag_kb_dir = _project_root / "rag_knowledge_base"
+if rag_kb_dir.exists():
   import importlib.util
   if "rag_knowledge_base" not in sys.modules:
     # 动态将 rag-knowledge-base 注册为 rag_knowledge_base 包
-    sys.path.insert(0, str(rag_hyphen_dir.parent))
+    sys.path.insert(0, str(rag_kb_dir.parent))
     try:
       import rag_knowledge_base
     except ImportError:
       # 手动加载模块别名
-      init_file = rag_hyphen_dir / "__init__.py"
+      init_file = rag_kb_dir / "__init__.py"
       if not init_file.exists():
         init_file.touch()
-      spec = importlib.util.spec_from_file_location("rag_knowledge_base", str(init_file), submodule_search_locations=[str(rag_hyphen_dir)])
+      spec = importlib.util.spec_from_file_location("rag_knowledge_base", str(init_file), submodule_search_locations=[str(rag_kb_dir)])
       if spec and spec.loader:
         mod = importlib.util.module_from_spec(spec)
         sys.modules["rag_knowledge_base"] = mod
@@ -55,7 +56,7 @@ def _extract_chinese_tokens(query: str) -> list[str]:
 
 def _search_raw_documents(query: str) -> str:
   """动态检索 rag-knowledge-base/data/raw 下所有原始知识文档"""
-  raw_dir = _project_root / "rag-knowledge-base" / "data" / "raw"
+  raw_dir = _project_root / "rag_knowledge_base" / "data" / "raw"
   if not raw_dir.exists():
     return ""
 
