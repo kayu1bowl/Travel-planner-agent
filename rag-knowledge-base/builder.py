@@ -69,81 +69,55 @@ def _vector_backend():
 # Embedding 模型
 # ===================================================================
 
+class _TfidfEmbedder:
+    """轻量级 TF-IDF 嵌入替代方案（绕开 PyTorch 兼容性问题）"""
+    def __init__(self):
+        from sklearn.feature_extraction.text import TfidfVectorizer
+        self._fit_done = False
+        self._vectorizer = TfidfVectorizer(
+            max_features=4096,
+            sublinear_tf=True,
+            analyzer='word',
+            token_pattern=r'(?u)\b\w+\b',
+        )
+        self._dim = 4096
+
+    def fit(self, texts):
+        self._vectorizer.fit(texts)
+        self._dim = len(self._vectorizer.get_feature_names_out())
+        self._fit_done = True
+        print(f"  📐 TF-IDF 嵌入 (sklearn) | 词典大小: {self._dim}")
+
+    def get_text_embedding(self, text):
+        import numpy as np
+        if not self._fit_done:
+            raise RuntimeError("fit() must be called before get_text_embedding")
+        v = self._vectorizer.transform([text]).toarray().astype(np.float32)[0]
+        # L2 normalize for cosine similarity
+        norm = np.linalg.norm(v)
+        if norm > 0:
+            v = v / norm
+        return v.tolist()
+
+    def get_text_embedding_batch(self, texts):
+        import numpy as np
+        if not self._fit_done:
+            raise RuntimeError("fit() must be called before get_text_embedding")
+        m = self._vectorizer.transform(texts).toarray().astype(np.float32)
+        norms = np.linalg.norm(m, axis=1, keepdims=True)
+        norms[norms == 0] = 1
+        m = m / norms
+        return [row.tolist() for row in m]
+
+
 def create_embed_model():
-    """创建 embedding 模型实例（单例缓存，本地优先）"""
+    """创建 embedding 模型实例（单例缓存，sklearn TF-IDF 替代 HuggingFace）"""
     if hasattr(create_embed_model, "_cache"):
         return create_embed_model._cache
 
-    # ★ 在所有 import 之前设离线环境变量，阻止一切联网
-    import os as _os
-    _old_offline_hf = _os.environ.get("HF_HUB_OFFLINE")
-    _old_offline_tr = _os.environ.get("TRANSFORMERS_OFFLINE")
-    _os.environ["HF_HUB_OFFLINE"] = "1"
-    _os.environ["TRANSFORMERS_OFFLINE"] = "1"
-
-    from llama_index.embeddings.huggingface import HuggingFaceEmbedding
-
-    is_qwen = EMBED_BACKEND.startswith("qwen") or "qwen" in str(EMBEDDING_MODEL).lower()
-
-    try:
-        if is_qwen:
-            model = HuggingFaceEmbedding(
-                model_name=EMBEDDING_MODEL,
-                trust_remote_code=True,
-                query_instruction="为这个句子生成表示以用于检索相关文章：",
-            )
-            print(f"  📐 Qwen 模型已加载（本地） | instruction 前缀已启用")
-        else:
-            model = HuggingFaceEmbedding(
-                model_name=EMBEDDING_MODEL,
-                trust_remote_code=True,
-            )
-            print(f"  📐 BGE 模型已加载（本地）")
-    except Exception as e:
-        # 本地没有，放联网下载
-        if _old_offline_hf is None:
-            del _os.environ["HF_HUB_OFFLINE"]
-        else:
-            _os.environ["HF_HUB_OFFLINE"] = _old_offline_hf
-        if _old_offline_tr is None:
-            del _os.environ["TRANSFORMERS_OFFLINE"]
-        else:
-            _os.environ["TRANSFORMERS_OFFLINE"] = _old_offline_tr
-        print(f"  🔍 本地缓存未找到 ({e})")
-        print(f"  📡 尝试联网下载模型: {EMBEDDING_MODEL}")
-        if is_qwen:
-            model = HuggingFaceEmbedding(
-                model_name=EMBEDDING_MODEL,
-                trust_remote_code=True,
-                query_instruction="为这个句子生成表示以用于检索相关文章：",
-            )
-            print(f"  📐 Qwen 模型已加载（联网） | instruction 前缀已启用")
-        else:
-            model = HuggingFaceEmbedding(
-                model_name=EMBEDDING_MODEL,
-                trust_remote_code=True,
-            )
-            print(f"  📐 BGE 模型已加载（联网）")
-    else:
-        if _old_offline_hf is None:
-            del _os.environ["HF_HUB_OFFLINE"]
-        else:
-            _os.environ["HF_HUB_OFFLINE"] = _old_offline_hf
-        if _old_offline_tr is None:
-            del _os.environ["TRANSFORMERS_OFFLINE"]
-        else:
-            _os.environ["TRANSFORMERS_OFFLINE"] = _old_offline_tr
-
-    try:
-        if hasattr(model, '_model'):
-            dim_fn = getattr(model._model, 'get_embedding_dimension', None) or \
-                     getattr(model._model, 'get_sentence_embedding_dimension', None)
-            dim = dim_fn() if dim_fn else "?"
-        else:
-            dim = "?"
-        print(f"  📏 模型维度: {dim}")
-    except:
-        pass
+    model = _TfidfEmbedder()
+    print(f"  📐 TF-IDF 嵌入已就绪 (sklearn)")
+    print(f"  📏 最大维度: {model._dim}")
     create_embed_model._cache = model
     return model
 
@@ -402,8 +376,6 @@ class KnowledgeBaseBuilder:
                     continue
                 if incremental and node_text[:100] in existing_by_text:
                     continue
-                if self.backend == "faiss":
-                    all_vectors.append(self.embed_model.get_text_embedding(node_text))
                 all_chunks.append({
                     "id": str(uuid.uuid4()),
                     "text": node_text,
@@ -411,6 +383,12 @@ class KnowledgeBaseBuilder:
                 })
 
             print(f"  \U0001f4c4 {f.name[:40]}... {len(nodes)} 片段 (累计{len(all_chunks)})")
+
+        # TF-IDF 嵌入需要先 fit 整个语料库
+        if self.backend == "faiss" and all_chunks:
+            all_texts = [c["text"] for c in all_chunks]
+            self.embed_model.fit(all_texts)
+            all_vectors = self.embed_model.get_text_embedding_batch(all_texts)
 
         if not all_chunks:
             print("  \u26a0\ufe0f  没有新片段")
@@ -465,8 +443,6 @@ class KnowledgeBaseBuilder:
                     continue
                 if incremental and node_text[:100] in existing_by_text:
                     continue
-                if self.backend == "faiss":
-                    all_vectors.append(self.embed_model.get_text_embedding(node_text))
                 all_chunks.append({
                     "id": str(uuid.uuid4()),
                     "text": node_text,
@@ -476,6 +452,13 @@ class KnowledgeBaseBuilder:
         if not all_chunks:
             print("  \u26a0\ufe0f  没有新片段")
             return
+
+        # TF-IDF 批量嵌入
+        if self.backend == "faiss" and all_chunks:
+            all_texts = [c["text"] for c in all_chunks]
+            self.embed_model.fit(all_texts)
+            all_vectors = self.embed_model.get_text_embedding_batch(all_texts)
+
         self._finalize(all_chunks, all_vectors, label="网络")
 
     def build_from_web(self, web_documents, incremental=False):

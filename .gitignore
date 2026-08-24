@@ -46,3 +46,11 @@ Thumbs.db
 
 # Logs
 *.log
+
+# RAG build artifacts
+rag-knowledge-base/data/cleaned/
+rag-knowledge-base/vector_db/
+rag-knowledge-base/data/chunks/
+
+# Symlink for import compatibility
+rag_knowledge_base
