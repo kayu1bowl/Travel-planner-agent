@@ -127,11 +127,11 @@ export async function fetchTravelPlan(query, conversationHistory = null, prefere
 
   // 候选 API 端点列表（按响应优先级排序，充分预留 LLM 思考与深度推演时间）
   const candidateEndpoints = [
-    { url: '/api-8000/api/v1/plan', payload: { query, conversation_history: formattedHistory, preferences: preferences || {} }, timeout: 60000 },
-    { url: '/api-8080/api/plan', payload: { query, conversation_history: formattedHistory }, timeout: 60000 },
-    { url: 'http://127.0.0.1:8000/api/v1/plan', payload: { query, conversation_history: formattedHistory, preferences: preferences || {} }, timeout: 60000 },
-    { url: 'http://127.0.0.1:8080/api/plan', payload: { query, conversation_history: formattedHistory }, timeout: 60000 }
-  ];
+    { url: '/api-8000/api/v1/plan', payload: { query, conversation_history: formattedHistory, preferences: preferences || {} }, timeout: 120000 },
+    { url: '/api-8080/api/plan', payload: { query, conversation_history: formattedHistory }, timeout: 120000 },
+    { url: 'http://127.0.0.1:8000/api/v1/plan', payload: { query, conversation_history: formattedHistory, preferences: preferences || {} }, timeout: 120000 },
+    { url: 'http://127.0.0.1:8080/api/plan', payload: { query, conversation_history: formattedHistory }, timeout: 120000 }
+  };
 
   for (const ep of candidateEndpoints) {
     try {
