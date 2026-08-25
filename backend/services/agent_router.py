@@ -134,6 +134,48 @@ class AgentRouter:
         plan_result = self._call_llm_for_plan(user_query, combined_context, data_sources)
         return plan_result
 
+    @staticmethod
+    def _normalize_response_fields(data: dict):
+        """规范化 LLM 返回的 JSON 字段类型，确保符合 Pydantic 模型约束"""
+        # summary 可能被返回为 dict（如 {title, days, route, budget}），提取为字符串
+        if isinstance(data.get("summary"), dict):
+            s = data["summary"]
+            parts = []
+            for k in ["title", "route", "days", "budget"]:
+                v = s.get(k)
+                if v:
+                    parts.append(str(v))
+            data["summary"] = "，".join(parts) if parts else str(s)
+        elif not isinstance(data.get("summary"), str):
+            data["summary"] = str(data.get("summary", "")) if data.get("summary") else ""
+
+        # 确保列表字段是列表
+        for lst_field in ["itineraries", "must_visit_spots", "photo_guides"]:
+            val = data.get(lst_field)
+            if val is None:
+                data[lst_field] = []
+            elif not isinstance(val, list):
+                data[lst_field] = [val] if isinstance(val, dict) else []
+
+        # 确保每段行程有基本的字符串字段
+        for itin in data.get("itineraries", []):
+            for field in ["theme", "morning", "afternoon", "evening", "transport", "tips"]:
+                if field in itin and not isinstance(itin[field], str):
+                    itin[field] = str(itin[field]) if itin[field] is not None else ""
+
+        # 确保必去景点和摄影指南是有效字符串
+        for spot in data.get("must_visit_spots", []):
+            for field in ["name", "category", "highlight", "address_or_area"]:
+                if field in spot and not isinstance(spot[field], str):
+                    spot[field] = str(spot[field]) if spot[field] is not None else ""
+            if not isinstance(spot.get("rating"), str):
+                spot["rating"] = str(spot.get("rating", "5/5"))
+
+        for pg in data.get("photo_guides", []):
+            for field in ["location", "best_time", "composition_tips", "camera_params", "outfit_color"]:
+                if field in pg and not isinstance(pg[field], str):
+                    pg[field] = str(pg[field]) if pg[field] is not None else ""
+
     def _call_llm_for_plan(self, query: str, context: str, data_sources: List[str]) -> TravelPlanResponse:
         """调用 LLM 并反序列化为 TravelPlanResponse"""
         system_prompt = """你是一个顶级专业智能旅游规划师与资深风光摄影领队。
@@ -186,18 +228,7 @@ class AgentRouter:
         # 判断是否有有效的 LLM API Key
         has_llm_key = bool(self.openai_api_key and self.openai_api_key.strip())
 
-        # 优先方式 1: 运行 OpenClaw 多阶段 Agent 协同流水线 (Multi-Stage Pipeline)
-        if has_llm_key:
-            try:
-                from openclaw_agent.workflows.multi_stage_planner import run_multi_stage_pipeline
-                multi_dict = run_multi_stage_pipeline(query, context, data_sources)
-                if multi_dict and multi_dict.get("itineraries"):
-                    print(f"🌟 [AgentRouter] 成功由 OpenClaw 多阶段 Agent 流水线生成规划！总天数: {len(multi_dict.get('itineraries', []))}天")
-                    return TravelPlanResponse(**multi_dict)
-            except Exception as stage_e:
-                print(f"⚠️ [AgentRouter] 多阶段流水线降级 ({stage_e})，尝试单次 LLM 补全...")
-
-        # 方式 2: 用户自定义配置的 Gemini OpenAI 兼容 API 接口
+        # LLM 路径：单次调用为主（DeepSeek 对多阶段管线响应慢，直接走单次更可靠）
         if has_llm_key and self.openai_api_base:
             try:
                 headers = {
@@ -256,8 +287,13 @@ class AgentRouter:
                             
                             if data and isinstance(data, dict):
                                 data["data_sources"] = data_sources
+                                # 规范化 LLM 返回的字段类型，防止 Pydantic 校验失败
+                                self._normalize_response_fields(data)
                                 print(f"🌟 [AgentRouter] 成功由用户自定义 Gemini 接口 ({ep}) 实时生成结构化规划！")
-                                return TravelPlanResponse(**data)
+                                try:
+                                    return TravelPlanResponse(**data)
+                                except Exception as validation_err:
+                                    print(f"⚠️ [AgentRouter] 响应结构校验异常: {validation_err}，进入降级...")
                     except Exception as err:
                         print(f"⚠️ [AgentRouter] 接口 {ep} 请求异常: {err}")
                         continue
