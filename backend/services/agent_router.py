@@ -226,7 +226,7 @@ class AgentRouter:
                             f"{ep}/chat/completions",
                             json=body,
                             headers=headers,
-                            timeout=60.0,
+                            timeout=120.0,
                             allow_redirects=True
                         )
                         if res.status_code == 200:

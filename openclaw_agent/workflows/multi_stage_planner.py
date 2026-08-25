@@ -54,7 +54,7 @@ def _clean_and_parse_json(text: str) -> Optional[dict]:
     return None
 
 
-def call_llm_json(prompt: str, system_prompt: str, timeout: float = 35.0) -> Optional[dict]:
+def call_llm_json(prompt: str, system_prompt: str, timeout: float = 120.0) -> Optional[dict]:
     """底层快速单次 LLM JSON 调用"""
     headers = {
         "Authorization": f"Bearer {LLM_API_KEY}",
@@ -114,7 +114,7 @@ class RouteArchitectAgent:
     @classmethod
     def run(cls, user_query: str, context: str = "") -> Optional[dict]:
         prompt = f"用户旅行需求：{user_query}\n\n参考资料（优先结合私有知识库）：\n{context}\n\n请构思宏观路线骨架大纲。"
-        return call_llm_json(prompt, cls.SYSTEM_PROMPT, timeout=25.0)
+        return call_llm_json(prompt, cls.SYSTEM_PROMPT, timeout=90.0)
 
 
 # =========================================================================
@@ -156,7 +156,7 @@ class TimelineDetailAgent:
 {context}
 
 请将上述大纲逐日细化为高质量的每日行程。"""
-        return call_llm_json(prompt, cls.SYSTEM_PROMPT, timeout=35.0)
+        return call_llm_json(prompt, cls.SYSTEM_PROMPT, timeout=120.0)
 
 
 # =========================================================================
@@ -202,7 +202,7 @@ class ExperienceCuratorAgent:
 {context}
 
 请为该行程甄选当地口碑必去景点、特色美食名吃以及专业级摄影机位指南。"""
-        return call_llm_json(prompt, cls.SYSTEM_PROMPT, timeout=30.0)
+        return call_llm_json(prompt, cls.SYSTEM_PROMPT, timeout=120.0)
 
 
 # =========================================================================
