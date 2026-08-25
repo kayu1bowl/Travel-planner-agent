@@ -131,7 +131,7 @@ export async function fetchTravelPlan(query, conversationHistory = null, prefere
     { url: '/api-8080/api/plan', payload: { query, conversation_history: formattedHistory }, timeout: 120000 },
     { url: 'http://127.0.0.1:8000/api/v1/plan', payload: { query, conversation_history: formattedHistory, preferences: preferences || {} }, timeout: 120000 },
     { url: 'http://127.0.0.1:8080/api/plan', payload: { query, conversation_history: formattedHistory }, timeout: 120000 }
-  };
+  ];
 
   for (const ep of candidateEndpoints) {
     try {
